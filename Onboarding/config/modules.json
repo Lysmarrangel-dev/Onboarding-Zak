@@ -1,0 +1,493 @@
+{
+  "_comment": "Módulos de ZAK (lista oficial de iTech, 18 módulos, en su orden) y requisitos que el cliente necesita para cada uno. De aquí salen la selección de módulos, el checklist, la puntuación de preparación y los ítems del Google Form (Apps Script lee este mismo archivo). Una vez creado el Form, no cambies los nombres de módulo ni los textos de requisito sin actualizarlo también.",
+  "selection": {
+    "id": "M.1",
+    "formTitle": "¿Qué módulos de ZAK contratará la empresa?",
+    "prompt": "Estos son los 18 módulos de ZAK. ¿Cuáles van a contratar?",
+    "hint": "Puedes elegir varios. Si aún no lo tienes claro, marca los que te interesan: tu consultor lo confirma contigo."
+  },
+  "checklist": {
+    "promptTemplate": "Revisemos lo que necesitas para {module}. ¿Con qué cuentas hoy?",
+    "hint": "Marca cada requisito. Si todavía no lo tienes, no pasa nada: así sabemos por dónde empezar.",
+    "states": [
+      {
+        "id": "tengo",
+        "label": "Lo tengo",
+        "score": 1
+      },
+      {
+        "id": "proceso",
+        "label": "En proceso",
+        "score": 0.5
+      },
+      {
+        "id": "no",
+        "label": "No lo tengo",
+        "score": 0
+      }
+    ]
+  },
+  "levels": [
+    {
+      "min": 80,
+      "id": "alta",
+      "label": "Preparación alta",
+      "client": "Tienes casi todo listo para arrancar.",
+      "internal": "Listo para configurar"
+    },
+    {
+      "min": 50,
+      "id": "media",
+      "label": "Preparación media",
+      "client": "Tienes una buena base. Te ayudamos a completar lo que falta.",
+      "internal": "Requiere completar requisitos"
+    },
+    {
+      "min": 0,
+      "id": "baja",
+      "label": "Preparación inicial",
+      "client": "Vamos a preparar juntos lo necesario antes de arrancar.",
+      "internal": "Requiere acompañamiento"
+    }
+  ],
+  "groups": [
+    {
+      "id": "zak",
+      "title": "Módulos de ZAK",
+      "modules": [
+        {
+          "id": "dashboard",
+          "name": "Dashboard",
+          "icon": "chart",
+          "desc": "Un panel que muestra el dinero: cobrado hoy, por cobrar, ventas y tareas.",
+          "requirements": [
+            {
+              "id": "kpis",
+              "text": "Indicadores que quieres ver al entrar (cobrado, por cobrar, ventas del mes…)"
+            },
+            {
+              "id": "metas",
+              "text": "Metas mensuales definidas"
+            },
+            {
+              "id": "usuarios",
+              "text": "Quién verá el panel (dueño, gerencia, líderes)"
+            }
+          ]
+        },
+        {
+          "id": "adstudio",
+          "name": "AdStudio",
+          "icon": "spark",
+          "desc": "Flyers y videos para Ads, Reels y Stories, entrenados con tu marca.",
+          "requirements": [
+            {
+              "id": "marca",
+              "text": "Manual de marca (logo, colores, tipografías)"
+            },
+            {
+              "id": "material",
+              "text": "Fotos o videos de tus productos"
+            },
+            {
+              "id": "publico",
+              "text": "Público objetivo y propuesta de valor definidos"
+            },
+            {
+              "id": "cuentas",
+              "text": "Acceso a tus redes y cuentas publicitarias (Meta, TikTok, Google)"
+            }
+          ]
+        },
+        {
+          "id": "agentes-ia",
+          "name": "Agentes IA",
+          "icon": "bot",
+          "desc": "Recepción, ventas, cobranza, soporte… un equipo digital por área.",
+          "requirements": [
+            {
+              "id": "documentos",
+              "text": "Documentos de conocimiento (catálogo, precios, políticas) en PDF, Word o Excel"
+            },
+            {
+              "id": "mantenimiento",
+              "text": "Responsable de mantener actualizada esa información"
+            },
+            {
+              "id": "alcance",
+              "text": "Qué puede hacer solo cada agente"
+            },
+            {
+              "id": "canales",
+              "text": "Canal de cada agente (WhatsApp, teléfono o web)"
+            }
+          ]
+        },
+        {
+          "id": "contactos",
+          "name": "Contactos",
+          "icon": "avatar",
+          "desc": "Tu base de clientes y prospectos, con la ficha de cada uno.",
+          "requirements": [
+            {
+              "id": "base",
+              "text": "Base de contactos lista para migrar (Excel, CSV u otro CRM)"
+            },
+            {
+              "id": "campos",
+              "text": "Datos que guardan de cada cliente"
+            },
+            {
+              "id": "etiquetas",
+              "text": "Etiquetas o segmentos que usan hoy"
+            }
+          ]
+        },
+        {
+          "id": "inbox",
+          "name": "Inbox Omnicanal",
+          "icon": "chat",
+          "desc": "WhatsApp, Instagram, Messenger y correo en una sola bandeja.",
+          "requirements": [
+            {
+              "id": "numero",
+              "text": "Número dedicado para la API de WhatsApp (nuevo o listo para migrar)"
+            },
+            {
+              "id": "portfolio",
+              "text": "Acceso de administrador al Meta Business Portfolio"
+            },
+            {
+              "id": "verificacion",
+              "text": "Documentos legales para verificar el negocio en Meta"
+            },
+            {
+              "id": "tarjeta",
+              "text": "Tarjeta de pago registrada en Meta"
+            },
+            {
+              "id": "instagram",
+              "text": "Instagram profesional vinculado a la página de Facebook"
+            },
+            {
+              "id": "plantillas",
+              "text": "Mensajes de plantilla definidos (recordatorios, cobros, promociones)"
+            }
+          ]
+        },
+        {
+          "id": "call-center",
+          "name": "Call Center",
+          "icon": "phone",
+          "desc": "La IA contesta, llama, confirma citas y cobra con guion aprobado.",
+          "requirements": [
+            {
+              "id": "linea",
+              "text": "Número telefónico para el call center"
+            },
+            {
+              "id": "guiones",
+              "text": "Guiones aprobados (citas, cobranza, prospección)"
+            },
+            {
+              "id": "horario",
+              "text": "Horario de atención y qué hacer fuera de él"
+            },
+            {
+              "id": "voz",
+              "text": "Voz elegida (de catálogo, o audio de 1 a 2 minutos con autorización)"
+            },
+            {
+              "id": "grabacion",
+              "text": "Política de grabación y aviso al cliente"
+            }
+          ]
+        },
+        {
+          "id": "pipelines",
+          "name": "Pipelines",
+          "icon": "flow",
+          "desc": "Tus etapas de venta, postventa o cobranza, con reglas y SLA.",
+          "requirements": [
+            {
+              "id": "etapas",
+              "text": "Etapas actuales de venta identificadas"
+            },
+            {
+              "id": "responsables",
+              "text": "Lista de vendedores y responsables por etapa"
+            },
+            {
+              "id": "asignacion",
+              "text": "Regla para asignar clientes (zona, turno o round-robin)"
+            },
+            {
+              "id": "seguimiento",
+              "text": "Tiempos de seguimiento por etapa"
+            }
+          ]
+        },
+        {
+          "id": "web-funnels",
+          "name": "Web & Funnels",
+          "icon": "magnet",
+          "desc": "Landings, embudos y formularios que convierten visitas en contactos.",
+          "requirements": [
+            {
+              "id": "web",
+              "text": "Sitio web o dominio propio"
+            },
+            {
+              "id": "oferta",
+              "text": "Oferta y propuesta de valor definidas"
+            },
+            {
+              "id": "campos",
+              "text": "Campos mínimos del formulario de lead definidos"
+            },
+            {
+              "id": "formularios",
+              "text": "Formularios externos que quieren conectar (Google Forms, Typeform)"
+            }
+          ]
+        },
+        {
+          "id": "ventas",
+          "name": "Ventas",
+          "icon": "doc",
+          "desc": "Cotización, contrato, firma y cobro por QR o enlace de pago.",
+          "requirements": [
+            {
+              "id": "catalogo",
+              "text": "Catálogo de productos o servicios con precios"
+            },
+            {
+              "id": "impuestos",
+              "text": "Tasa de impuestos y política de descuentos"
+            },
+            {
+              "id": "formato",
+              "text": "Formato o logo para las cotizaciones"
+            },
+            {
+              "id": "contrato",
+              "text": "Plantilla de contrato y firmante autorizado"
+            },
+            {
+              "id": "cobros",
+              "text": "Métodos de cobro y monedas definidos"
+            },
+            {
+              "id": "pasarela",
+              "text": "Cuenta bancaria o pasarela activa (Stripe, Mercado Pago, Conekta)"
+            }
+          ]
+        },
+        {
+          "id": "email-marketing",
+          "name": "Email Marketing",
+          "icon": "mail",
+          "desc": "Campañas de correo segmentadas, con tu marca.",
+          "requirements": [
+            {
+              "id": "correo",
+              "text": "Correo corporativo con acceso de administrador"
+            },
+            {
+              "id": "optin",
+              "text": "Base de contactos con consentimiento (opt-in)"
+            },
+            {
+              "id": "segmentos",
+              "text": "Segmentos de clientes definidos"
+            },
+            {
+              "id": "marca",
+              "text": "Manual de marca para las plantillas"
+            }
+          ]
+        },
+        {
+          "id": "calendario",
+          "name": "Calendario",
+          "icon": "calendar",
+          "desc": "Citas que se agendan, recuerdan y reprograman solas.",
+          "requirements": [
+            {
+              "id": "calendario",
+              "text": "Calendario en uso (Google Calendar u Outlook)"
+            },
+            {
+              "id": "tipos",
+              "text": "Tipos de cita y su duración"
+            },
+            {
+              "id": "disponibilidad",
+              "text": "Horarios disponibles de cada persona"
+            }
+          ]
+        },
+        {
+          "id": "workforce",
+          "name": "Workforce Center",
+          "icon": "team",
+          "desc": "Quién está haciendo qué, en tiempo real, con resúmenes del equipo.",
+          "requirements": [
+            {
+              "id": "usuarios",
+              "text": "Lista de usuarios con nombre, apellido y correo"
+            },
+            {
+              "id": "roles",
+              "text": "Administradores y Colaboradores definidos"
+            },
+            {
+              "id": "modulos",
+              "text": "Módulos que verá cada persona"
+            },
+            {
+              "id": "supervisores",
+              "text": "Supervisor o líder de cada equipo"
+            }
+          ]
+        },
+        {
+          "id": "rrhh",
+          "name": "Recursos Humanos",
+          "icon": "people",
+          "desc": "Personal, cargos y políticas internas en un solo lugar.",
+          "requirements": [
+            {
+              "id": "empleados",
+              "text": "Lista de empleados"
+            },
+            {
+              "id": "cargos",
+              "text": "Estructura de cargos y áreas"
+            },
+            {
+              "id": "politicas",
+              "text": "Políticas internas documentadas"
+            },
+            {
+              "id": "sistemas",
+              "text": "Sistemas externos que quieren conectar"
+            }
+          ]
+        },
+        {
+          "id": "cowork",
+          "name": "Cowork",
+          "icon": "chat",
+          "desc": "Comunicación interna de tu equipo y acceso directo al soporte de ZAK.",
+          "requirements": [
+            {
+              "id": "grupos",
+              "text": "Grupos o canales internos definidos (por área o proyecto)"
+            },
+            {
+              "id": "herramienta",
+              "text": "Herramienta que usan hoy para comunicarse internamente (WhatsApp, Slack, Teams…)"
+            },
+            {
+              "id": "personas",
+              "text": "Personas que participarán en la comunicación interna"
+            },
+            {
+              "id": "soporte",
+              "text": "Responsable que gestionará los casos con el soporte de ZAK"
+            }
+          ]
+        },
+        {
+          "id": "number-master",
+          "name": "Number Master",
+          "icon": "gauge",
+          "desc": "Un número que resume toda la operación, con dueño por decimal.",
+          "requirements": [
+            {
+              "id": "kpis",
+              "text": "KPI por área definidos (ventas, cobranza, atención, contabilidad, equipo)"
+            },
+            {
+              "id": "metas",
+              "text": "Metas mensuales definidas"
+            },
+            {
+              "id": "duenos",
+              "text": "Responsable por cada área"
+            }
+          ]
+        },
+        {
+          "id": "contabilidad",
+          "name": "Contabilidad",
+          "icon": "ledger",
+          "desc": "Facturas, conciliaciones y cuentas conectadas con la venta.",
+          "requirements": [
+            {
+              "id": "erp",
+              "text": "ERP o sistema contable identificado, con su versión"
+            },
+            {
+              "id": "api",
+              "text": "Posibilidad de generar una API Key o Token"
+            },
+            {
+              "id": "sincronizacion",
+              "text": "Regla de sincronización (cuándo se crea la factura o el cliente)"
+            },
+            {
+              "id": "bancos",
+              "text": "Acceso a los estados de cuenta bancarios"
+            }
+          ]
+        },
+        {
+          "id": "workflows",
+          "name": "Workflows",
+          "icon": "workflow",
+          "desc": "Reglas automáticas: cuando pasa algo, ZAK hace lo siguiente.",
+          "requirements": [
+            {
+              "id": "procesos",
+              "text": "Procesos repetitivos que quieres automatizar"
+            },
+            {
+              "id": "reglas",
+              "text": "Reglas y plazos de cada proceso (p. ej. avisar al vendedor a los 2 días)"
+            },
+            {
+              "id": "aprobador",
+              "text": "Responsable de aprobar cada automatización"
+            }
+          ]
+        },
+        {
+          "id": "piloto-automatico",
+          "name": "Piloto Automático",
+          "icon": "auto",
+          "desc": "Lo que la IA hace sola, lo que consulta y lo que nunca hará.",
+          "requirements": [
+            {
+              "id": "descuentos",
+              "text": "Política de descuentos y monto tope de venta"
+            },
+            {
+              "id": "escalar",
+              "text": "Casos en los que debe pasar a un humano"
+            },
+            {
+              "id": "sla",
+              "text": "Tiempos de respuesta deseados (SLA)"
+            },
+            {
+              "id": "prohibidos",
+              "text": "Temas que la IA nunca debe responder"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  "_comment": "Mapa id de pregunta ↔ id de ítem del Google Form. Lo genera setupForm() en Apps Script (ver docs/GUIA.md, paso 3). Si un id falta, el script busca el ítem por el prefijo del título (ej. «1.1 · »).",
+  "items": {}
+}

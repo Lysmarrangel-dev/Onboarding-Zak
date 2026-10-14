@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Onboarding ZAK · iTech</title>
+  <meta name="description" content="Asistente de onboarding para la implementación de ZAK de iTech." />
+  <meta name="theme-color" content="#53037B" />
+  <meta name="robots" content="noindex" />
+
+  <!-- Favicon: isotipo «it» (el manual permite el isotipo en favicon 16/24/32 px) -->
+  <link rel="icon" type="image/svg+xml" href="assets/brand/itech-isotipo-degradado.svg" />
+  <link rel="apple-touch-icon" href="assets/brand/itech-isotipo-degradado.svg" />
+
+  <!-- Iquost (corporativa) se carga localmente desde css/tokens.css. Inter (interfaz) desde Google Fonts. -->
+  <link rel="preload" href="assets/fonts/Iquost.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/app.css" />
+  <script>
+    // Aplica el tema guardado antes de pintar (evita parpadeo). Claro por defecto.
+    try { document.documentElement.setAttribute('data-theme', localStorage.getItem('zak-theme') || 'light'); } catch (e) {}
+  </script>
+</head>
+<body>
+  <div id="app" aria-live="off">
+    <noscript>Esta aplicación necesita JavaScript para funcionar.</noscript>
+  </div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

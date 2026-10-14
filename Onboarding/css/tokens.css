@@ -1,0 +1,89 @@
+/* ==========================================================================
+   Design tokens · Manual de Marca iTech v1.0
+   Único lugar donde se definen colores, fuentes, radios y movimiento.
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Iquost';
+  src: url('../assets/fonts/Iquost.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Paleta oficial (HEX exactos del manual) */
+  --itech-purple: #53037B;   /* Púrpura iTech · primario */
+  --itech-magenta: #A72DBC;  /* Magenta IA · secundario (acento) */
+  --itech-carbon: #1C1C1C;   /* Carbón · neutro principal */
+  --itech-white: #FFFFFF;    /* Apoyo · superficies */
+  --itech-lavender: #F5F2F8; /* Lavanda claro · fondos y tarjetas */
+  --itech-gradient: linear-gradient(125deg, #53037B 0%, #A72DBC 100%);
+
+  /* Tipografía */
+  --font-brand: 'Iquost', 'Inter', Arial, sans-serif;
+  --font-ui: 'Inter', Arial, sans-serif;
+
+  /* Radios y espaciado */
+  --radius-card: 20px;
+  --radius-bubble: 18px;
+  --radius-input: 12px;
+  --radius-pill: 999px;
+
+  /* Movimiento */
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+  --dur-fast: 160ms;
+  --dur-med: 320ms;
+
+  /* ---- Tema claro (por defecto) ---- */
+  --bg: var(--itech-white);
+  --surface: var(--itech-white);
+  --surface-soft: var(--itech-lavender);
+  --card: var(--itech-lavender);
+  --text: var(--itech-carbon);
+  --text-muted: #5E5866;            /* carbón aclarado, contraste AA sobre blanco y lavanda */
+  --accent-text: var(--itech-purple);
+  --border: #E4DDEB;
+  --border-strong: #CFC4DA;
+  --focus: var(--itech-purple);
+  --focus-ring: rgba(83, 3, 123, .18);
+  --chip-bg: var(--itech-white);
+  --chip-border: rgba(83, 3, 123, .28);
+  --chip-text: var(--itech-purple);
+  --chip-hover: var(--itech-lavender);
+  --danger: #B3261E;
+  --danger-bg: #FCEEEE;
+  --header-bg: rgba(255, 255, 255, .86);
+  --overlay: rgba(28, 28, 28, .45);
+  --shadow: 0 10px 30px rgba(83, 3, 123, .10);
+  --logo-positive: block;
+  --logo-negative: none;
+  color-scheme: light;
+}
+
+/* ---- Tema oscuro basado en carbón (se activa con el interruptor; el claro es el predeterminado) ---- */
+:root[data-theme="dark"] {
+  --bg: #121212;
+  --surface: #171717;
+  --surface-soft: var(--itech-carbon);
+  --card: var(--itech-carbon);
+  --text: var(--itech-lavender);
+  --text-muted: #B9B1C2;
+  --accent-text: #E3C6EA;           /* lavanda con tinte magenta: contraste AA sobre carbón */
+  --border: #2C2A30;
+  --border-strong: #3D3942;
+  --focus: var(--itech-magenta);
+  --focus-ring: rgba(167, 45, 188, .35);
+  --chip-bg: var(--itech-carbon);
+  --chip-border: rgba(245, 242, 248, .22);
+  --chip-text: var(--itech-lavender);
+  --chip-hover: #262329;
+  --danger: #FFB4AB;
+  --danger-bg: #3A1D1B;
+  --header-bg: rgba(18, 18, 18, .86);
+  --overlay: rgba(0, 0, 0, .6);
+  --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+  --logo-positive: none;
+  --logo-negative: block;
+  color-scheme: dark;
+}

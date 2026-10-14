@@ -1,0 +1,50 @@
+{
+  "_comment": "Guion de la presentación de bienvenida. La app muestra `caption` y la voz narra `say` (o `caption` si no hay `say`). Los audios se generan una vez con ElevenLabs: tools/generar_voz.py crea assets/audio/intro/<id>.mp3. Si cambias un texto, vuelve a ejecutar el script. Si falta un audio, la app usa la voz del navegador para esa escena.",
+  "audioDir": "assets/audio/intro",
+  "elevenlabs": {
+    "voiceId": "O5hbneAmtjLMgfg5UFIm",
+    "modelId": "eleven_multilingual_v2",
+    "outputFormat": "mp3_44100_128",
+    "languageCode": "es",
+    "voiceSettings": {
+      "stability": 0.5,
+      "similarity_boost": 0.8,
+      "style": 0.15,
+      "use_speaker_boost": true
+    }
+  },
+  "scenes": [
+    {
+      "id": "hello",
+      "min": 3600,
+      "caption": "Hola, soy ZAK Assistant. Te acompaño en el onboarding de ZAK."
+    },
+    {
+      "id": "zak",
+      "min": 4600,
+      "caption": "ZAK es el sistema de automatización empresarial de iTech: tu empresa en un solo lugar."
+    },
+    {
+      "id": "stats",
+      "min": 4200,
+      "caption": "18 módulos, 6 canales y un solo panel.",
+      "say": "Dieciocho módulos, seis canales y un solo panel."
+    },
+    {
+      "id": "voice",
+      "min": 5400,
+      "caption": "Captas, vendes, cobras y diriges a tu equipo… incluso hablando."
+    },
+    {
+      "id": "cycle",
+      "min": 4600,
+      "caption": "Con tus respuestas configuramos ZAK según la operación de tu empresa."
+    },
+    {
+      "id": "go",
+      "min": 4400,
+      "caption": "Toma unos 35 minutos y puedes editar cualquier respuesta. Empecemos.",
+      "say": "Toma unos treinta y cinco minutos, y puedes editar cualquier respuesta. Empecemos."
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+# Sitio estático: no necesita compilación. Publica la carpeta raíz.
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "DENY"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/config/*"
+  [headers.values]
+    Cache-Control = "no-cache"

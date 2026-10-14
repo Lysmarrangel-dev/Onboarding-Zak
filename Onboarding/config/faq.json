@@ -1,0 +1,773 @@
+{
+  "_comment": "Respuestas breves sobre ZAK. Fuentes: cuestionario oficial de onboarding y 'ZAK Brochure - iTech.pdf' (presentación comercial de ZAK). El agente elige la entrada con más coincidencias de palabras clave (se ignoran mayúsculas y tildes; las palabras deben coincidir completas). Sin coincidencia, usa 'fallback'. Para precios, plazos o casos concretos, las respuestas remiten a un consultor de iTech.",
+  "fallback": "No tengo esa información en este momento. Un consultor de iTech te contactará para resolverlo. Sigamos con el onboarding.",
+  "entries": [
+    {
+      "id": "que-es",
+      "source": "ZAK brochure p.1-3",
+      "keywords": [
+        "que es zak",
+        "que hace zak",
+        "para que sirve",
+        "de que se trata",
+        "que incluye",
+        "que es el sistema",
+        "que ofrece",
+        "que es el crm",
+        "en que consiste"
+      ],
+      "answer": "ZAK (Central Automated Kinetic System) es el Sistema de Automatización Empresarial de iTech C.A. Reúne en un solo lugar todo el ciclo comercial: captar, publicitar, vender, cobrar, atender por teléfono, firmar y dirigir al equipo. Son 18 módulos conectados, con un solo acceso y una sola factura."
+    },
+    {
+      "id": "significado",
+      "source": "ZAK brochure p.1",
+      "keywords": [
+        "que significa zak",
+        "significado",
+        "siglas",
+        "que quiere decir zak",
+        "por que se llama zak",
+        "nombre zak"
+      ],
+      "answer": "ZAK significa Central Automated Kinetic System. Es el Sistema de Automatización Empresarial de iTech C.A."
+    },
+    {
+      "id": "quien-desarrolla",
+      "source": "ZAK brochure p.1",
+      "keywords": [
+        "quien lo desarrolla",
+        "quien lo hizo",
+        "empresa detras",
+        "quien es itech",
+        "fabricante",
+        "quien desarrolla",
+        "desarrolla zak",
+        "quien creo",
+        "quien creo zak",
+        "de que empresa"
+      ],
+      "answer": "ZAK lo desarrolla iTech C.A., la empresa que te acompaña en este onboarding y en la configuración."
+    },
+    {
+      "id": "canales",
+      "source": "ZAK brochure p.1, p.11, p.14",
+      "keywords": [
+        "canales",
+        "canal",
+        "omnicanal",
+        "6 canales",
+        "seis canales",
+        "donde atiende"
+      ],
+      "answer": "ZAK reúne 6 canales en un solo panel. En la presentación aparecen WhatsApp oficial, Instagram, Messenger, correo (Gmail y Outlook), teléfono con el call center y la web con el avatar interactivo. Tu consultor confirma cuáles vas a activar."
+    },
+    {
+      "id": "problemas",
+      "source": "ZAK brochure p.2, p.16",
+      "keywords": [
+        "por que zak",
+        "que problema resuelve",
+        "que problemas resuelve",
+        "beneficios",
+        "ventajas",
+        "para que me sirve",
+        "por que lo necesito",
+        "diferencia"
+      ],
+      "answer": "ZAK resuelve problemas comunes de los equipos comerciales: pagar varias suscripciones que no se conectan entre sí, vendedores que trabajan solo por WhatsApp, ventas perdidas por falta de seguimiento, no saber qué hace el equipo en tiempo real, bots que inventan respuestas, informes armados a mano cada mes y publicidad desconectada de la venta."
+    },
+    {
+      "id": "modulos",
+      "source": "lista oficial de módulos de iTech",
+      "keywords": [
+        "modulos",
+        "modulo",
+        "que modulos",
+        "funcionalidades",
+        "funciones",
+        "herramientas incluye",
+        "cuantos modulos",
+        "18 modulos",
+        "lista de modulos"
+      ],
+      "answer": "ZAK tiene 18 módulos: Dashboard, AdStudio, Agentes IA, Contactos, Inbox Omnicanal, Call Center, Pipelines, Web & Funnels, Ventas, Email Marketing, Calendario, Workforce Center, Recursos Humanos, Cowork, Number Master, Contabilidad, Workflows y Piloto Automático. Cada uno se activa cuando lo necesitas."
+    },
+    {
+      "id": "activar-modulos",
+      "source": "ZAK brochure p.4, p.15",
+      "keywords": [
+        "activar modulo",
+        "activar modulos",
+        "agregar modulo",
+        "agregar modulos",
+        "nuevo modulo",
+        "nuevos modulos",
+        "mas adelante",
+        "despues",
+        "empezar con pocos",
+        "no necesito todo"
+      ],
+      "answer": "Cada módulo se activa cuando lo necesitas, y los nuevos se suman sin rehacer lo que ya está configurado. Puedes empezar con pocos módulos y crecer después."
+    },
+    {
+      "id": "idiomas",
+      "source": "ZAK brochure p.3, p.11, p.12",
+      "keywords": [
+        "idioma",
+        "idiomas",
+        "ingles",
+        "english",
+        "espanol",
+        "otro idioma",
+        "varios idiomas"
+      ],
+      "answer": "ZAK funciona en español e inglés. El avatar interactivo atiende en varios idiomas, y el estudio creativo genera versiones de un anuncio por idioma y país."
+    },
+    {
+      "id": "voz",
+      "source": "ZAK brochure p.3, p.5, p.6",
+      "keywords": [
+        "voz",
+        "hablando",
+        "por voz",
+        "comando",
+        "comandos",
+        "dictado",
+        "dictar",
+        "esfera de voz",
+        "ordenes",
+        "barra de comando"
+      ],
+      "answer": "Con ZAK trabajas hablando: puedes dictar en cualquier campo, y el asistente cumple lo que le pides. Todo lo que se hace con el mouse se puede pedir por voz. Por ejemplo: «¿Cuánto vendimos esta semana?», «Agenda una cita mañana a las 10», «Cóbrale por QR a este cliente» o «¿Quién tiene tareas vencidas?»."
+    },
+    {
+      "id": "kira",
+      "source": "cuestionario 12.1 + ZAK brochure p.6",
+      "keywords": [
+        "kira",
+        "copiloto",
+        "asistente de voz"
+      ],
+      "answer": "Kira es el copiloto de voz de ZAK. Con ella ejecutas por voz las tareas del día a día, como crear contactos, mover tratos, agendar citas o preguntar quién no ha pagado. Cada rol define qué puede pedirle."
+    },
+    {
+      "id": "permisos-auditoria",
+      "source": "ZAK brochure p.6",
+      "keywords": [
+        "permiso",
+        "permisos",
+        "roles",
+        "rol",
+        "auditoria",
+        "registro",
+        "quien hizo",
+        "restringir",
+        "restriccion",
+        "trazabilidad",
+        "historial"
+      ],
+      "answer": "Lo que cada persona puede pedir depende de su rol. Además, cada orden queda registrada con la hora, el usuario y el resultado."
+    },
+    {
+      "id": "panel-inicio",
+      "source": "ZAK brochure p.3, p.5",
+      "keywords": [
+        "panel",
+        "inicio",
+        "homepage",
+        "pantalla principal",
+        "pantalla de inicio",
+        "que veo al entrar",
+        "al entrar",
+        "resumen del dia"
+      ],
+      "answer": "Al entrar ves el dinero, no gráficos decorativos: lo cobrado hoy, lo que está por cobrar, las ventas y objetivos del mes, las conversaciones abiertas, las llamadas atendidas y perdidas, las citas del día, las tareas por persona y el costo de la IA. Al tocar una tarjeta se abre su detalle. También puedes reordenarlas o pedirle al asistente una vista a tu medida."
+    },
+    {
+      "id": "number-master",
+      "source": "ZAK brochure p.7",
+      "keywords": [
+        "number master",
+        "indicador",
+        "indicador general",
+        "un numero",
+        "salud del negocio",
+        "puntaje"
+      ],
+      "answer": "Number Master resume toda la operación en un solo número. Lo forman los KPI de ventas, cobranza, atención, contabilidad y equipo, cada uno con un peso definido. Si el número baja, puedes rastrear la causa hasta el proceso, la persona, la tarjeta o la factura. El sistema también asigna el seguimiento, fija un plazo y vuelve a medir."
+    },
+    {
+      "id": "pipeline",
+      "source": "ZAK brochure p.8",
+      "keywords": [
+        "pipeline",
+        "pipelines",
+        "embudo",
+        "embudos",
+        "etapas",
+        "etapa",
+        "columnas",
+        "columna",
+        "sla",
+        "slas",
+        "tratos",
+        "trato",
+        "kanban"
+      ],
+      "answer": "Los embudos se adaptan a tu proceso. Las columnas son ilimitadas: las creas, renombras, reordenas u ocultas arrastrando o por voz. Puedes tener un embudo por área (ventas, postventa, cobranza, soporte, reclutamiento) y reglas y SLA por columna, como «al entrar en Cotizado, envía la propuesta y avisa al vendedor a los 2 días». La IA resume cada tarjeta, sugiere el siguiente paso y detecta las que se enfrían."
+    },
+    {
+      "id": "automatizacion",
+      "source": "ZAK brochure p.9",
+      "keywords": [
+        "automatico",
+        "automatica",
+        "automatizacion",
+        "automatizar",
+        "hace solo",
+        "piloto automatico",
+        "autorizacion",
+        "que no hace",
+        "limites de la ia",
+        "control de la ia",
+        "descuento",
+        "descuentos",
+        "sola",
+        "solo",
+        "por su cuenta",
+        "sin permiso"
+      ],
+      "answer": "Hay tres niveles. Lo que la IA hace sola: responder chats con tus documentos, calificar interesados, agendar y recordar citas, enviar cotizaciones y enlaces de cobro, dar seguimiento y repartir tickets. Lo que requiere autorización: descuentos fuera de política, ventas sobre el monto tope, escribir a toda la base, cambiar precios o SLA. Lo que nunca hace sola: firmar por la empresa, borrar información de forma definitiva o cambiar permisos de usuarios."
+    },
+    {
+      "id": "respuestas-inventadas",
+      "source": "ZAK brochure p.2, p.9, p.15",
+      "keywords": [
+        "inventa",
+        "inventar",
+        "inventan",
+        "se equivoca",
+        "errores",
+        "alucina",
+        "respuestas falsas",
+        "confiable",
+        "precision"
+      ],
+      "answer": "Los agentes responden con tus propios documentos (catálogo, precios y políticas). Por eso te preguntamos por ellos en el onboarding. Arrancan en modo conservador, y lo que está fuera de tus reglas lo consultan antes de actuar."
+    },
+    {
+      "id": "agentes",
+      "source": "ZAK brochure p.10",
+      "keywords": [
+        "agentes",
+        "agente",
+        "agente de ia",
+        "agentes de ia",
+        "bot",
+        "bots",
+        "chatbot",
+        "crear un agente",
+        "sin programar"
+      ],
+      "answer": "ZAK funciona con un equipo de agentes, no con un solo bot: recepción, ventas, cotizador, cobranza, soporte, agenda, RR. HH. y reportes. Crear uno nuevo no requiere programar: defines su nombre y puesto, los documentos que puede leer, lo que puede hacer solo y el canal (WhatsApp, teléfono o web)."
+    },
+    {
+      "id": "avatar",
+      "source": "ZAK brochure p.11",
+      "keywords": [
+        "avatar",
+        "avatar interactivo",
+        "persona en pantalla",
+        "recepcionista",
+        "recepcionista web"
+      ],
+      "answer": "El avatar interactivo es una persona en pantalla que ve, escucha y responde en el momento; no es un video grabado. Recibe y agenda en tu web sin formularios, hace demostraciones del producto y ayuda a capacitar al personal. Funciona 24/7, en varios idiomas, con un tope de uso configurable."
+    },
+    {
+      "id": "call-center",
+      "source": "ZAK brochure p.11",
+      "keywords": [
+        "call center",
+        "llamadas",
+        "llamada",
+        "telefono",
+        "telefonia",
+        "central telefonica",
+        "grabacion",
+        "transcripcion",
+        "marcacion",
+        "llamar"
+      ],
+      "answer": "El call center con IA pone el teléfono dentro de ZAK. La IA contesta, reconoce al cliente y abre su ficha. Además marca listas y campañas de reactivación, y confirma citas o hace cobranza con un guion aprobado. La grabación, la transcripción y el resumen quedan en la ficha del cliente."
+    },
+    {
+      "id": "estudio-creativo",
+      "source": "ZAK brochure p.12",
+      "keywords": [
+        "estudio creativo",
+        "publicidad",
+        "anuncios",
+        "flyer",
+        "flyers",
+        "reels",
+        "stories",
+        "contenido",
+        "creditos",
+        "diseño",
+        "campanas publicitarias"
+      ],
+      "answer": "En el estudio creativo dictas la idea (qué necesitas, el estilo y la paleta) y la IA genera flyers y videos para Ads, Reels y Stories, entrenada con tu marca. Adapta el contenido a cada red y crea versiones por idioma y país, con aprobación interna antes de publicar. El plan incluye créditos de contenido."
+    },
+    {
+      "id": "video-real",
+      "source": "cuestionario 10.4",
+      "keywords": [
+        "video real",
+        "costo adicional",
+        "biblioteca de muestra",
+        "ad studio"
+      ],
+      "answer": "En Ad Studio, generar video real implica un costo adicional. Para empezar, pueden usar la biblioteca de muestra."
+    },
+    {
+      "id": "captacion",
+      "source": "ZAK brochure p.4, p.12",
+      "keywords": [
+        "landing",
+        "landings",
+        "captacion",
+        "captar",
+        "quiz",
+        "leads",
+        "lead",
+        "prospectos",
+        "calificacion",
+        "calificar"
+      ],
+      "answer": "ZAK capta con landings, anuncios y quiz. El prospecto entra directo desde la campaña, se califica para priorizar los de mayor valor, recibe una cotización a medida y se le da seguimiento uno a uno hasta el cierre."
+    },
+    {
+      "id": "cobro-qr",
+      "source": "ZAK brochure p.3, p.9",
+      "keywords": [
+        "qr",
+        "cobro",
+        "cobros",
+        "cobrar",
+        "link de pago",
+        "enlace de pago",
+        "enlaces de pago",
+        "cobranza"
+      ],
+      "answer": "ZAK tiene un motor de cobro: puedes cobrar por QR en segundos y enviar enlaces de cobro desde la conversación. La pantalla de inicio muestra lo que entró al banco y quién está por vencer."
+    },
+    {
+      "id": "cotizacion-contrato",
+      "source": "ZAK brochure p.4, p.6, p.9",
+      "keywords": [
+        "cotizacion",
+        "cotizaciones",
+        "cotizar",
+        "contrato",
+        "contratos",
+        "firma",
+        "firmar",
+        "firma electronica"
+      ],
+      "answer": "En el módulo de ventas armas la cotización, generas el contrato y lo envías para firma, todo desde ZAK. Puedes pedirlo por voz, como «Arma una cotización de 3 productos» o «Envía el contrato para firma». La IA nunca firma en nombre de la empresa."
+    },
+    {
+      "id": "whatsapp-oficial",
+      "source": "ZAK brochure p.4, p.14",
+      "keywords": [
+        "whatsapp oficial",
+        "subcrm",
+        "api de whatsapp",
+        "whatsapp business api",
+        "vendedores whatsapp",
+        "whatsapp no oficial"
+      ],
+      "answer": "ZAK se conecta a WhatsApp solo por la vía oficial de Meta. Incluye un SubCRM de WhatsApp para que las conversaciones de los vendedores queden registradas y con seguimiento."
+    },
+    {
+      "id": "migrar-numero",
+      "source": "cuestionario 2.2",
+      "keywords": [
+        "migrar",
+        "migracion",
+        "app movil",
+        "celular",
+        "dejara de funcionar",
+        "perder whatsapp",
+        "mismo numero"
+      ],
+      "answer": "Si migramos un número a la API, deja de funcionar en la app de WhatsApp del celular. Por eso te damos la opción de habilitar una línea nueva."
+    },
+    {
+      "id": "tarifas-meta",
+      "source": "cuestionario 2.5",
+      "keywords": [
+        "tarifas de meta",
+        "cobra meta",
+        "costo whatsapp",
+        "por conversacion",
+        "tarjeta",
+        "tarifa por conversacion"
+      ],
+      "answer": "Meta cobra tarifas por conversación de WhatsApp. Para cubrirlas, se necesita una tarjeta de pago registrada en el Business Portfolio de la empresa."
+    },
+    {
+      "id": "integraciones",
+      "source": "ZAK brochure p.14",
+      "keywords": [
+        "integracion",
+        "integraciones",
+        "gmail",
+        "outlook",
+        "google calendar",
+        "stripe",
+        "mercado pago",
+        "conekta",
+        "google sheets",
+        "sheets",
+        "excel",
+        "meta ads",
+        "instagram",
+        "messenger",
+        "api abierta",
+        "con que se conecta",
+        "con que se integra",
+        "que integraciones tiene",
+        "se conecta con otros",
+        "whatsapp instagram"
+      ],
+      "answer": "La conexión es inmediata con WhatsApp oficial de Meta, Instagram y Messenger, Gmail y Outlook, Google Calendar, Stripe, Mercado Pago y Conekta, Google Sheets y Excel, Meta Ads Manager y cualquier sistema con API abierta."
+    },
+    {
+      "id": "integraciones-extra",
+      "source": "ZAK brochure p.14",
+      "keywords": [
+        "pago movil",
+        "clabe",
+        "banco",
+        "bancos",
+        "sistema contable",
+        "sistemas contables",
+        "erp",
+        "programa viejo",
+        "sistema antiguo",
+        "odoo",
+        "siigo",
+        "alegra",
+        "sap",
+        "quickbooks"
+      ],
+      "answer": "Algunas conexiones requieren trabajo extra: sistemas contables locales, bancos sin API pública (con estado de cuenta), programas antiguos sin conexión y Pago Móvil o CLABE, según el banco. Un consultor de iTech revisará tu caso con lo que respondas en la sección de ERP."
+    },
+    {
+      "id": "limites",
+      "source": "ZAK brochure p.14",
+      "keywords": [
+        "limite",
+        "limites",
+        "mensajes por minuto",
+        "no tiene api",
+        "sin api",
+        "restricciones tecnicas",
+        "que no se puede"
+      ],
+      "answer": "Hay límites que conviene conocer: WhatsApp solo funciona por la vía oficial, cada proveedor tiene un tope de mensajes por minuto, algunas plataformas cobran por conexión y lo que no tenga API ni archivo se opera a mano."
+    },
+    {
+      "id": "reemplaza-herramientas",
+      "source": "ZAK brochure p.13",
+      "keywords": [
+        "reemplaza",
+        "reemplazar",
+        "sustituye",
+        "suscripciones",
+        "gohighlevel",
+        "kommo",
+        "pipedrive",
+        "calendly",
+        "docusign",
+        "typeform",
+        "manychat",
+        "wati",
+        "mailchimp",
+        "activecampaign",
+        "elevenlabs",
+        "heygen",
+        "aircall",
+        "twilio",
+        "ahorro",
+        "ahorrar"
+      ],
+      "answer": "ZAK agrupa en una sola suscripción herramientas que hoy se pagan por separado: CRM y automatización, agenda, firma de documentos, formularios, chatbots de WhatsApp, correo masivo, voz con IA, video con IA y central telefónica. Frente a la suma de esas herramientas, el ahorro va del 30 % al 60 %, según el plan."
+    },
+    {
+      "id": "precio",
+      "source": "ZAK brochure p.13",
+      "keywords": [
+        "precio",
+        "precios de zak",
+        "cuanto cuesta",
+        "cuanto vale",
+        "costo de zak",
+        "planes",
+        "plan",
+        "mensualidad",
+        "factura"
+      ],
+      "answer": "El precio depende del plan y de los módulos que actives. Todo va en una sola suscripción y una sola factura. Un consultor de iTech te dará el detalle según tu configuración."
+    },
+    {
+      "id": "implementacion",
+      "source": "ZAK brochure p.15-16",
+      "keywords": [
+        "implementacion",
+        "como empezamos",
+        "cuanto tarda",
+        "puesta en marcha",
+        "pasos",
+        "arranque",
+        "arrancar",
+        "siguientes pasos",
+        "que sigue"
+      ],
+      "answer": "Son tres etapas. Configuración: cargamos tu catálogo, precios, documentos y equipo, y armamos tus embudos tal como vendes hoy. Puesta en marcha: los agentes se entrenan con tus documentos y empezamos en modo conservador con una sesión de una hora. Acompañamiento: ajustamos embudos y reglas cuando lo pidas. Los plazos exactos los define tu consultor de iTech."
+    },
+    {
+      "id": "capacitacion",
+      "source": "ZAK brochure p.3-4, p.15",
+      "keywords": [
+        "capacitacion",
+        "entrenamiento",
+        "aprender",
+        "dificil",
+        "facil de usar",
+        "curva de aprendizaje",
+        "conocimiento tecnico",
+        "tecnico"
+      ],
+      "answer": "ZAK está pensado para usarse sin conocimientos técnicos, porque puedes manejarlo por voz. La puesta en marcha incluye una sesión de una hora, y en la última sección del onboarding nos cuentas qué capacitación necesita tu equipo."
+    },
+    {
+      "id": "equipo",
+      "source": "ZAK brochure p.2, p.5, p.9",
+      "keywords": [
+        "equipo",
+        "vendedores",
+        "tareas vencidas",
+        "supervisar",
+        "control de equipo",
+        "rendimiento",
+        "tickets",
+        "asignar"
+      ],
+      "answer": "Con el control de equipo ves en tiempo real las tareas de cada persona y las que están vencidas. También recibes resúmenes, y los tickets se reparten según la carga de trabajo. Además puedes dar órdenes por voz, como «Asigna este ticket a Luis»."
+    },
+    {
+      "id": "agenda-correo",
+      "source": "ZAK brochure p.4, p.9",
+      "keywords": [
+        "agenda",
+        "citas",
+        "cita",
+        "recordatorio",
+        "recordatorios",
+        "reprogramar",
+        "correo masivo",
+        "email marketing",
+        "campanas de correo",
+        "newsletter"
+      ],
+      "answer": "ZAK incluye agenda y correo masivo. La IA agenda, recuerda y reprograma citas. Para escribir a toda la base de clientes, siempre pide autorización."
+    },
+    {
+      "id": "reportes",
+      "source": "ZAK brochure p.2, p.4",
+      "keywords": [
+        "reportes",
+        "reporte",
+        "informes",
+        "informe",
+        "tableros",
+        "analisis",
+        "dashboards",
+        "estadisticas"
+      ],
+      "answer": "Los tableros de análisis y los resúmenes se generan solos, sin armar informes a mano cada mes. En la sección 11 puedes contarnos qué reportes en Excel o CSV quieres convertir en tableros."
+    },
+    {
+      "id": "administrativo",
+      "source": "ZAK brochure p.4",
+      "keywords": [
+        "contabilidad",
+        "contable",
+        "administrativo",
+        "rrhh",
+        "recursos humanos",
+        "personal"
+      ],
+      "answer": "ZAK incluye un módulo administrativo y contable, y uno de RR. HH. con conexiones abiertas a otros sistemas. Los permisos de cada rol definen quién ve la información financiera."
+    },
+    {
+      "id": "demo",
+      "source": "ZAK brochure p.16",
+      "keywords": [
+        "demo",
+        "demostracion",
+        "ver el sistema",
+        "probar",
+        "prueba",
+        "verlo funcionando"
+      ],
+      "answer": "Te mostramos ZAK en una demostración en vivo con tus propios productos y tu forma de vender. Un consultor de iTech te contactará para coordinarla."
+    },
+    {
+      "id": "api-key",
+      "source": "cuestionario 6.2",
+      "keywords": [
+        "api key",
+        "apikey",
+        "token",
+        "clave",
+        "contrasena",
+        "password"
+      ],
+      "answer": "No compartas claves ni contraseñas en este onboarding. Solo necesitamos saber si pueden generarlas. Las configuramos contigo por un canal seguro."
+    },
+    {
+      "id": "clonar-voz",
+      "source": "cuestionario 4.4",
+      "keywords": [
+        "clonar",
+        "voz clonada",
+        "clonacion",
+        "audio"
+      ],
+      "answer": "Para clonar una voz necesitamos un audio limpio de 1 a 2 minutos y la autorización de la persona. Si no, pueden elegir una voz de catálogo."
+    },
+    {
+      "id": "privacidad",
+      "source": "onboarding",
+      "keywords": [
+        "mis datos",
+        "privacidad",
+        "quien ve",
+        "confidencial",
+        "seguridad de los datos",
+        "proteccion de datos"
+      ],
+      "answer": "Tus respuestas llegan solo al equipo de iTech, que las usa para configurar ZAK según la operación de tu empresa."
+    },
+    {
+      "id": "guardar-progreso",
+      "source": "onboarding",
+      "keywords": [
+        "guardar",
+        "pausar",
+        "continuar despues",
+        "mas tarde",
+        "salir",
+        "cerrar la pestana"
+      ],
+      "answer": "Tu progreso se guarda en este dispositivo. Puedes cerrar la pestaña y continuar después desde el mismo navegador."
+    },
+    {
+      "id": "duracion-onboarding",
+      "source": "onboarding",
+      "keywords": [
+        "cuanto falta",
+        "cuanto dura el onboarding",
+        "duracion",
+        "cuantas preguntas"
+      ],
+      "answer": "El onboarding toma unos 35 minutos. En la barra superior ves en qué sección estás y tu porcentaje de avance."
+    },
+    {
+      "id": "elegir-modulos",
+      "source": "onboarding + ZAK brochure p.4, p.16",
+      "keywords": [
+        "que modulos contratar",
+        "cual me conviene",
+        "cuales elijo",
+        "que modulos elijo",
+        "no se que modulos",
+        "debo contratar",
+        "recomiendas",
+        "modulos debo contratar",
+        "que modulos debo",
+        "modulos contratar",
+        "cuales modulos necesito",
+        "que modulos necesito"
+      ],
+      "answer": "Depende de cómo vende y atiende tu empresa. Marca los módulos que te interesan: tu consultor de iTech confirma contigo la configuración final. Cada módulo se puede activar después, cuando lo necesites."
+    },
+    {
+      "id": "checklist",
+      "source": "onboarding",
+      "keywords": [
+        "checklist",
+        "preparacion",
+        "porcentaje",
+        "calificacion",
+        "nivel de preparacion",
+        "requisitos",
+        "lo tengo",
+        "en proceso",
+        "que me falta"
+      ],
+      "answer": "El checklist mide qué tan lista está tu empresa para cada módulo que elegiste. «Lo tengo» cuenta 100 %, «En proceso» 50 % y «No lo tengo» 0 %. Tu preparación global es el promedio de los módulos. No es un examen: nos dice por dónde empezar y en qué te acompañamos."
+    },
+    {
+      "id": "presentacion",
+      "source": "onboarding",
+      "keywords": [
+        "video",
+        "presentacion",
+        "voz del asistente",
+        "silenciar",
+        "volver a ver",
+        "ver de nuevo"
+      ],
+      "answer": "La presentación del inicio dura unos 25 segundos. Puedes pausarla, silenciar la voz o volver a verla desde el primer mensaje del chat."
+    },
+    {
+      "id": "cowork",
+      "source": "iTech (definición del módulo)",
+      "keywords": [
+        "cowork",
+        "comunicacion interna",
+        "chat interno",
+        "mensajeria interna",
+        "hablar con mi equipo",
+        "slack",
+        "teams",
+        "reemplaza a slack",
+        "reemplaza slack",
+        "reemplaza a teams",
+        "reemplaza teams",
+        "en vez de slack",
+        "en vez de whatsapp interno"
+      ],
+      "answer": "Cowork es el módulo de comunicación interna de tu equipo dentro de ZAK. También incluye una sección de soporte de ZAK, desde donde tu equipo puede pedir ayuda."
+    },
+    {
+      "id": "soporte-zak",
+      "source": "iTech (definición del módulo Cowork)",
+      "keywords": [
+        "soporte",
+        "soporte de zak",
+        "soporte tecnico",
+        "ayuda",
+        "contactar soporte",
+        "reportar un problema",
+        "falla",
+        "incidencia"
+      ],
+      "answer": "El soporte de ZAK está en el módulo Cowork, que tiene una sección dedicada. Desde ahí tu equipo reporta casos y hace consultas. Durante la implementación, tu consultor de iTech te acompaña directamente."
+    }
+  ]
+}
