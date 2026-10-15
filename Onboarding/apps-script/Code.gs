@@ -196,13 +196,17 @@ function updateForm() {
   Logger.log('Form (edición): ' + form.getEditUrl());
 }
 
-/** setRequired() solo existe en los ítems tipados; los de form.getItems() son genéricos. */
+/**
+ * setRequired() solo existe en los ítems tipados (los que devuelve form.add…Item()).
+ * Los de form.getItems() son genéricos y hay que convertirlos con as…Item().
+ */
 function setRequired_(item, required) {
+  if (typeof item.setRequired === 'function') return void item.setRequired(required);
   var as = {
     TEXT: 'asTextItem', PARAGRAPH_TEXT: 'asParagraphTextItem', MULTIPLE_CHOICE: 'asMultipleChoiceItem',
     CHECKBOX: 'asCheckboxItem', GRID: 'asGridItem', DATE: 'asDateItem',
   }[String(item.getType())];
-  if (as) item[as]().setRequired(required);
+  if (as && typeof item[as] === 'function') item[as]().setRequired(required);
 }
 
 /** Pone al día el título y las opciones de un ítem existente del mismo tipo. */
