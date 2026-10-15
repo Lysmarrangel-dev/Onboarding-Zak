@@ -37,6 +37,14 @@ La presentación usa la voz de ElevenLabs `O5hbneAmtjLMgfg5UFIm`, definida en `c
 - **Kira leyendo las preguntas:** `python3 tools/generar_voz.py --kira` genera unos 176 audios (≈ 13.000 caracteres de ElevenLabs) en `assets/audio/kira/`. Solo genera los textos nuevos o cambiados: ejecútalo de nuevo cada vez que edites preguntas. Sin estos audios, Kira usa la voz del navegador.
 - Para ajustar el tono, cambia `voiceSettings` en `config/intro.json` (estabilidad, similitud y estilo) y regenera.
 
+## Actualizar un onboarding ya en marcha
+
+Si el Form ya existe y solo cambiaron las preguntas (o el `Code.gs`):
+
+1. Publica el sitio con los cambios y pega el `Code.gs` nuevo en el editor de Apps Script.
+2. Ejecuta **`updateForm()`** (no `setupForm()`): añade al Form las preguntas e ítems de control nuevos, actualiza títulos y opciones, y marca «(obsoleta)» lo que cambió de tipo o ya no se usa. Conserva el Form, la hoja, la carpeta y las respuestas. Se puede ejecutar varias veces.
+3. **Implementar → Gestionar implementaciones →** lápiz → **Versión: nueva versión**. Así la URL `/exec` no cambia.
+
 ## Paso 2 · Crear el proyecto de Apps Script
 
 1. Entra en <https://script.google.com> → **Nuevo proyecto**. Llámalo "Onboarding ZAK".

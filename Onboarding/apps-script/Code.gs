@@ -4,13 +4,15 @@
  * 1) setupForm()   Crea el Google Form (mismas preguntas, orden y tipos que config/questions.json),
  *                  lo vincula a una hoja de Google Sheets y crea la carpeta de Drive para archivos.
  *                  Registra en el log el JSON de mapeo para pegar en config/form-mapping.json.
+ * 1b) updateForm() Pone al día el Form existente tras cambiar las preguntas, sin perder la hoja,
+ *                  la carpeta ni las respuestas. Es lo que hay que ejecutar en cada actualización.
  * 2) doPost(e)     Aplicación web que recibe las respuestas de la app y las envía al Form con
  *                  form.createResponse() → withItemResponse() → submit().
  *                  También recibe archivos (action: "upload") y los guarda en Drive.
  * 3) doGet()       Comprobación de estado.
  *
  * Propiedades del script (Configuración del proyecto → Propiedades del script):
- *   QUESTIONS_URL    URL pública de config/questions.json (tu sitio en Netlify). Solo para setupForm().
+ *   QUESTIONS_URL    (opcional) URL pública de config/questions.json. Por defecto, la de onboarding.zak.ia.ve.
  *   NOTIFY_EMAIL     (opcional) Correo(s) del equipo iTech para recibir un resumen de cada onboarding.
  *   FORM_ID, SHEET_ID, UPLOAD_FOLDER_ID, ITEM_MAP  → las escribe setupForm() automáticamente.
  */
@@ -21,15 +23,30 @@ var ALLOWED_MIME = /^(audio\/|image\/|application\/pdf|application\/msword|appli
 /* ============================================================
    1. Creación del Form (ejecutar una sola vez desde el editor)
    ============================================================ */
-function setupForm() {
-  var props = PropertiesService.getScriptProperties();
-  var url = props.getProperty('QUESTIONS_URL');
-  if (!url) throw new Error('Define la propiedad QUESTIONS_URL con la URL de config/questions.json');
+var DEFAULT_QUESTIONS_URL = 'https://onboarding.zak.ia.ve/config/questions.json';
+
+/** Lee questions.json (+ modules.json y agents.json) del sitio publicado. */
+function loadSchema_(props) {
+  var url = (props.getProperty('QUESTIONS_URL') || DEFAULT_QUESTIONS_URL).trim();
+  // Si solo se puso el dominio del sitio, se completa la ruta del JSON.
+  if (!/questions\.json/.test(url)) url = url.replace(/\/+$/, '') + '/config/questions.json';
   var schema = JSON.parse(UrlFetchApp.fetch(url, { muteHttpExceptions: false }).getContentText());
   // Módulos + checklist: mismas reglas que js/readiness.js (buildModuleSchema).
   var mods = JSON.parse(UrlFetchApp.fetch(url.replace(/questions\.json.*$/, 'modules.json')).getContentText());
   var agents = JSON.parse(UrlFetchApp.fetch(url.replace(/questions\.json.*$/, 'agents.json')).getContentText());
   addModuleSchema_(schema, mods, agents);
+  return schema;
+}
+
+/** Las condicionales (por respuesta o por módulo contratado) no pueden ser obligatorias en el Form. */
+function isRequired_(schema, q) {
+  var sec = schema.sections.filter(function (x) { return x.id === q.section; })[0] || {};
+  return Boolean(q.required && !(q.showIf || q.modules || sec.modules));
+}
+
+function setupForm() {
+  var props = PropertiesService.getScriptProperties();
+  var schema = loadSchema_(props);
 
   var form = FormApp.create('Onboarding ZAK · iTech');
   form.setDescription('Respuestas del asistente de onboarding de ZAK. Las respuestas llegan desde la app; no compartas este formulario con clientes.');
@@ -52,11 +69,7 @@ function setupForm() {
       else form.addPageBreakItem().setTitle(sectionTitle[q.section]).setHelpText(sec.intro || '');
     }
     var item = addItem_(form, q);
-    // Las condicionales no pueden ser obligatorias en el Form: solo se responden si aplican.
-    // Las condicionales (por respuesta o por módulo contratado) no pueden ser obligatorias en el Form.
-    var sec = schema.sections.filter(function (x) { return x.id === q.section; })[0] || {};
-    var gated = Boolean(q.showIf || q.modules || sec.modules);
-    if (item.setRequired) item.setRequired(Boolean(q.required && !gated));
+    if (item.setRequired) item.setRequired(isRequired_(schema, q));
     map[q.id] = item.getId();
   });
 
@@ -86,6 +99,105 @@ function setupForm() {
   Logger.log('Hoja de respuestas: ' + ss.getUrl());
   Logger.log('Carpeta de archivos: ' + folder.getUrl());
   Logger.log('Pega esto en config/form-mapping.json →\n' + JSON.stringify({ items: map }, null, 2));
+}
+
+/* ============================================================
+   1b. Actualización del Form existente (tras cambiar las preguntas)
+   Conserva el Form, la hoja de respuestas, la carpeta de Drive y las respuestas anteriores:
+   añade las preguntas e ítems de control nuevos, actualiza títulos, opciones y obligatoriedad,
+   y sustituye los ítems cuyo tipo cambió (el anterior queda como «(obsoleta)»).
+   ============================================================ */
+function updateForm() {
+  var props = PropertiesService.getScriptProperties();
+  var schema = loadSchema_(props);
+  var form = FormApp.openById(prop_('FORM_ID'));
+  var map = JSON.parse(props.getProperty('ITEM_MAP') || '{}');
+
+  var byItemId = {}, byPrefix = {}, byTitle = {};
+  form.getItems().forEach(function (it) {
+    byItemId[it.getId()] = it;
+    byTitle[it.getTitle()] = it;
+    var m = /^([\w.-]+) · /.exec(it.getTitle());
+    if (m) byPrefix[m[1]] = it;
+  });
+  var controlPage = form.getItems(FormApp.ItemType.PAGE_BREAK).filter(function (it) { return it.getTitle() === 'Control interno iTech'; })[0];
+  var sectionTitle = {};
+  schema.sections.forEach(function (s) { sectionTitle[s.id] = s.number === 0 ? s.title : s.number + '. ' + s.title; });
+
+  var added = [], updated = [], replaced = [], lastSection = null;
+  // Coloca un ítem recién creado justo antes de la sección «Control interno iTech».
+  var place = function (item) { if (controlPage) form.moveItem(item, controlPage.getIndex()); };
+
+  schema.questions.forEach(function (q) {
+    var item = byItemId[map[q.id]] || byPrefix[q.id] || null;
+    var want = FormApp.ItemType[q.formType] || FormApp.ItemType.PARAGRAPH_TEXT;
+    if (item && item.getType() !== want) {
+      item.setTitle('(obsoleta) ' + item.getTitle());
+      if (item.setRequired) item.setRequired(false); // ya no recibe respuestas
+      replaced.push(q.id);
+      item = null;
+    }
+    var isNew = !item;
+    if (item) {
+      refreshItem_(item, q);
+      updated.push(q.id);
+    } else {
+      if (q.section !== lastSection) {
+        var sec = schema.sections.filter(function (s) { return s.id === q.section; })[0] || {};
+        place(form.addPageBreakItem().setTitle(sectionTitle[q.section] || q.section).setHelpText(sec.intro || ''));
+      }
+      item = addItem_(form, q);
+      place(item);
+      if (replaced.indexOf(q.id) < 0) added.push(q.id);
+    }
+    // Las preguntas nuevas seguidas de una misma sección comparten un solo salto de página.
+    lastSection = isNew ? q.section : null;
+    if (item.setRequired) item.setRequired(isRequired_(schema, q));
+    map[q.id] = item.getId();
+  });
+
+  // Preguntas que ya no están en el cuestionario: se conservan (con sus respuestas) pero dejan de ser obligatorias.
+  var current = {};
+  schema.questions.forEach(function (q) { current[q.id] = true; });
+  Object.keys(byPrefix).forEach(function (id) {
+    var it = byPrefix[id];
+    if (current[id] || map[id] === it.getId()) return;
+    it.setTitle('(obsoleta) ' + it.getTitle());
+    if (it.setRequired) it.setRequired(false);
+    replaced.push(id);
+  });
+
+  // Ítems de control nuevos (al final, dentro de «Control interno iTech»).
+  if (!controlPage) form.addPageBreakItem().setTitle('Control interno iTech');
+  schema.controlItems.forEach(function (c) {
+    var it = byItemId[map[c.id]] || byTitle[c.formTitle];
+    if (!it) {
+      it = c.formType === 'PARAGRAPH_TEXT' ? form.addParagraphTextItem() : form.addTextItem();
+      it.setTitle(c.formTitle);
+      added.push(c.id);
+    }
+    map[c.id] = it.getId();
+  });
+
+  props.setProperty('ITEM_MAP', JSON.stringify(map));
+  Logger.log('Añadidas (' + added.length + '): ' + added.join(', '));
+  Logger.log('Marcadas «(obsoleta)» (cambio de tipo o eliminadas) (' + replaced.length + '): ' + replaced.join(', '));
+  Logger.log('Actualizadas (' + updated.length + ')');
+  Logger.log('Form (edición): ' + form.getEditUrl());
+}
+
+/** Pone al día el título y las opciones de un ítem existente del mismo tipo. */
+function refreshItem_(item, q) {
+  var field = q.formValueField ? q.fields.filter(function (f) { return f.id === q.formValueField; })[0] : null;
+  item.setTitle(q.id + ' · ' + q.formTitle);
+  switch (q.formType) {
+    case 'MULTIPLE_CHOICE':
+      item.asMultipleChoiceItem().setChoiceValues(field.options).showOtherOption(Boolean(field.other)); break;
+    case 'CHECKBOX':
+      item.asCheckboxItem().setChoiceValues(field.options).showOtherOption(Boolean(field.other)); break;
+    case 'GRID':
+      item.asGridItem().setRows(field.rows).setColumns(field.columns); break;
+  }
 }
 
 /**
