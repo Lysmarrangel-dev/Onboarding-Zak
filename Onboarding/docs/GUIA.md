@@ -32,7 +32,7 @@ Kira suena igual en el onboarding, en el CRM ZAK y en el brochure: es la voz Gem
 3. Haz commit y `git push`: Vercel vuelve a publicar el sitio.
 
 - Para cambiar una frase, edita `caption` o `say` en `config/intro.json` y ejecuta `python3 tools/generar_voz.py --force`, o `--only <escena>` para una sola. `--kira` solo genera los textos nuevos o cambiados: ejecútalo cada vez que edites preguntas.
-- Si falta algún audio, la app pide la voz de Kira en vivo al backend (`kiraTtsUrl` en `js/config.js`), así que no cambia de voz. Para eso el dominio del onboarding debe estar en la variable `FRONTEND_URL` del backend en Railway (CORS). Solo si el backend no responde se usa la voz del navegador.
+- Si falta algún audio, la app pide la voz de Kira en vivo al backend (`kiraTtsUrl` en `js/config.js`), así que no cambia de voz. La llamada va a `/api/kira/tts` del mismo dominio y `vercel.json` la reenvía al backend en Railway (igual que el CRM y el brochure), así que no hace falta configurar CORS. Solo si el backend no responde se usa la voz del navegador.
 
 ## Actualizar un onboarding ya en marcha
 

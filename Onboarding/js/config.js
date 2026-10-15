@@ -11,8 +11,8 @@ export const CONFIG = {
 
   // Voz de Kira (la misma del CRM y del brochure), servida por el backend del CRM. Se usa cuando falta
   // el MP3 pregenerado de un texto. Vacía = esos textos usan la voz del navegador.
-  // El dominio del onboarding debe estar en FRONTEND_URL del backend (CORS).
-  kiraTtsUrl: 'https://itech-crm-production.up.railway.app/api/kira/tts',
+  // Ruta del mismo dominio: vercel.json la reenvía al backend en Railway (igual que el CRM y el brochure), sin CORS.
+  kiraTtsUrl: '/api/kira/tts',
 
   // Reintentos automáticos del envío (esperas en ms entre intentos).
   retryDelays: [1000, 3000, 6000],

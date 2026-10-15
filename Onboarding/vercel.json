@@ -3,6 +3,9 @@
   "framework": null,
   "buildCommand": "",
   "outputDirectory": ".",
+  "rewrites": [
+    { "source": "/api/kira/tts", "destination": "https://itech-crm-production.up.railway.app/api/kira/tts" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
