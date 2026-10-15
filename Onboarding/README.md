@@ -2,7 +2,7 @@
 
 Asistente conversacional que guía a cada cliente nuevo en el onboarding de ZAK. Hace las preguntas del cuestionario oficial una a una, valida las respuestas y las envía a un Google Form vinculado a una hoja de Google Sheets.
 
-- **App:** HTML + CSS + JS (módulos ES), sin compilación. Se despliega en Netlify arrastrando la carpeta.
+- **App:** HTML + CSS + JS (módulos ES), sin compilación. Se despliega en Vercel (Root Directory = `Onboarding`), igual que el CRM y el brochure; cada push a `main` publica.
 - **Preguntas:** `config/questions.json`. Se pueden cambiar sin tocar el código.
 - **Kira:** la asistente del onboarding lee cada pregunta en voz alta con **la misma voz que en el CRM y el brochure** (Gemini «Aoede», servida por el backend del CRM en `/api/kira/tts`). `js/kira.js` usa los MP3 pregenerados con `tools/generar_voz.py --kira`; si falta alguno, pide la voz en vivo al backend (`js/kiraVoice.js`) y solo en último caso usa la del navegador.
 - **Presentación:** el primer mensaje es un audiovisual de unos 25 s con subtítulos (`js/intro.js`), narrado con la voz de Kira (`config/intro.json`; los audios se generan con `tools/generar_voz.py`). Se puede sustituir por un video real desde `js/config.js`.

@@ -1,22 +1,22 @@
 # Guía de puesta en marcha · Onboarding ZAK
 
-Tiempo estimado: 20–30 minutos. Necesitas una cuenta de Google (idealmente la del equipo iTech, que será dueña del Form y de la hoja) y una cuenta de Netlify.
+Tiempo estimado: 20–30 minutos. Necesitas una cuenta de Google (idealmente la del equipo iTech, que será dueña del Form y de la hoja) y acceso al proyecto en Vercel.
 
 El orden importa: primero se publica la app, porque el Apps Script lee las preguntas desde `config/questions.json` para crear el Form.
 
 ---
 
-## Paso 1 · Publicar la app en Netlify (modo demostración)
+## Paso 1 · Publicar la app en Vercel (modo demostración)
 
-La app es estática (HTML + CSS + JS), no necesita compilación.
+La app es estática (HTML + CSS + JS), no necesita compilación. Se publica igual que el CRM y el brochure: desde el repositorio, en Vercel.
 
-1. Entra en <https://app.netlify.com/drop>.
-2. Arrastra la carpeta **`Onboarding`** completa.
-3. Netlify te da una URL, por ejemplo `https://zak-onboarding.netlify.app`. En *Site configuration → Change site name* puedes cambiarla.
+1. En Vercel: *Add New → Project* e importa el repositorio **Onboarding-Zak**.
+2. En *Root Directory* elige **`Onboarding`**. Framework: *Other*, sin comando de compilación (`vercel.json` ya lo indica, junto con las cabeceras de seguridad).
+3. Pulsa *Deploy*. Vercel te da una URL (por ejemplo `https://onboarding-zak.vercel.app`); en *Settings → Domains* se asigna el dominio propio (`onboarding.zak.ia.ve`).
 4. Abre la URL. La app funciona completa en **modo demostración**: no envía nada y lo indica con la etiqueta "Modo demostración".
-5. Comprueba que carga: `https://TU-SITIO.netlify.app/config/questions.json`.
+5. Comprueba que carga: `https://TU-SITIO/config/questions.json`.
 
-> Alternativa con Git: sube la carpeta a un repositorio y conéctalo en Netlify (*Add new site → Import an existing project*). `netlify.toml` ya indica que se publica la raíz sin comando de compilación.
+Cada `git push` a `main` vuelve a publicar el sitio automáticamente.
 
 ## Paso 1b · Generar la voz de Kira
 
@@ -29,7 +29,7 @@ Kira suena igual en el onboarding, en el CRM ZAK y en el brochure: es la voz Gem
    python3 tools/generar_voz.py --kira   # preguntas e introducciones → assets/audio/kira/
    ```
    Con el backend en local: `KIRA_TTS_URL=http://localhost:3000/api/kira/tts python3 tools/generar_voz.py`.
-3. Vuelve a subir la carpeta a Netlify.
+3. Haz commit y `git push`: Vercel vuelve a publicar el sitio.
 
 - Para cambiar una frase, edita `caption` o `say` en `config/intro.json` y ejecuta `python3 tools/generar_voz.py --force`, o `--only <escena>` para una sola. `--kira` solo genera los textos nuevos o cambiados: ejecútalo cada vez que edites preguntas.
 - Si falta algún audio, la app pide la voz de Kira en vivo al backend (`kiraTtsUrl` en `js/config.js`), así que no cambia de voz. Para eso el dominio del onboarding debe estar en la variable `FRONTEND_URL` del backend en Railway (CORS). Solo si el backend no responde se usa la voz del navegador.
@@ -51,7 +51,7 @@ Si el Form ya existe y solo cambiaron las preguntas (o el `Code.gs`):
 
    | Propiedad | Valor |
    |---|---|
-   | `QUESTIONS_URL` | `https://TU-SITIO.netlify.app/config/questions.json` (el script lee también `modules.json` y `agents.json` en la misma carpeta) |
+   | `QUESTIONS_URL` | `https://TU-SITIO/config/questions.json` (el script lee también `modules.json` y `agents.json` en la misma carpeta) |
    | `NOTIFY_EMAIL` | (opcional) correo o correos del equipo, separados por comas |
 
 ## Paso 3 · Crear el Google Form y la hoja de respuestas
@@ -82,7 +82,7 @@ Si el Form ya existe y solo cambiaron las preguntas (o el `Code.gs`):
    ```js
    appsScriptUrl: 'https://script.google.com/macros/s/AKfy…/exec',
    ```
-2. Vuelve a subir la carpeta a Netlify: en *Deploys*, arrastra la carpeta otra vez.
+2. Haz commit y `git push`: Vercel vuelve a publicar el sitio.
 3. La etiqueta "Modo demostración" desaparece.
 
 > La URL `/exec` no es secreta: es un punto de entrada público, como la dirección de un formulario. La app no guarda ninguna clave privada. El script rechaza el spam con un campo trampa, valida el ID de sesión, limita los archivos a 10 MB y a formatos permitidos, y evita duplicados si la app reintenta.
@@ -126,7 +126,7 @@ Si el Form ya existe y solo cambiaron las preguntas (o el `Code.gs`):
 ```
 Onboarding/
 ├── index.html                 Punto de entrada
-├── netlify.toml               Configuración de despliegue y cabeceras de seguridad
+├── vercel.json                Configuración de despliegue (Vercel) y cabeceras de seguridad
 ├── config/
 │   ├── questions.json         Cuestionario completo (fuente única de preguntas)
 │   ├── intro.json             Guion de la presentación y voz de Kira

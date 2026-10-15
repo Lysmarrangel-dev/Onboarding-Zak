@@ -64,7 +64,7 @@ async function boot() {
   } catch (e) {
     root.replaceChildren(h('div', { class: 'summary' }, h('div', { class: 'status-card error' },
       h('strong', {}, 'No se pudo cargar el cuestionario.'),
-      h('p', {}, 'Abre la app desde un servidor web (por ejemplo Netlify) y vuelve a intentarlo.'))));
+      h('p', {}, 'Abre la app desde un servidor web (por ejemplo Vercel) y vuelve a intentarlo.'))));
     return;
   }
   engine = createEngine(schema);
