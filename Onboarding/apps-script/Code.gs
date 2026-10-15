@@ -113,6 +113,15 @@ function updateForm() {
   var form = FormApp.openById(prop_('FORM_ID'));
   var map = JSON.parse(props.getProperty('ITEM_MAP') || '{}');
 
+  // Limpieza de una ejecución interrumpida: la sección de control no lleva saltos de página propios,
+  // así que cualquiera que haya quedado después de ella sobra.
+  var ctl = form.getItems(FormApp.ItemType.PAGE_BREAK).filter(function (it) { return it.getTitle() === 'Control interno iTech'; })[0];
+  if (ctl) {
+    form.getItems(FormApp.ItemType.PAGE_BREAK)
+      .filter(function (it) { return it.getIndex() > ctl.getIndex(); })
+      .forEach(function (it) { form.deleteItem(it); });
+  }
+
   var byItemId = {}, byPrefix = {}, byTitle = {};
   form.getItems().forEach(function (it) {
     byItemId[it.getId()] = it;
@@ -126,14 +135,15 @@ function updateForm() {
 
   var added = [], updated = [], replaced = [], lastSection = null;
   // Coloca un ítem recién creado justo antes de la sección «Control interno iTech».
-  var place = function (item) { if (controlPage) form.moveItem(item, controlPage.getIndex()); };
+  // moveItem(Item, n) no acepta ítems tipados (PageBreakItem, TextItem…): se mueve por posición.
+  var place = function (item) { if (controlPage) form.moveItem(item.getIndex(), controlPage.getIndex()); };
 
   schema.questions.forEach(function (q) {
     var item = byItemId[map[q.id]] || byPrefix[q.id] || null;
     var want = FormApp.ItemType[q.formType] || FormApp.ItemType.PARAGRAPH_TEXT;
     if (item && item.getType() !== want) {
       item.setTitle('(obsoleta) ' + item.getTitle());
-      if (item.setRequired) item.setRequired(false); // ya no recibe respuestas
+      setRequired_(item, false); // ya no recibe respuestas
       replaced.push(q.id);
       item = null;
     }
@@ -152,7 +162,7 @@ function updateForm() {
     }
     // Las preguntas nuevas seguidas de una misma sección comparten un solo salto de página.
     lastSection = isNew ? q.section : null;
-    if (item.setRequired) item.setRequired(isRequired_(schema, q));
+    setRequired_(item, isRequired_(schema, q));
     map[q.id] = item.getId();
   });
 
@@ -163,7 +173,7 @@ function updateForm() {
     var it = byPrefix[id];
     if (current[id] || map[id] === it.getId()) return;
     it.setTitle('(obsoleta) ' + it.getTitle());
-    if (it.setRequired) it.setRequired(false);
+    setRequired_(it, false);
     replaced.push(id);
   });
 
@@ -184,6 +194,15 @@ function updateForm() {
   Logger.log('Marcadas «(obsoleta)» (cambio de tipo o eliminadas) (' + replaced.length + '): ' + replaced.join(', '));
   Logger.log('Actualizadas (' + updated.length + ')');
   Logger.log('Form (edición): ' + form.getEditUrl());
+}
+
+/** setRequired() solo existe en los ítems tipados; los de form.getItems() son genéricos. */
+function setRequired_(item, required) {
+  var as = {
+    TEXT: 'asTextItem', PARAGRAPH_TEXT: 'asParagraphTextItem', MULTIPLE_CHOICE: 'asMultipleChoiceItem',
+    CHECKBOX: 'asCheckboxItem', GRID: 'asGridItem', DATE: 'asDateItem',
+  }[String(item.getType())];
+  if (as) item[as]().setRequired(required);
 }
 
 /** Pone al día el título y las opciones de un ítem existente del mismo tipo. */
