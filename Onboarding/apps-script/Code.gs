@@ -18,6 +18,7 @@
  */
 
 var MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB por archivo
+var RIF_QUESTION_ID = '0.2';              // su PDF se archiva aparte en «RIF de clientes» (RIF_FOLDER_ID)
 var ALLOWED_MIME = /^(audio\/|image\/|application\/pdf|application\/msword|application\/vnd\.openxmlformats-officedocument\.|application\/vnd\.ms-excel|application\/vnd\.ms-powerpoint|text\/csv|text\/plain|application\/octet-stream)/;
 
 /* ============================================================
@@ -361,6 +362,8 @@ function handleSubmit_(body) {
     });
     if (missing.length) return fatal_('El Form no tiene los ítems: ' + missing.join(', ') + '. Revisa config/form-mapping.json.');
 
+    var rifUrl = archiveRif_(body, reference); // después de validar: un envío rechazado no deja copias sueltas
+
     var rd = body.readiness || {};
     var ctl = {
       'ctl.reference': reference,
@@ -377,6 +380,7 @@ function handleSubmit_(body) {
       'ctl.infoPending': body.info ? body.info.pending : '',
       'ctl.attachments': String(body.attachments || '').slice(0, 30000),
       'ctl.consulting2': String(body.consulting || '').slice(0, 20000),
+      'ctl.rif': rifUrl,
     };
     Object.keys(ctl).forEach(function (id) {
       var item = itemsById[map[id]] || findByTitle_(form, id);
@@ -386,7 +390,7 @@ function handleSubmit_(body) {
     response.submit();
     cache.setProperty('sub_' + body.sessionId, reference);
 
-    notify_(body, reference);
+    notify_(body, reference, rifUrl);
     return { ok: true, reference: reference, submittedAt: new Date().toISOString() };
   } finally {
     lock.releaseLock();
@@ -422,6 +426,7 @@ function findByTitle_(form, id) {
     'ctl.byModule': 'Preparación por módulo', 'ctl.missing': 'Requisitos pendientes',
     'ctl.info': 'Información disponible (%)', 'ctl.consulting': 'Consultoría recomendada', 'ctl.infoDetail': 'Desglose de información',
     'ctl.infoPending': 'Información por completar', 'ctl.attachments': 'Adjuntos por pregunta', 'ctl.consulting2': 'Consultoría solicitada por el cliente',
+    'ctl.rif': 'RIF en PDF (enlace para revisión)',
   };
   var hit = form.getItems().filter(function (it) { return it.getTitle() === titles[id]; });
   return hit[0] || null;
@@ -434,6 +439,11 @@ function handleUpload_(body) {
   if (bytes.length > MAX_UPLOAD_BYTES) return fatal_('El archivo supera los 10 MB');
   var mime = String(body.mimeType || 'application/octet-stream');
   if (!ALLOWED_MIME.test(mime)) return fatal_('Formato de archivo no admitido');
+  // El RIF (pregunta 0.2) solo se acepta en PDF: se comprueba la firma «%PDF-» del contenido.
+  if (body.questionId === RIF_QUESTION_ID) {
+    if (!isPdf_(bytes)) return fatal_('El RIF debe subirse en PDF');
+    mime = 'application/pdf';
+  }
 
   var root = DriveApp.getFolderById(prop_('UPLOAD_FOLDER_ID'));
   var sub = root.getFoldersByName(body.sessionId);
@@ -444,10 +454,58 @@ function handleUpload_(body) {
   return { ok: true, id: file.getId(), url: file.getUrl(), name: safeName };
 }
 
+function isPdf_(bytes) {
+  var sig = [0x25, 0x50, 0x44, 0x46, 0x2d]; // %PDF-
+  if (bytes.length < sig.length) return false;
+  for (var i = 0; i < sig.length; i++) if ((bytes[i] & 0xff) !== sig[i]) return false;
+  return true;
+}
+
+/**
+ * Archiva una copia del PDF del RIF en «RIF de clientes» (dentro de la carpeta de archivos),
+ * con un nombre fácil de revisar: «RIF · J-12345678-9 · Razón social · ZAK-2026-XXXXXX.pdf».
+ * El original se queda en la carpeta de la sesión. Devuelve el enlace de la copia ('' si no hay RIF).
+ * Solo se aceptan archivos que este mismo onboarding subió a la carpeta de su sesión.
+ */
+function archiveRif_(body, reference) {
+  var id = body.rifFile && body.rifFile.id;
+  if (!id) return '';
+  try {
+    var root = DriveApp.getFolderById(prop_('UPLOAD_FOLDER_ID'));
+    var file = DriveApp.getFileById(id);
+    var parents = file.getParents();
+    var inSession = false;
+    while (parents.hasNext()) {
+      var p = parents.next();
+      if (p.getName() !== body.sessionId) continue;
+      var gp = p.getParents();
+      while (gp.hasNext()) if (gp.next().getId() === root.getId()) inSession = true;
+    }
+    if (!inSession || file.getMimeType() !== 'application/pdf') return '';
+
+    var props = PropertiesService.getScriptProperties();
+    var folderId = props.getProperty('RIF_FOLDER_ID');
+    var folder = null;
+    try { folder = folderId ? DriveApp.getFolderById(folderId) : null; } catch (e) { folder = null; }
+    if (!folder) {
+      folder = root.createFolder('RIF de clientes');
+      props.setProperty('RIF_FOLDER_ID', folder.getId());
+    }
+    var clean = function (s) { return String(s || '').replace(/[\\/:*?"<>|]/g, '_').trim().slice(0, 80); };
+    var name = ['RIF', clean(body.taxId) || 'sin RIF', clean(body.legalName || body.company) || 'sin razón social', reference].join(' · ') + '.pdf';
+    var copy = file.makeCopy(name, folder);
+    copy.setDescription('Onboarding ' + reference + ' · ' + (body.company || '') + ' · ' + (body.contactName || '') + ' <' + (body.contactEmail || '') + '>');
+    return copy.getUrl();
+  } catch (err) {
+    console.error('No se pudo archivar el RIF: ' + err);
+    return ''; // el envío no se bloquea: el PDF sigue en la carpeta de la sesión y su enlace en la respuesta 0.2
+  }
+}
+
 /* ============================================================
    3. Notificación por correo (opcional)
    ============================================================ */
-function notify_(body, reference) {
+function notify_(body, reference, rifUrl) {
   var to = prop_('NOTIFY_EMAIL');
   if (!to) return;
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -466,7 +524,8 @@ function notify_(body, reference) {
     '<div style="margin-top:6px">Referencia <b>' + esc(reference) + '</b> · ' + esc(body.contactName) + ' · ' + esc(body.contactEmail) + '</div>' +
     (body.info ? '<div style="margin-top:10px;font-size:18px">Información: <b>' + esc(body.info.overall) + ' %</b> · ' + esc(body.info.consulting) + '</div>' : '') +
     (body.readiness ? '<div style="margin-top:4px">Preparación de módulos: <b>' + esc(body.readiness.overall) + ' %</b> · ' + esc(body.readiness.level) + '</div>' : '') +
-    (body.taxId ? '<div style="margin-top:4px">RIF: ' + esc(body.taxId) + ' · ' + esc(body.legalName) + '</div>' : '') +
+    (body.taxId ? '<div style="margin-top:4px">RIF: ' + esc(body.taxId) + ' · ' + esc(body.legalName) +
+      (rifUrl ? ' · <a href="' + esc(rifUrl) + '" style="color:#fff;text-decoration:underline">Ver RIF (PDF)</a>' : '') + '</div>' : '') +
     '</div>' +
     (body.consulting ? '<h3 style="color:#53037B">Consultoría solicitada</h3><p style="white-space:pre-line">' + esc(body.consulting) + '</p>' : '') +
     (body.info ? '<h3 style="color:#53037B">Información por completar</h3><p style="white-space:pre-line">' + esc(body.info.pending) + '</p>' : '') +

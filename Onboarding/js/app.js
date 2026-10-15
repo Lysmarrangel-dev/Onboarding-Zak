@@ -948,6 +948,8 @@ function buildPayload() {
     company: state.answers['0.1']?.empresa || '',
     legalName: state.answers['0.2']?.razonSocial || '',
     taxId: state.answers['0.2']?.rif || '',
+    // PDF del RIF ya subido a Drive: el Apps Script lo archiva en «RIF de clientes» para revisarlo.
+    rifFile: state.answers['0.2']?.comprobante?.id ? { id: state.answers['0.2'].comprobante.id } : null,
     contactName: state.answers['0.3']?.contacto || '',
     contactEmail: state.answers['0.4']?.correo || '',
     answers: flow.map((q) => ({

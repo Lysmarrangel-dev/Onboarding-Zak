@@ -1,10 +1,14 @@
 /**
  * Kira lee el onboarding en voz alta: la introducción de cada sección y cada pregunta.
- * - Si existe el audio generado con ElevenLabs (assets/audio/kira/<sha1 del texto>.mp3), lo usa.
+ * Siempre con la voz de Kira del CRM y el brochure (Gemini «Aoede»):
+ * - Si existe el audio pregenerado (assets/audio/kira/<sha1 del texto>.mp3), lo usa.
  *   Ver tools/generar_voz.py --kira.
- * - Si no, usa la voz del navegador en español.
+ * - Si no, la pide al backend del CRM (js/kiraVoice.js).
+ * - Solo si eso falla, usa la voz del navegador en español.
  * El cliente puede activarla o silenciarla desde el encabezado; la preferencia se guarda.
  */
+import { kiraVoiceUrl } from './kiraVoice.js';
+
 const KEY = 'zak-kira-voz';
 const AUDIO_DIR = 'assets/audio/kira';
 const tts = 'speechSynthesis' in window ? window.speechSynthesis : null;
@@ -80,10 +84,12 @@ async function play(text, my, done) {
     u.onend = u.onerror = () => done();
     tts.speak(u);
   };
-  if (!key || !manifest.has(key)) return fallback();
+  const src = key && manifest.has(key) ? `${AUDIO_DIR}/${key}.mp3` : await kiraVoiceUrl(text);
+  if (my !== token) return;
+  if (!src) return fallback();
   let fell = false;
   audio.onended = () => done();
   audio.onerror = () => { if (!fell) { fell = true; fallback(); } };
-  audio.src = `${AUDIO_DIR}/${key}.mp3`;
+  audio.src = src;
   audio.play().catch((e) => { if (e?.name !== 'AbortError' && !fell) { fell = true; fallback(); } });
 }

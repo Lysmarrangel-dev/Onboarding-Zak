@@ -1,17 +1,11 @@
 {
-  "_comment": "Guion de la presentación de bienvenida. La app muestra `caption` y la voz narra `say` (o `caption` si no hay `say`). Los audios se generan una vez con ElevenLabs: tools/generar_voz.py crea assets/audio/intro/<id>.mp3. Si cambias un texto, vuelve a ejecutar el script. Si falta un audio, la app usa la voz del navegador para esa escena.",
+  "_comment": "Guion de la presentación de bienvenida. La app muestra `caption` y la voz narra `say` (o `caption` si no hay `say`). Los audios se generan una vez con la voz de Kira (la misma del CRM y el brochure): tools/generar_voz.py crea assets/audio/intro/<id>.mp3. Si cambias un texto, vuelve a ejecutar el script. Si falta un audio, la app usa la voz del navegador para esa escena.",
   "audioDir": "assets/audio/intro",
-  "elevenlabs": {
-    "voiceId": "O5hbneAmtjLMgfg5UFIm",
-    "modelId": "eleven_multilingual_v2",
-    "outputFormat": "mp3_44100_128",
-    "languageCode": "es",
-    "voiceSettings": {
-      "stability": 0.5,
-      "similarity_boost": 0.8,
-      "style": 0.15,
-      "use_speaker_boost": true
-    }
+  "kiraVoice": {
+    "_comment": "Misma voz de Kira que en el CRM y el brochure (Gemini, voz «Aoede»). El backend del CRM la fija en KIRA_VOICE (backend/server.ts); este generador solo llama a su /api/kira/tts.",
+    "ttsUrl": "https://itech-crm-production.up.railway.app/api/kira/tts",
+    "voice": "Aoede",
+    "mp3Kbps": 64
   },
   "scenes": [
     {

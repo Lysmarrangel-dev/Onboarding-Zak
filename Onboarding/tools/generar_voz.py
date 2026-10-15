@@ -1,53 +1,74 @@
 #!/usr/bin/env python3
-"""Genera con ElevenLabs las voces del onboarding.
+"""Genera las voces del onboarding con la voz de Kira (la misma del CRM ZAK y del brochure).
 
   python3 tools/generar_voz.py            Presentación de bienvenida (config/intro.json → assets/audio/intro/)
   python3 tools/generar_voz.py --kira     Kira leyendo cada pregunta e introducción de sección
                                           (→ assets/audio/kira/<sha1 del texto>.mp3 + manifest.json)
 Opciones: --force (regenera todo) · --only <escena> (solo presentación)
 
-La clave se lee de ELEVENLABS_API_KEY; nunca se guarda en el proyecto ni llega al navegador.
+Requisito: pip install lameenc   (codifica el audio a MP3; no hace falta ffmpeg)
+
+El audio lo genera el backend del CRM (POST /api/kira/tts, voz Gemini «Aoede»): aquí no hay
+ninguna clave de API. La URL está en config/intro.json → kiraVoice.ttsUrl; se puede cambiar con
+la variable KIRA_TTS_URL (p. ej. http://localhost:3000/api/kira/tts con el backend en local).
 Con --kira, solo se generan los textos nuevos o cambiados (el nombre del archivo es la huella del texto),
 así que puedes ejecutarlo cada vez que edites preguntas.
 """
+import base64
 import hashlib
 import json
 import os
 import pathlib
 import sys
+import time
 import unicodedata
 import urllib.error
 import urllib.request
 
+try:
+    import lameenc
+except ImportError:
+    sys.exit('Falta el codificador MP3. Ejecuta: pip install lameenc  y vuelve a intentarlo.')
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 cfg = json.loads((ROOT / 'config/intro.json').read_text(encoding='utf-8'))
-el = cfg['elevenlabs']
-key = os.environ.get('ELEVENLABS_API_KEY', '').strip()
+kv = cfg['kiraVoice']
+url = os.environ.get('KIRA_TTS_URL', '').strip() or kv['ttsUrl']
 force = '--force' in sys.argv
 only = sys.argv[sys.argv.index('--only') + 1] if '--only' in sys.argv else None
-url = f"https://api.elevenlabs.io/v1/text-to-speech/{el['voiceId']}?output_format={el['outputFormat']}"
 
 
-def tts(text, target, prev=None, nxt=None):
-    body = {'text': text, 'model_id': el['modelId'], 'voice_settings': el['voiceSettings']}
-    if prev: body['previous_text'] = prev
-    if nxt: body['next_text'] = nxt
-    req = urllib.request.Request(url, data=json.dumps(body).encode('utf-8'), method='POST',
-                                 headers={'xi-api-key': key, 'Content-Type': 'application/json', 'Accept': 'audio/mpeg'})
-    try:
-        with urllib.request.urlopen(req, timeout=120) as res:
-            target.write_bytes(res.read())
-        return True
-    except urllib.error.HTTPError as e:
-        detail = e.read().decode('utf-8', 'replace')[:400]
-        print(f"✗ {target.name}: HTTP {e.code} · {detail}")
-        if e.code in (401, 403):
-            sys.exit('La clave no es válida o no tiene permiso de text-to-speech.')
-        if e.code in (400, 404) and 'voice' in detail.lower():
-            sys.exit('ElevenLabs no encuentra la voz. Si es de la Voice Library, añádela primero a «My Voices».')
-        return False
-    except urllib.error.URLError as e:
-        sys.exit(f'Sin conexión con ElevenLabs: {e.reason}')
+def to_mp3(pcm, rate):
+    enc = lameenc.Encoder()
+    enc.set_bit_rate(kv.get('mp3Kbps', 64))
+    enc.set_in_sample_rate(rate)
+    enc.set_channels(1)
+    enc.set_quality(2)
+    return enc.encode(pcm) + enc.flush()
+
+
+def tts(text, target):
+    req = urllib.request.Request(url, data=json.dumps({'text': text}).encode('utf-8'), method='POST',
+                                 headers={'Content-Type': 'application/json'})
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=120) as res:
+                body = json.loads(res.read().decode('utf-8'))
+            if body.get('voice') and body['voice'] != kv['voice']:
+                print(f"! El backend usa la voz «{body['voice']}» y config/intro.json dice «{kv['voice']}».")
+            target.write_bytes(to_mp3(base64.b64decode(body['audioBase64']), int(body.get('sampleRate', 24000))))
+            return True
+        except urllib.error.HTTPError as e:
+            detail = e.read().decode('utf-8', 'replace')[:300]
+            print(f"✗ {target.name}: HTTP {e.code} · {detail}")
+            if e.code == 404:
+                sys.exit(f'El backend no tiene /api/kira/tts ({url}). Despliega la versión actual del CRM.')
+            if e.code == 400:
+                return False
+        except urllib.error.URLError as e:
+            print(f"✗ {target.name}: sin conexión con {url} ({e.reason})")
+        time.sleep(2 * (attempt + 1))  # límite de uso de Gemini TTS: espera y reintenta
+    return False
 
 
 def kira_texts():
@@ -69,8 +90,7 @@ def kira_texts():
     return list(dict.fromkeys(t for t in texts if t))
 
 
-if not key:
-    sys.exit('Falta ELEVENLABS_API_KEY. Ejecuta: export ELEVENLABS_API_KEY="tu_clave"  y vuelve a intentarlo.')
+print(f"Voz de Kira («{kv['voice']}») desde {url}\n")
 
 if '--kira' in sys.argv:
     out = ROOT / 'assets/audio/kira'
@@ -91,14 +111,13 @@ if '--kira' in sys.argv:
 
 out_dir = ROOT / cfg['audioDir']
 out_dir.mkdir(parents=True, exist_ok=True)
-scenes, ok = cfg['scenes'], 0
-for i, scene in enumerate(scenes):
+ok = 0
+for scene in cfg['scenes']:
     if only and scene['id'] != only:
         continue
     target = out_dir / f"{scene['id']}.mp3"
     if target.exists() and not force:
         print(f"= {target.name} ya existe (usa --force para regenerar)"); continue
-    say = lambda s: s.get('say') or s['caption']
-    if tts(say(scene), target, say(scenes[i - 1]) if i else None, say(scenes[i + 1]) if i < len(scenes) - 1 else None):
+    if tts(scene.get('say') or scene['caption'], target):
         ok += 1; print(f"✓ {target.relative_to(ROOT)}")
 print(f"\nListo: {ok} audio(s) de la presentación en {out_dir.relative_to(ROOT)}.")

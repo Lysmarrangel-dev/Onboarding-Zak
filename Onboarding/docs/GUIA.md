@@ -18,24 +18,21 @@ La app es estática (HTML + CSS + JS), no necesita compilación.
 
 > Alternativa con Git: sube la carpeta a un repositorio y conéctalo en Netlify (*Add new site → Import an existing project*). `netlify.toml` ya indica que se publica la raíz sin comando de compilación.
 
-## Paso 1b · Generar la voz de la presentación (ElevenLabs)
+## Paso 1b · Generar la voz de Kira
 
-La presentación usa la voz de ElevenLabs `O5hbneAmtjLMgfg5UFIm`, definida en `config/intro.json`. Los audios se generan **una sola vez** y se publican como archivos MP3: la clave de API nunca llega a la web.
+Kira suena igual en el onboarding, en el CRM ZAK y en el brochure: es la voz Gemini **«Aoede»**, que fija el backend del CRM (`KIRA_VOICE` en `backend/server.ts` del repo itech-crm). El onboarding no tiene ninguna clave de API: los audios los genera ese backend en `POST /api/kira/tts` (URL en `config/intro.json → kiraVoice.ttsUrl`).
 
-1. En ElevenLabs, abre la voz y pulsa **Add to My Voices**. Las voces de la Voice Library deben estar en tu cuenta para usarse por API.
-2. Crea una clave en *Settings → API Keys*. Basta con el permiso **Text to Speech**.
-3. En la Terminal, dentro de la carpeta `Onboarding`:
+1. Instala el codificador MP3 (una sola vez): `pip install lameenc`
+2. En la Terminal, dentro de la carpeta `Onboarding`:
    ```bash
-   export ELEVENLABS_API_KEY="tu_clave"
-   python3 tools/generar_voz.py
+   python3 tools/generar_voz.py          # presentación → assets/audio/intro/ (hello.mp3, zak.mp3, …)
+   python3 tools/generar_voz.py --kira   # preguntas e introducciones → assets/audio/kira/
    ```
-   Se crean 6 archivos en `assets/audio/intro/` (`hello.mp3`, `zak.mp3`, …).
-4. Abre la app en local o vuelve a subir la carpeta a Netlify, y escucha la presentación.
+   Con el backend en local: `KIRA_TTS_URL=http://localhost:3000/api/kira/tts python3 tools/generar_voz.py`.
+3. Vuelve a subir la carpeta a Netlify.
 
-- Para cambiar una frase, edita `caption` o `say` en `config/intro.json` y ejecuta `python3 tools/generar_voz.py --force`, o `--only <escena>` para una sola.
-- Si algún audio falta, esa escena usa la voz del navegador, así que la presentación nunca se queda muda.
-- **Kira leyendo las preguntas:** `python3 tools/generar_voz.py --kira` genera unos 176 audios (≈ 13.000 caracteres de ElevenLabs) en `assets/audio/kira/`. Solo genera los textos nuevos o cambiados: ejecútalo de nuevo cada vez que edites preguntas. Sin estos audios, Kira usa la voz del navegador.
-- Para ajustar el tono, cambia `voiceSettings` en `config/intro.json` (estabilidad, similitud y estilo) y regenera.
+- Para cambiar una frase, edita `caption` o `say` en `config/intro.json` y ejecuta `python3 tools/generar_voz.py --force`, o `--only <escena>` para una sola. `--kira` solo genera los textos nuevos o cambiados: ejecútalo cada vez que edites preguntas.
+- Si falta algún audio, la app pide la voz de Kira en vivo al backend (`kiraTtsUrl` en `js/config.js`), así que no cambia de voz. Para eso el dominio del onboarding debe estar en la variable `FRONTEND_URL` del backend en Railway (CORS). Solo si el backend no responde se usa la voz del navegador.
 
 ## Actualizar un onboarding ya en marcha
 
@@ -99,6 +96,7 @@ Si el Form ya existe y solo cambiaron las preguntas (o el `Code.gs`):
    - **Form → Respuestas**: aparece una respuesta nueva;
    - **Hoja**: una fila nueva, con una columna por pregunta (`1.1 · …`) y las columnas de control al final;
    - **Drive**: una carpeta con el ID de sesión y el archivo, cuyo enlace aparece en la celda de esa pregunta;
+   - **RIF**: en «Onboarding ZAK · Archivos → RIF de clientes», el PDF del RIF como `RIF · <RIF> · <razón social> · <referencia>.pdf`; su enlace está en la columna «RIF en PDF (enlace para revisión)» y en el correo de aviso;
    - **Correo** (si configuraste `NOTIFY_EMAIL`): el resumen con la referencia.
 5. Borra la respuesta de prueba en el Form y la fila en la hoja.
 
@@ -131,7 +129,7 @@ Onboarding/
 ├── netlify.toml               Configuración de despliegue y cabeceras de seguridad
 ├── config/
 │   ├── questions.json         Cuestionario completo (fuente única de preguntas)
-│   ├── intro.json             Guion de la presentación y voz de ElevenLabs
+│   ├── intro.json             Guion de la presentación y voz de Kira
 │   ├── (plantillas en assets/plantillas/: usuarios y Number Master)
 │   ├── nda.json               Acuerdo de confidencialidad (texto y versión)
 │   ├── agents.json            Departamentos y campos de los agentes de IA
@@ -150,7 +148,8 @@ Onboarding/
 │   ├── readiness.js           Módulos, checklist, agentes de IA y cálculo de preparación
 │   ├── info.js                Nivel de información y consultoría recomendada
 │   ├── faq.js                 Búsqueda en las preguntas frecuentes
-│   ├── kira.js                Kira lee las preguntas (ElevenLabs o voz del navegador)
+│   ├── kira.js                Kira lee las preguntas (voz de Kira del CRM)
+│   ├── kiraVoice.js           Voz de Kira en vivo desde el backend del CRM
 │   ├── inputs.js              Componentes por tipo de respuesta
 │   ├── api.js                 Envío con reintentos y subida de archivos
 │   ├── store.js               Guardado del progreso en el navegador

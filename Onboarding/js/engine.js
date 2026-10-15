@@ -127,6 +127,9 @@ export function createEngine(schema) {
     }
     if (field.type === 'file') {
       if (required && isEmpty(t)) return 'Adjunta el archivo para continuar.';
+      // Progreso guardado con un formato que ya no se admite (p. ej. el RIF en imagen, antes de exigir PDF).
+      const pdfOnly = field.accept && field.accept.split(',').every((s) => /^(\.pdf|application\/pdf)$/i.test(s.trim()));
+      if (pdfOnly && [].concat(t || []).some((x) => !/\.pdf$/i.test(x?.name || ''))) return 'Sube el archivo en PDF.';
       return null;
     }
     if (field.type === 'users') {

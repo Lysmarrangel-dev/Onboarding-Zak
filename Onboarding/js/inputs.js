@@ -249,12 +249,20 @@ function acceptMatches(file, accept) {
     rule.startsWith('.') ? name.endsWith(rule) : rule.endsWith('/*') ? (file.type || '').startsWith(rule.slice(0, -1)) : file.type === rule);
 }
 
+const isPdfOnly = (accept) => Boolean(accept) && accept.split(',').every((s) => /^(\.pdf|application\/pdf)$/i.test(s.trim()));
+
+async function isRealPdf(file) {
+  try { return (await file.slice(0, 5).text()) === '%PDF-'; } catch { return false; }
+}
+
 async function handleFiles(files, f, q, ctx) {
   if (!files.length) return;
   const chosen = f.multiple ? files : files.slice(0, 1);
   for (const file of chosen) {
     if (!acceptMatches(file, f.accept)) { ctx.setError(f.id, `«${file.name}» no tiene un formato admitido.`); return; }
     if (file.size > (f.maxMB || 10) * 1024 * 1024) { ctx.setError(f.id, `«${file.name}» supera los ${f.maxMB || 10} MB.`); return; }
+    // Campos solo-PDF (el RIF): se comprueba que el contenido sea un PDF real, no solo la extensión.
+    if (isPdfOnly(f.accept) && !(await isRealPdf(file))) { ctx.setError(f.id, `«${file.name}» no es un PDF válido.`); return; }
   }
   ctx.clearError(f.id);
   for (const file of chosen) {

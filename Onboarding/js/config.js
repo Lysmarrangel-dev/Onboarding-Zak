@@ -9,6 +9,11 @@ export const CONFIG = {
   // Vacía = modo demostración: la app funciona completa pero no envía nada.
   appsScriptUrl: 'https://script.google.com/macros/s/AKfycbx4_h4UlxmrShKBTEGvVNYi9m_NyX0h7y4ZAb8j6N6xl2LvpE_VLHlbdfyKpaPLjjm3/exec',
 
+  // Voz de Kira (la misma del CRM y del brochure), servida por el backend del CRM. Se usa cuando falta
+  // el MP3 pregenerado de un texto. Vacía = esos textos usan la voz del navegador.
+  // El dominio del onboarding debe estar en FRONTEND_URL del backend (CORS).
+  kiraTtsUrl: 'https://itech-crm-production.up.railway.app/api/kira/tts',
+
   // Reintentos automáticos del envío (esperas en ms entre intentos).
   retryDelays: [1000, 3000, 6000],
   requestTimeoutMs: 30000,
@@ -23,7 +28,7 @@ export const CONFIG = {
   // Presentación audiovisual de bienvenida (primer mensaje del chat).
   intro: {
     enabled: true,
-    voice: true,        // narración con la voz del navegador; el cliente puede silenciarla
+    voice: true,        // narración con la voz de Kira; el cliente puede silenciarla
     // Si producen un video (p. ej. con el avatar), pon su URL aquí y reemplaza la animación:
     videoSrc: '',       // 'assets/video/intro-zak.mp4'
     videoPoster: '',    // imagen de portada opcional

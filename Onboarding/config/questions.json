@@ -51,7 +51,7 @@
       "fields": [
         {"id": "rif", "type": "taxid", "label": "RIF o ID fiscal", "placeholder": "J-12345678-9"},
         {"id": "razonSocial", "type": "text", "label": "Razón social (tal como aparece en el RIF)", "placeholder": "Ej.: Comercial Andina, C.A."},
-        {"id": "comprobante", "type": "file", "label": "Comprobante del RIF (PDF o imagen)", "accept": ".pdf,image/*", "maxMB": 10, "hint": "Obligatorio: Meta lo pide para verificar tu empresa."}
+        {"id": "comprobante", "type": "file", "label": "RIF de la empresa en PDF", "accept": ".pdf,application/pdf", "maxMB": 10, "hint": "Obligatorio y solo en PDF (descárgalo del portal del SENIAT). Lo guardamos para verificar tu empresa ante Meta."}
       ]
     },
     {
@@ -525,6 +525,7 @@
     {"id": "ctl.infoDetail", "formTitle": "Desglose de información", "formType": "TEXT"},
     {"id": "ctl.infoPending", "formTitle": "Información por completar", "formType": "PARAGRAPH_TEXT"},
     {"id": "ctl.attachments", "formTitle": "Adjuntos por pregunta", "formType": "PARAGRAPH_TEXT"},
-    {"id": "ctl.consulting2", "formTitle": "Consultoría solicitada por el cliente", "formType": "PARAGRAPH_TEXT"}
+    {"id": "ctl.consulting2", "formTitle": "Consultoría solicitada por el cliente", "formType": "PARAGRAPH_TEXT"},
+    {"id": "ctl.rif", "formTitle": "RIF en PDF (enlace para revisión)", "formType": "TEXT"}
   ]
 }

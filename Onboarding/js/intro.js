@@ -1,14 +1,16 @@
 /**
  * Presentación audiovisual de bienvenida.
  * - Modo animado (por defecto): 6 escenas con animación de marca, subtítulos y narración.
- *   La narración usa los MP3 generados con ElevenLabs (config/intro.json → tools/generar_voz.py);
- *   si falta el audio de una escena, usa la voz del navegador (Web Speech API).
+ *   La narración usa la voz de Kira (la misma del CRM y el brochure): los MP3 pregenerados
+ *   (config/intro.json → tools/generar_voz.py) o, si faltan, la voz en vivo del backend del CRM
+ *   (js/kiraVoice.js); solo si eso falla, la voz del navegador (Web Speech API).
  *   Cada escena avanza cuando termina su frase y su tiempo mínimo.
  * - Modo video: si CONFIG.intro.videoSrc tiene una URL (p. ej. un video del avatar), se muestra ese
  *   video con sus subtítulos en lugar de la animación.
  * Respeta prefers-reduced-motion (no arranca solo) y se puede pausar, silenciar, repetir o saltar.
  */
 import { h, icon, prefersReducedMotion } from './dom.js';
+import { kiraVoiceUrl } from './kiraVoice.js';
 
 const ISO_WHITE = 'assets/brand/itech-isotipo-blanco.svg';
 
@@ -147,11 +149,23 @@ export function createIntro({ config = {}, script = null, autoplay = false, ende
     }
   }
 
-  /** Narra la escena: primero el MP3 de ElevenLabs; si no existe o falla, la voz del navegador. */
+  /**
+   * Narra la escena con la voz de Kira: primero el MP3 pregenerado; si no existe, la voz en vivo
+   * del backend del CRM; si tampoco, la voz del navegador.
+   */
   function narrate(s, my, done) {
     if (!audio) return browserSpeak(s, done);
     let fellBack = false;
-    const fallback = () => { if (fellBack || my !== token) return; fellBack = true; browserSpeak(s, done); };
+    const fallback = async () => {
+      if (fellBack || my !== token) return;
+      fellBack = true;
+      const live = await kiraVoiceUrl(s.say || s.caption);
+      if (my !== token) return;
+      if (!live) return browserSpeak(s, done);
+      audio.onerror = () => browserSpeak(s, done);
+      audio.src = live;
+      audio.play().catch((e) => { if (e?.name !== 'AbortError') browserSpeak(s, done); });
+    };
     audio.onended = done;
     audio.onerror = fallback;
     audio.src = `${audioDir}/${s.id}.mp3`;
@@ -170,7 +184,10 @@ export function createIntro({ config = {}, script = null, autoplay = false, ende
   }
 
   function prefetch(n) {
-    if (audio && SCRIPT[n]) fetch(`${audioDir}/${SCRIPT[n].id}.mp3`).catch(() => {});
+    const s = SCRIPT[n];
+    if (!audio || !s) return;
+    // Sin MP3 pregenerado, se pide ya la voz en vivo para que la escena no espere.
+    fetch(`${audioDir}/${s.id}.mp3`).then((r) => { if (!r.ok) kiraVoiceUrl(s.say || s.caption); }).catch(() => {});
   }
 
   function silence() {
