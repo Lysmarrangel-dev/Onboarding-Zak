@@ -5,8 +5,9 @@
  */
 import { h, icon } from './dom.js';
 import { uploadFile } from './api.js';
+import { ATTACH } from './engine.js';
 
-const INPUT_TYPES = { text: 'text', email: 'email', phone: 'tel', url: 'url', taxid: 'text', number: 'text', date: 'date', time: 'time' };
+const INPUT_TYPES = { text: 'text', email: 'email', phone: 'tel', url: 'url', taxid: 'text', idcard: 'text', number: 'text', date: 'date', time: 'time' };
 const AUTOCOMPLETE = { email: 'email', phone: 'tel', url: 'url' };
 
 let uid = 0;
@@ -16,12 +17,54 @@ export function renderForm(q, ctx) {
   const fields = ctx.engine.visibleFields(q, ctx.answers, ctx.draft);
   const wrap = h('div', { class: 'fields', style: { display: 'grid', gap: '16px' } });
   // Etiqueta visible sólo si la pregunta tiene varias partes; si no, la etiqueta es la pregunta.
-  const showLabels = fields.length > 1 || ctx.alwaysLabel;
+  const showLabels = fields.filter((f) => f.type !== 'notice').length > 1 || ctx.alwaysLabel;
   for (const f of fields) wrap.appendChild(renderField(f, q, ctx, showLabels));
+  // «No» / «No sé» → ofrecemos consultoría de iTech.
+  if (ctx.consultCheck?.(q, ctx.draft, fields)) wrap.appendChild(renderConsultCta(q, ctx));
+  // Adjuntos o nota de voz en todas las preguntas, salvo las que ya piden su propio archivo.
+  if (!ctx.noAttach && !q.noAttach && !q.fields.some((f) => f.type === 'file')) wrap.appendChild(renderAttach(q, ctx));
   return wrap;
 }
 
+const CONSULT_KEY = '__consultoria';
+
+/** Llamada a la acción de consultoría cuando la respuesta indica que algo falta o no se sabe. */
+function renderConsultCta(q, ctx) {
+  const v = ctx.draft[CONSULT_KEY];
+  return h('div', { class: 'consult-cta', role: 'group', 'aria-label': 'Consultoría de iTech' },
+    h('span', { class: 'consult-ico', 'aria-hidden': 'true' }, icon('help')),
+    h('div', { class: 'consult-body' },
+      h('strong', {}, '¿Quieres que un consultor de iTech te ayude con esto?'),
+      h('span', {}, 'Lo anotamos y lo vemos contigo en la implementación.'),
+      h('div', { class: 'chips' },
+        ['Sí, quiero consultoría', 'No, por ahora'].map((o) => h('button', {
+          type: 'button', class: 'chip', 'aria-pressed': String(v === o), 'data-fk': `${CONSULT_KEY}:${o}`,
+          onclick: () => { ctx.draft[CONSULT_KEY] = v === o ? '' : o; ctx.rerender(); },
+        }, o)))));
+}
+
+/** «Adjuntar documento o imagen»: disponible en todas las preguntas, plegado hasta que se usa. */
+function renderAttach(q, ctx) {
+  const files = [].concat(ctx.draft[ATTACH.id] || []);
+  const open = files.length > 0 || (ctx.uploads[ATTACH.id] || []).length > 0 || ctx.attachOpen?.[q.id];
+  if (!open) {
+    return h('div', { class: 'attach-toggle' },
+      h('button', {
+        type: 'button', class: 'btn-text btn-xs', 'data-fk': 'attach-open',
+        onclick: () => { (ctx.attachOpen ||= {})[q.id] = true; ctx.rerender(); setTimeout(() => document.querySelector('.attach-box .dropzone input')?.focus(), 0); },
+      }, icon('clip'), 'Adjuntar archivo o responder con audio'));
+  }
+  const id = nextId(`f-${q.id}-attach`).replace(/\./g, '_');
+  return h('div', { class: 'field attach-box' },
+    h('span', { class: 'field-label', id: `${id}-label` }, icon('clip'), ' Archivos o nota de voz', h('span', { class: 'opt' }, ' (opcional)')),
+    h('div', { class: 'field-hint' }, 'Si prefieres, responde con una nota de voz: reemplaza las respuestas escritas de esta pregunta.'),
+    audioRecorder(q, ctx),
+    fileControl(ATTACH, q, ctx, { id, describedBy: null, labelId: `${id}-label` }),
+    ctx.errors[ATTACH.id] ? h('div', { class: 'field-error', role: 'alert' }, icon('alert', 'icon'), ctx.errors[ATTACH.id]) : null);
+}
+
 function renderField(f, q, ctx, showLabel) {
+  if (f.type === 'notice') return h('div', { class: 'field' }, noticeControl(f));
   const id = nextId(`f-${q.id}-${f.id}`).replace(/\./g, '_');
   const hintId = f.hint ? `${id}-hint` : null;
   const errId = ctx.errors[f.id] ? `${id}-err` : null;
@@ -33,9 +76,10 @@ function renderField(f, q, ctx, showLabel) {
 
   const control = CONTROLS[f.type]?.(f, q, ctx, { id, describedBy, labelId: `${id}-label` }) || h('span', {}, `Tipo no soportado: ${f.type}`);
 
-  const usesLabelFor = ['text', 'email', 'phone', 'url', 'taxid', 'number', 'date', 'time', 'textarea', 'select'].includes(f.type);
+  const usesLabelFor = ['text', 'email', 'phone', 'url', 'taxid', 'idcard', 'number', 'date', 'time', 'textarea', 'select'].includes(f.type);
   return h('div', { class: 'field' },
-    usesLabelFor ? h('label', { for: id, class: showLabel ? 'field-label' : 'sr-only', id: `${id}-label` }, label, optional ? h('span', { class: 'opt' }, ' (opcional)') : null) : labelEl,
+    f.type === 'consent' ? null // la casilla lleva su propio texto como etiqueta
+      : usesLabelFor ? h('label', { for: id, class: showLabel ? 'field-label' : 'sr-only', id: `${id}-label` }, label, optional ? h('span', { class: 'opt' }, ' (opcional)') : null) : labelEl,
     f.hint ? h('div', { class: 'field-hint', id: hintId }, f.hint) : null,
     control,
     ctx.errors[f.id] ? h('div', { class: 'field-error', id: errId, role: 'alert' }, icon('alert', 'icon'), ctx.errors[f.id]) : null,
@@ -127,7 +171,26 @@ function multiChips(f, q, ctx, { labelId, describedBy }) {
     }, h('span', { class: 'check' }, icon('check')), opt));
   }
   const out = h('div', { style: { display: 'grid', gap: '8px' } }, group);
-  if (f.other && current().includes('Otro')) out.appendChild(otherInput(f, ctx));
+  if (f.other && current().includes('Otro')) {
+    // «Otro» con catálogo: lista completa con descripción, más un campo libre.
+    if (f.otherCatalog) {
+      out.appendChild(h('div', { class: 'field-hint' }, 'Elige de la lista completa de indicadores o escribe otro:'));
+      out.appendChild(multiselectBox({ ctx, key: `${f.id}__cat`, options: f.otherCatalog, label: 'Más indicadores', open: true }));
+    }
+    out.appendChild(otherInput(f, ctx));
+  }
+  // Un campo por cada opción elegida (p. ej. el usuario o enlace de cada red social).
+  if (f.optionInputs) {
+    const det = (ctx.draft[`${f.id}__det`] ||= {});
+    current().filter((o) => o !== 'Otro' && !(f.exclusive || []).includes(o)).forEach((o, i) => out.appendChild(
+      h('label', { class: 'option-input' },
+        h('span', {}, f.optionInputs.label.replace('{opt}', o)),
+        h('input', {
+          class: 'input', type: 'text', value: det[o] || '', placeholder: f.optionInputs.placeholder || '', 'data-fk': `${f.id}__det:${i}`,
+          oninput: (e) => { det[o] = e.target.value; },
+          onkeydown: (e) => { if (e.key === 'Enter') e.preventDefault(); },
+        }))));
+  }
   return out;
 }
 
@@ -266,22 +329,49 @@ function plansControl(f, q, ctx) {
 function gridControl(f, q, ctx, { labelId }) {
   const value = (ctx.draft[f.id] = ctx.draft[f.id] || {});
   const answered = f.rows.filter((r) => value[r]).length;
-  // Acceso rápido: marcar todas las filas con la primera columna (p. ej. «Lo tengo»).
+  // Acceso rápido: marcar todas las filas con la primera opción (p. ej. «Sí, lo tengo»).
   const bulk = f.bulk ? h('div', { class: 'grid-bulk' },
     h('span', { class: 'field-hint' }, `${answered} de ${f.rows.length} respondidos`),
     h('button', {
       type: 'button', class: 'btn-text', 'data-fk': `${f.id}:bulk`,
       onclick: () => { f.rows.forEach((r) => { value[r] = f.bulk; }); ctx.clearError(f.id); ctx.rerender(); },
     }, icon('check'), `Marcar todo «${f.bulk}»`)) : null;
-  return h('div', { class: `grid-table ${f.stacked ? 'is-stacked' : ''}`, role: 'group', 'aria-labelledby': labelId },
+  const det = (ctx.draft[`${f.id}__det`] ||= {});
+  const cons = (ctx.draft[`${f.id}__cons`] ||= {});
+  const stateOf = (label) => (f.states || []).find((st) => st.label === label);
+
+  return h('div', { class: `grid-table ${f.stacked ? 'is-stacked' : ''} ${f.display === 'select' ? 'is-select' : ''}`, role: 'group', 'aria-labelledby': labelId },
     bulk,
-    f.rows.map((r) => h('div', { class: `grid-row ${value[r] ? 'is-answered' : ''}` },
-      h('span', { class: 'label', id: `${labelId}-${r}` }, r),
-      h('div', { class: 'chips', role: 'group', 'aria-labelledby': `${labelId}-${r}` },
-        f.columns.map((c) => h('button', {
-          type: 'button', class: 'chip', 'aria-pressed': String(value[r] === c), 'data-fk': `${f.id}:${r}:${c}`,
-          onclick: () => { value[r] = c; ctx.clearError(f.id); ctx.rerender(); },
-        }, c))))));
+    f.rows.map((r, i) => {
+      const st = stateOf(value[r]);
+      const rowId = `${labelId}-r${i}`;
+      const control = f.display === 'select'
+        ? h('select', {
+          class: 'select', 'aria-labelledby': rowId, 'data-fk': `${f.id}:sel:${i}`,
+          onchange: (e) => { value[r] = e.target.value; ctx.clearError(f.id); ctx.rerender(stateOf(e.target.value)?.input ? `${f.id}__det:${i}` : undefined); },
+        }, h('option', { value: '', disabled: true, selected: !value[r] }, 'Elige una opción'),
+        (f.states ? f.states.map((x) => x.label) : f.columns).map((c) => h('option', { value: c, selected: value[r] === c }, c)))
+        : h('div', { class: 'chips', role: 'group', 'aria-labelledby': rowId },
+          f.columns.map((c) => h('button', {
+            type: 'button', class: 'chip', 'aria-pressed': String(value[r] === c), 'data-fk': `${f.id}:${r}:${c}`,
+            onclick: () => { value[r] = c; ctx.clearError(f.id); ctx.rerender(); },
+          }, c)));
+      return h('div', { class: `grid-row ${value[r] ? 'is-answered' : ''} ${st && st.score === 0 ? 'is-missing' : ''}` },
+        h('span', { class: 'label', id: rowId }, r),
+        control,
+        // Detalle contextual según la opción elegida (p. ej. «¿Para cuándo lo tendrás?»).
+        st?.input ? h('label', { class: 'missing-note' },
+          h('span', { class: 'missing-q' }, st.input.label),
+          h('input', {
+            class: 'input', type: 'text', maxlength: 500, value: det[r] || '', placeholder: st.input.placeholder || '',
+            'data-fk': `${f.id}__det:${i}`,
+            oninput: (e) => { det[r] = e.target.value; },
+            onkeydown: (e) => { if (e.key === 'Enter') e.preventDefault(); },
+          })) : null,
+        st?.consult ? h('label', { class: 'consult-check' },
+          h('input', { type: 'checkbox', checked: Boolean(cons[r]), 'data-fk': `${f.id}__cons:${i}`, onchange: (e) => { cons[r] = e.target.checked; } }),
+          h('span', {}, 'Quiero consultoría de iTech para esto')) : null);
+    }));
 }
 
 function userRolesControl(f, q, ctx, { labelId }) {
@@ -305,7 +395,7 @@ function modulesControl(f, q, ctx, { labelId, describedBy }) {
   const total = f.groups.reduce((a, g) => a + g.modules.length, 0);
   return h('div', { class: 'mod-picker', role: 'group', 'aria-labelledby': labelId, 'aria-describedby': describedBy },
     h('div', { class: 'mod-top' },
-      h('span', { class: 'mod-count', 'aria-live': 'polite' }, `${current().length} de ${total} módulos elegidos`),
+      h('span', { class: 'mod-count', 'aria-live': 'polite' }, `${current().length} de ${total} ${f.noun || 'módulos'} elegidos`),
       h('button', {
         type: 'button', class: 'btn-text', 'data-fk': `${f.id}:all`,
         onclick: () => set(current().length === total ? [] : f.groups.flatMap((g) => g.modules.map((m) => m.id))),
@@ -334,7 +424,174 @@ function modulesControl(f, q, ctx, { labelId, describedBy }) {
     }));
 }
 
+/** Casilla de aceptación: guarda la fecha y hora exactas en que se marcó. */
+function consentControl(f, q, ctx, { id, describedBy }) {
+  return h('label', { class: `consent ${ctx.errors[f.id] ? 'is-invalid' : ''}` },
+    h('input', {
+      id, type: 'checkbox', checked: Boolean(ctx.draft[f.id]), 'aria-describedby': describedBy, 'data-fk': f.id,
+      'aria-invalid': ctx.errors[f.id] ? 'true' : null,
+      onchange: (e) => { ctx.draft[f.id] = e.target.checked ? new Date().toISOString() : ''; ctx.clearError(f.id); ctx.rerender(); },
+    }),
+    h('span', { class: 'consent-box', 'aria-hidden': 'true' }, icon('check')),
+    h('span', { class: 'consent-text' }, f.label));
+}
+
+/** Aviso informativo (no se responde). Puede llevar un enlace, p. ej. a una plantilla. */
+function noticeControl(f) {
+  return h('div', { class: `notice ${f.tone ? `notice-${f.tone}` : ''}`, role: 'note' },
+    icon(f.icon || 'shield'),
+    h('div', {}, h('p', {}, f.text),
+      f.link ? h('a', { href: f.link.href, target: f.link.href.startsWith('mailto:') ? null : '_blank', rel: 'noopener', download: f.link.download || null }, icon(f.link.download ? 'download' : 'arrowRight'), f.link.label) : null));
+}
+
+/**
+ * Lista desplegable de selección múltiple. Opciones como texto o { label, desc }.
+ * Se queda abierta entre re-renderizados (ctx.msOpen).
+ */
+function multiselectBox({ ctx, key, options, label, open, getValue, setValue, fk }) {
+  const read = getValue || (() => ctx.draft[key] || []);
+  const write = setValue || ((v) => { ctx.draft[key] = v; });
+  const sel = read();
+  const opts = options.map((o) => (typeof o === 'string' ? { label: o } : o));
+  const k = fk || key;
+  ctx.msOpen ||= {};
+  const isOpen = ctx.msOpen[k] ?? open ?? false;
+  const box = h('details', {
+    class: 'ms', open: isOpen || null,
+    ontoggle: (e) => { ctx.msOpen[k] = e.currentTarget.open; },
+  },
+  h('summary', { 'data-fk': `${k}:summary` },
+    h('span', { class: 'ms-label' }, sel.length ? sel.join(', ') : `${label}: elige una o varias`),
+    h('span', { class: 'ms-count' }, sel.length ? String(sel.length) : '')),
+  h('div', { class: 'ms-list', role: 'group', 'aria-label': label },
+    opts.map((o, i) => h('label', { class: 'ms-item' },
+      h('input', {
+        type: 'checkbox', checked: sel.includes(o.label), 'data-fk': `${k}:${i}`,
+        onchange: (e) => {
+          const cur = read();
+          write(e.target.checked ? [...cur, o.label] : cur.filter((x) => x !== o.label));
+          ctx.rerender(`${k}:${i}`);
+        },
+      }),
+      h('span', {}, h('span', { class: 'ms-name' }, o.label), o.desc ? h('span', { class: 'ms-desc' }, o.desc) : null)))));
+  return box;
+}
+
+function multiselectControl(f, q, ctx) {
+  const options = f.optionsFrom === 'modules' ? (ctx.chosenModules?.() || []) : f.options;
+  return multiselectBox({ ctx, key: f.id, options, label: f.label, open: f.open });
+}
+
+/** Tabla de filas con columnas configurables (texto, correo, teléfono, hora, lista o selección múltiple). */
+function rowsControl(f, q, ctx) {
+  const empty = () => Object.fromEntries(f.columns.map((c) => [c.id, c.type === 'multiselect' ? [] : '']));
+  return rowsEditor({
+    f, ctx, title: f.rowLabel || 'Fila', addLabel: f.addLabel || 'Agregar',
+    emptyRow: empty,
+    cells: (row, i) => f.columns.map((c, col) => {
+      if (c.showIf && row[c.showIf.col] !== c.showIf.eq) return null;
+      const aria = `${c.label} (${(f.rowLabel || 'fila').toLowerCase()} ${i + 1})`;
+      if (c.type === 'select') {
+        return h('select', {
+          class: 'select', 'aria-label': aria, 'data-fk': `${f.id}:${i}:${col}`,
+          onchange: (e) => { row[c.id] = e.target.value; ctx.clearError(f.id); ctx.rerender(`${f.id}:${i}:${col}`); },
+        }, h('option', { value: '', disabled: true, selected: !row[c.id] }, c.label),
+        c.options.map((o) => h('option', { value: o, selected: row[c.id] === o }, o)));
+      }
+      if (c.type === 'multiselect') {
+        const options = c.optionsFrom === 'modules' ? (ctx.chosenModules?.() || []) : c.options;
+        return h('div', { class: 'row-ms' }, multiselectBox({
+          ctx, key: `${f.id}:${i}:${c.id}`, fk: `${f.id}:${i}:${col}`, options, label: c.label,
+          getValue: () => row[c.id] || [], setValue: (v) => { row[c.id] = v; ctx.clearError(f.id); },
+        }));
+      }
+      const type = { email: 'email', phone: 'tel', time: 'time', number: 'text' }[c.type] || 'text';
+      return cellInput(f, ctx, row, c.id, i, col, { type, placeholder: c.placeholder || c.label, 'aria-label': aria, autocomplete: 'off', inputmode: c.type === 'number' ? 'decimal' : null });
+    }),
+  });
+}
+
+/** Nota de voz: graba con el micrófono y la adjunta como archivo de audio. */
+let recorder = null;
+function audioRecorder(q, ctx) {
+  if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') return null;
+  const recording = recorder?.qid === q.id;
+  return h('div', { class: 'recorder' },
+    h('button', {
+      type: 'button', class: `btn btn-sm ${recording ? 'btn-primary' : 'btn-ghost'}`, 'data-fk': 'rec',
+      'aria-pressed': String(recording),
+      onclick: async () => {
+        if (recording) { recorder.mr.stop(); return; }
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const mr = new MediaRecorder(stream);
+          const chunks = [];
+          mr.ondataavailable = (e) => chunks.push(e.data);
+          mr.onstop = () => {
+            stream.getTracks().forEach((t) => t.stop());
+            recorder = null;
+            const type = mr.mimeType || 'audio/webm';
+            const ext = type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm';
+            const file = new File(chunks, `nota-de-voz-${q.id}-${Date.now()}.${ext}`, { type });
+            handleFiles([file], ATTACH, q, ctx);
+          };
+          recorder = { qid: q.id, mr };
+          mr.start();
+          ctx.rerender('rec');
+        } catch {
+          ctx.setError(ATTACH.id, 'No pudimos usar el micrófono. Revisa el permiso del navegador.');
+        }
+      },
+    }, icon(recording ? 'pause' : 'mic'), recording ? 'Detener y adjuntar' : 'Grabar nota de voz'),
+    recording ? h('span', { class: 'rec-dot', role: 'status' }, 'Grabando…') : null);
+}
+
+/** KPIs por módulo: casillas con descripción y, por cada grupo con KPIs marcados, frecuencia y canal. */
+function kpiGroupsControl(f, q, ctx, { labelId }) {
+  const val = (ctx.draft[f.id] ||= {});
+  const freq = (ctx.draft[`${f.id}__freq`] ||= {});
+  const canal = (ctx.draft[`${f.id}__canal`] ||= {});
+  const toggle = (store, gid, item, fk) => {
+    const cur = store[gid] || [];
+    store[gid] = cur.includes(item) ? cur.filter((x) => x !== item) : [...cur, item];
+    ctx.clearError(f.id);
+    ctx.rerender(fk);
+  };
+  const chips = (store, gid, opts, kind, label) => h('div', { class: 'kpi-sel' },
+    h('span', { class: 'kpi-sel-label', id: `${labelId}-${gid}-${kind}` }, label),
+    h('div', { class: 'chips', role: 'group', 'aria-labelledby': `${labelId}-${gid}-${kind}` },
+      opts.map((o, i) => h('button', {
+        type: 'button', class: 'chip', role: 'checkbox', 'aria-checked': String((store[gid] || []).includes(o)), 'data-fk': `${f.id}:${gid}:${kind}:${i}`,
+        onclick: () => toggle(store, gid, o, `${f.id}:${gid}:${kind}:${i}`),
+      }, h('span', { class: 'check' }, icon('check')), o))));
+
+  return h('div', { class: 'kpi-groups', role: 'group', 'aria-labelledby': labelId },
+    ctx.engine.kpiGroupsFor(f, ctx.answers).map((g) => {
+      const sel = val[g.id] || [];
+      return h('section', { class: `kpi-group ${sel.length ? 'is-active' : ''}`, 'aria-labelledby': `${labelId}-${g.id}` },
+        h('div', { class: 'kpi-head' },
+          h('h4', { id: `${labelId}-${g.id}` }, g.title),
+          h('span', { class: 'kpi-count' }, sel.length ? `${sel.length} elegidos` : '')),
+        h('div', { class: 'ms-list kpi-list' },
+          g.kpis.map((k, i) => h('label', { class: 'ms-item' },
+            h('input', {
+              type: 'checkbox', checked: sel.includes(k.label), 'data-fk': `${f.id}:${g.id}:k:${i}`,
+              onchange: () => toggle(val, g.id, k.label, `${f.id}:${g.id}:k:${i}`),
+            }),
+            h('span', {}, h('span', { class: 'ms-name' }, k.label), h('span', { class: 'ms-desc' }, k.desc))))),
+        sel.length ? h('div', { class: 'kpi-extra' },
+          chips(freq, g.id, f.frequencies, 'f', 'Frecuencia del resumen ejecutivo'),
+          chips(canal, g.id, f.channels, 'c', 'Canal o destino de recepción')) : null);
+    }));
+}
+
 const CONTROLS = {
+  kpiGroups: kpiGroupsControl,
+  notice: noticeControl,
+  multiselect: multiselectControl,
+  rows: rowsControl,
+  consent: consentControl,
+  idcard: textInput,
   modules: modulesControl,
   text: textInput, email: textInput, phone: textInput, url: textInput, taxid: textInput,
   number: textInput, date: textInput, time: textInput,

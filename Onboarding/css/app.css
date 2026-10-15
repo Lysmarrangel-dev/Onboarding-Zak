@@ -570,3 +570,117 @@ button { cursor: pointer; }
 .s-ready { padding: 8px; }
 .s-ready .ready-card { margin: 0; border: 0; }
 .bubble p { white-space: pre-line; }
+
+/* ==========================================================================
+   11. Adjuntos, «¿Qué te falta?», medidor de información y enlaces
+   ========================================================================== */
+.attach-toggle { margin-top: -6px; }
+.attach-toggle .btn-text { color: var(--text-muted); }
+.attach-toggle .btn-text:hover { color: var(--accent-text); }
+.attach-box { padding-top: 12px; border-top: 1px dashed var(--border-strong); }
+.attach-box .field-label { display: flex; align-items: center; gap: 6px; }
+.attach-box .field-label .icon { width: 16px; height: 16px; }
+
+.grid-row.is-missing { outline-color: var(--danger); background: var(--danger-bg); }
+.missing-note { display: grid; gap: 6px; width: 100%; }
+.missing-q { font-size: .85rem; font-weight: 600; color: var(--danger); }
+.missing-note .input { min-height: 42px; background: var(--surface); }
+
+.info-meter { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: var(--radius-pill); background: var(--card); font-size: .78rem; }
+.info-lbl { font-weight: 600; color: var(--text-muted); letter-spacing: .08em; text-transform: uppercase; font-size: .64rem; }
+.info-bar { width: 64px; height: 6px; border-radius: var(--radius-pill); background: var(--border); overflow: hidden; }
+.info-bar i { display: block; height: 100%; background: var(--itech-gradient); transition: width var(--dur-med) var(--ease-out); }
+.info-val { font-weight: 700; color: var(--accent-text); font-variant-numeric: tabular-nums; min-width: 3.2ch; text-align: right; }
+@media (max-width: 520px) { .info-lbl { display: none; } .info-bar { width: 40px; } }
+
+.q-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px !important; }
+.q-links a { color: var(--accent-text); font-weight: 600; font-size: .9rem; text-decoration: underline; text-underline-offset: 3px; }
+
+.ready-note { display: block; font-size: .82rem; color: var(--text-muted); margin-top: 2px; }
+.info-pending { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 6px; font-size: .86rem; }
+
+/* ==========================================================================
+   12. Acuerdo de confidencialidad y casillas de aceptación
+   ========================================================================== */
+.nda { margin-top: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px; display: grid; gap: 10px; }
+.nda-head { display: flex; gap: 10px; align-items: flex-start; }
+.nda-head > .icon { width: 34px; height: 34px; padding: 7px; border-radius: 10px; background: var(--itech-gradient); color: #fff; flex: none; }
+.nda-head div { display: grid; }
+.nda-head strong { font-family: var(--font-brand); font-weight: 400; font-size: 1.05rem; color: var(--accent-text); }
+.nda-head span { font-size: .8rem; color: var(--text-muted); }
+.nda-summary { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: .9rem; }
+.nda-full summary { cursor: pointer; font-weight: 600; color: var(--accent-text); font-size: .9rem; }
+.nda-body { margin-top: 8px; max-height: 280px; overflow: auto; padding: 12px; border-radius: 10px; background: var(--surface-soft); font-size: .85rem; line-height: 1.55; }
+.nda-body p { margin: 0 0 10px; white-space: normal; }
+
+.consent { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--border-strong); background: var(--surface); }
+.consent:hover { border-color: var(--chip-border); }
+.consent.is-invalid { border-color: var(--danger); }
+.consent input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.consent-box { width: 22px; height: 22px; flex: none; border-radius: 7px; border: 1.5px solid var(--border-strong); display: grid; place-items: center; color: transparent; margin-top: 1px; }
+.consent-box .icon { width: 14px; height: 14px; }
+.consent input:checked + .consent-box { background: var(--itech-gradient); border-color: transparent; color: #fff; }
+.consent input:focus-visible + .consent-box { outline: 2px solid var(--focus); outline-offset: 2px; }
+.consent-text { font-size: .92rem; line-height: 1.4; }
+
+/* ==========================================================================
+   13. Mejoras iTech: consultoría, avisos, listas desplegables, audio y Kira
+   ========================================================================== */
+.consult-cta { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; background: var(--surface-soft); border: 1.5px solid var(--chip-border); }
+.consult-ico .icon { width: 30px; height: 30px; padding: 6px; border-radius: 10px; background: var(--itech-gradient); color: #fff; }
+.consult-body { display: grid; gap: 6px; }
+.consult-body strong { font-size: .95rem; }
+.consult-body > span { font-size: .84rem; color: var(--text-muted); }
+.consult-check { display: flex; gap: 8px; align-items: center; font-size: .86rem; font-weight: 600; color: var(--accent-text); cursor: pointer; }
+.consult-check input { width: 18px; height: 18px; accent-color: var(--itech-purple); }
+
+.notice { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: var(--surface-soft); border-left: 4px solid var(--itech-purple); font-size: .9rem; }
+.notice > .icon { flex: none; color: var(--accent-text); margin-top: 2px; }
+.notice p { margin: 0 0 6px; }
+.notice a { display: inline-flex; gap: 6px; align-items: center; font-weight: 600; color: var(--accent-text); text-decoration: underline; text-underline-offset: 3px; }
+.notice a .icon { width: 16px; height: 16px; }
+
+.ms { border: 1.5px solid var(--border-strong); border-radius: var(--radius-input); background: var(--surface); }
+.ms[open] { border-color: var(--focus); }
+.ms summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 11px 14px; min-height: 46px; }
+.ms summary::-webkit-details-marker { display: none; }
+.ms summary::after { content: ''; width: 10px; height: 10px; border-right: 2px solid var(--accent-text); border-bottom: 2px solid var(--accent-text); transform: rotate(45deg); margin-left: auto; flex: none; transition: transform var(--dur-fast); }
+.ms[open] summary::after { transform: rotate(-135deg); }
+.ms-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .93rem; }
+.ms-count:not(:empty) { font-size: .75rem; font-weight: 700; color: #fff; background: var(--itech-gradient); border-radius: var(--radius-pill); padding: 2px 8px; }
+.ms-list { display: grid; gap: 2px; padding: 4px 6px 8px; max-height: 300px; overflow: auto; border-top: 1px solid var(--border); }
+.ms-item { display: flex; gap: 10px; align-items: flex-start; padding: 8px; border-radius: 10px; cursor: pointer; }
+.ms-item:hover { background: var(--chip-hover); }
+.ms-item input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--itech-purple); flex: none; }
+.ms-item > span { display: grid; gap: 1px; }
+.ms-name { font-size: .92rem; font-weight: 500; }
+.ms-desc { font-size: .8rem; color: var(--text-muted); }
+.row-ms { grid-column: 1 / -1; }
+
+.option-input { display: grid; gap: 4px; font-size: .85rem; font-weight: 600; }
+
+.grid-table.is-select .grid-row { display: grid; gap: 8px; }
+.grid-table.is-select .select { min-height: 44px; }
+
+.recorder { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rec-dot { display: inline-flex; align-items: center; gap: 6px; font-size: .85rem; font-weight: 600; color: var(--danger); }
+.rec-dot::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--danger); animation: node-pulse 1.2s infinite; }
+
+.listen-btn { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; padding: 4px 8px 4px 0; color: var(--accent-text); font-weight: 600; font-size: .8rem; cursor: pointer; border-radius: 8px; }
+.listen-btn .icon { width: 16px; height: 16px; }
+.listen-btn:hover { text-decoration: underline; }
+.kira-toggle.is-on { background: var(--itech-gradient); color: #fff; border-color: transparent; }
+.grid-row:not(.is-missing) .missing-q { color: var(--accent-text); }
+.grid-table.is-select .grid-row .select { width: 100%; }
+
+/* KPIs por módulo (12.2) */
+.kpi-groups { display: grid; gap: 12px; }
+.kpi-group { border: 1.5px solid var(--border); border-radius: 14px; padding: 10px 12px; background: var(--surface); }
+.kpi-group.is-active { border-color: var(--chip-border); background: var(--surface-soft); }
+.kpi-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.kpi-head h4 { margin: 0; font-family: var(--font-brand); font-weight: 400; font-size: 1rem; color: var(--accent-text); }
+.kpi-count { font-size: .78rem; font-weight: 600; color: var(--text-muted); }
+.kpi-list { max-height: none; border-top: 0; padding: 6px 0 0; }
+.kpi-extra { display: grid; gap: 10px; margin-top: 8px; padding-top: 10px; border-top: 1px dashed var(--border-strong); }
+.kpi-sel { display: grid; gap: 6px; }
+.kpi-sel-label { font-size: .82rem; font-weight: 600; }

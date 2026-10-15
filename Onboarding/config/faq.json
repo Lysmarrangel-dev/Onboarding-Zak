@@ -138,17 +138,24 @@
         "ordenes",
         "barra de comando"
       ],
-      "answer": "Con ZAK trabajas hablando: puedes dictar en cualquier campo, y el asistente cumple lo que le pides. Todo lo que se hace con el mouse se puede pedir por voz. Por ejemplo: «¿Cuánto vendimos esta semana?», «Agenda una cita mañana a las 10», «Cóbrale por QR a este cliente» o «¿Quién tiene tareas vencidas?»."
+      "answer": "Con ZAK trabajas hablando: puedes dictar en cualquier campo, y Kira, la asistente de ZAK, cumple lo que le pides. Todo lo que se hace con el mouse se puede pedir por voz. Por ejemplo: «¿Cuánto vendimos esta semana?», «Agenda una cita mañana a las 10», «Cóbrale por QR a este cliente» o «¿Quién tiene tareas vencidas?»."
     },
     {
       "id": "kira",
-      "source": "cuestionario 12.1 + ZAK brochure p.6",
+      "source": "iTech (definición de Kira) + ZAK brochure p.6",
       "keywords": [
         "kira",
         "copiloto",
-        "asistente de voz"
+        "asistente de voz",
+        "quien es kira",
+        "asistente",
+        "asistente de zak",
+        "voz que lee",
+        "lee las preguntas",
+        "silenciar a kira",
+        "apagar la voz"
       ],
-      "answer": "Kira es el copiloto de voz de ZAK. Con ella ejecutas por voz las tareas del día a día, como crear contactos, mover tratos, agendar citas o preguntar quién no ha pagado. Cada rol define qué puede pedirle."
+      "answer": "Kira es la asistente que maneja ZAK hablando contigo. En este onboarding te lee cada pregunta (puedes silenciarla con el botón de volumen de arriba). Dentro de ZAK está en el panel de cada módulo: le pides en voz alta lo que harías con el mouse, como crear contactos, mover tratos o agendar citas, y ella lo hace. Cada rol define qué puede pedirle."
     },
     {
       "id": "permisos-auditoria",
@@ -658,9 +665,12 @@
         "quien ve",
         "confidencial",
         "seguridad de los datos",
-        "proteccion de datos"
+        "proteccion de datos",
+        "nda",
+        "acuerdo de confidencialidad",
+        "confidencialidad"
       ],
-      "answer": "Tus respuestas llegan solo al equipo de iTech, que las usa para configurar ZAK según la operación de tu empresa."
+      "answer": "Tus respuestas llegan solo al equipo de iTech, que las usa para configurar ZAK. Están protegidas por el Acuerdo de Confidencialidad y Protección de Datos que aceptaste al inicio: no las compartimos con terceros y puedes pedir que se eliminen al terminar la relación."
     },
     {
       "id": "guardar-progreso",
@@ -684,7 +694,7 @@
         "duracion",
         "cuantas preguntas"
       ],
-      "answer": "El onboarding toma unos 35 minutos. En la barra superior ves en qué sección estás y tu porcentaje de avance."
+      "answer": "Depende de los módulos que contrates: solo te preguntamos por ellos. Con pocos módulos toma unos 10 minutos; con todos, unos 35. En la barra superior ves en qué sección estás y tu porcentaje de avance."
     },
     {
       "id": "elegir-modulos",
@@ -703,7 +713,7 @@
         "cuales modulos necesito",
         "que modulos necesito"
       ],
-      "answer": "Depende de cómo vende y atiende tu empresa. Marca los módulos que te interesan: tu consultor de iTech confirma contigo la configuración final. Cada módulo se puede activar después, cuando lo necesites."
+      "answer": "Depende de cómo vende y atiende tu empresa. Marca los módulos que te interesan: tu consultor de iTech confirma contigo la configuración final. Cada módulo se puede activar después, cuando lo necesites. Según los módulos que elijas, el onboarding solo te pedirá la información de esos módulos."
     },
     {
       "id": "checklist",
@@ -768,6 +778,108 @@
         "incidencia"
       ],
       "answer": "El soporte de ZAK está en el módulo Cowork, que tiene una sección dedicada. Desde ahí tu equipo reporta casos y hace consultas. Durante la implementación, tu consultor de iTech te acompaña directamente."
+    },
+    {
+      "id": "rif-verificacion",
+      "source": "onboarding (pregunta 0.2)",
+      "keywords": [
+        "rif",
+        "para que el rif",
+        "verificacion",
+        "verificar",
+        "verificacion de meta",
+        "verificar negocio",
+        "comprobante",
+        "razon social",
+        "seniat"
+      ],
+      "answer": "Pedimos el RIF, la razón social y el comprobante del RIF para verificar tu negocio ante Meta. Esa verificación es necesaria para activar WhatsApp Business por la vía oficial. Puedes consultar tu RIF en el portal del SENIAT con el enlace de la pregunta 0.2."
+    },
+    {
+      "id": "adjuntos",
+      "source": "onboarding",
+      "keywords": [
+        "adjuntar",
+        "adjunto",
+        "adjuntos",
+        "subir archivo",
+        "subir documento",
+        "subir imagen",
+        "foto",
+        "documento de respaldo",
+        "que archivos"
+      ],
+      "answer": "En cada pregunta puedes adjuntar documentos o imágenes, o responder con una nota de voz desde «Adjuntar archivo o responder con audio». Se aceptan PDF, Word, Excel, PowerPoint, texto, imágenes y audio, de hasta 10 MB cada uno. La base de contactos no se sube aquí: envíala a zak@itech.com.ve."
+    },
+    {
+      "id": "nivel-informacion",
+      "source": "onboarding",
+      "keywords": [
+        "barra de informacion",
+        "nivel de informacion",
+        "informacion disponible",
+        "consultoria",
+        "cuanta consultoria",
+        "porcentaje de informacion",
+        "barra"
+      ],
+      "answer": "La barra «Información» del encabezado mide cuánta información tienes para configurar ZAK. Combina tus respuestas (las de «No sé» o «No lo tengo» restan) y el checklist de módulos. Con ese porcentaje recomendamos el nivel de consultoría: básica, estándar o intensiva."
+    },
+    {
+      "id": "base-contactos",
+      "source": "iTech (política de datos)",
+      "keywords": [
+        "base de contactos",
+        "base de datos",
+        "migrar contactos",
+        "subir contactos",
+        "subir clientes",
+        "lista de clientes",
+        "importar contactos",
+        "excel de clientes"
+      ],
+      "answer": "Por seguridad, la base de contactos o clientes no se sube en este onboarding. Envíala formalmente a zak@itech.com.ve. Recuerda que tenemos un acuerdo de confidencialidad: tus datos están seguros."
+    },
+    {
+      "id": "consultoria",
+      "source": "onboarding",
+      "keywords": [
+        "no se",
+        "no sé",
+        "no tengo",
+        "necesito ayuda",
+        "no lo tengo definido",
+        "consultoria",
+        "asesoria",
+        "acompanamiento"
+      ],
+      "answer": "Si algo no lo tienes o no lo sabes, no pasa nada. Cuando respondas «No» o «No sé», te preguntaremos si quieres consultoría de iTech para eso. Lo anotamos y tu consultor lo trabaja contigo en la implementación."
+    },
+    {
+      "id": "nota-de-voz",
+      "source": "onboarding",
+      "keywords": [
+        "audio",
+        "nota de voz",
+        "grabar",
+        "responder hablando",
+        "responder con audio",
+        "microfono"
+      ],
+      "answer": "Sí. En «Adjuntar archivo o responder con audio» pulsa «Grabar nota de voz», habla y pulsa «Detener y adjuntar». La nota de voz reemplaza las respuestas escritas de esa pregunta."
+    },
+    {
+      "id": "plantillas",
+      "source": "onboarding",
+      "keywords": [
+        "plantilla",
+        "plantillas",
+        "descargar plantilla",
+        "excel de usuarios",
+        "excel de number master",
+        "formato de usuarios"
+      ],
+      "answer": "Hay dos plantillas de Excel: la de usuarios (pregunta 7.1, con Nombre, Apellido, Correo y Teléfono) y la de Number Master (en la configuración de ese módulo). Descárgalas desde el enlace de cada pregunta, complétalas y súbelas ahí mismo."
     }
   ]
 }

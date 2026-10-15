@@ -3,7 +3,7 @@
  * La URL del Apps Script es pública por diseño (no es una clave privada).
  */
 export const CONFIG = {
-  agentName: 'ZAK Assistant',
+  agentName: 'Kira',
 
   // URL de la aplicación web de Apps Script (termina en /exec). Ver docs/GUIA.md, paso 4.
   // Vacía = modo demostración: la app funciona completa pero no envía nada.

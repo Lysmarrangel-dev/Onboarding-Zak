@@ -1,0 +1,101 @@
+{
+  "_comment": "Nivel de información disponible para configurar ZAK. Combina (a) la calidad de las respuestas del cuestionario y (b) la preparación del checklist de módulos. El resultado indica cuánta consultoría necesita la empresa. Se muestra como barra en el encabezado, en el resumen y llega al Form.",
+  "weights": {
+    "questionnaire": 0.5,
+    "checklist": 0.5
+  },
+  "unknownValues": [
+    "No sé",
+    "Aún no sé",
+    "No sé / necesito orientación"
+  ],
+  "partialValues": [
+    "En trámite",
+    "Parcialmente",
+    "Lo definimos con iTech",
+    "En proceso",
+    "Lo estoy preparando"
+  ],
+  "lacks": {
+    "2.3": {
+      "acceso": [
+        "No"
+      ]
+    },
+    "2.5": {
+      "tarjeta": [
+        "No"
+      ]
+    },
+    "3.1": {
+      "profesional": [
+        "No"
+      ]
+    },
+    "3.2": {
+      "vinculada": [
+        "No"
+      ]
+    },
+    "3.3": {
+      "permisos": [
+        "No"
+      ]
+    },
+    "3.4": {
+      "acceso": [
+        "No"
+      ]
+    },
+    "4.4": {
+      "autorizacion": [
+        "No"
+      ]
+    },
+    "5.1": {
+      "docs": [
+        "Aún no tenemos nada documentado"
+      ]
+    },
+    "6.2": {
+      "puede": [
+        "No"
+      ]
+    },
+    "9.3": {
+      "optin": [
+        "No"
+      ]
+    },
+    "10.3": {
+      "autorizacion": [
+        "No"
+      ]
+    }
+  },
+  "expectedFiles": {},
+  "levels": [
+    {
+      "min": 80,
+      "id": "basica",
+      "label": "Consultoría básica",
+      "client": "Tienes casi toda la información. Podemos configurar ZAK rápido."
+    },
+    {
+      "min": 50,
+      "id": "estandar",
+      "label": "Consultoría estándar",
+      "client": "Tienes una buena base. Un consultor te ayudará a completar lo que falta."
+    },
+    {
+      "min": 0,
+      "id": "intensiva",
+      "label": "Consultoría intensiva",
+      "client": "Un consultor te acompañará de cerca para reunir la información necesaria."
+    }
+  ],
+  "consultValues": [
+    "No lo tengo definido",
+    "No lo tengo"
+  ]
+}

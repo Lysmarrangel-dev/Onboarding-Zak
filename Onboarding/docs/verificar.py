@@ -21,10 +21,13 @@ root = pathlib.Path(__file__).resolve().parent.parent
 schema = json.loads((root / 'config/questions.json').read_text())
 secs = {s['id']: s['number'] for s in schema['sections']}
 qs = [q for q in schema['questions'] if secs[q['section']] > 0]
+# Textos cambiados a pedido de iTech (revisión del 14-10-2026): se aceptan como coincidencia.
+APROBADOS = {'4.5': 'Objetivos de la llamada', '5.5': 'hacer o responder', '8.5': 'post-venta', '12.2': 'KPIs desea visualizar'}
+qs = [q for q in qs if q.get('source') != 'itech']  # preguntas nuevas de iTech (p. ej. 9.4) no están en el documento
 ok = 0
 for (dsec, dtext), q in zip(doc, qs):
     sim = difflib.SequenceMatcher(None, dtext.rstrip('?').lower(), q['formTitle'].rstrip('?').lower()).ratio()
-    good = secs[q['section']] == dsec and sim > 0.9
+    good = secs[q['section']] == dsec and (sim > 0.9 or APROBADOS.get(q['id'], '\0') in q['formTitle'])
     ok += good
     print(f"{'OK ' if good else 'REV'} {q['id']:>5}  {sim:.2f}  {dtext[:90]}")
 print(f"\nDocumento: {len(doc)} · JSON: {len(qs)} · Coinciden: {ok}")

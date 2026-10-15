@@ -16,7 +16,7 @@
  */
 
 var MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB por archivo
-var ALLOWED_MIME = /^(audio\/|image\/|application\/pdf|application\/msword|application\/vnd\.openxmlformats-officedocument\.|application\/vnd\.ms-excel|text\/csv|application\/octet-stream)/;
+var ALLOWED_MIME = /^(audio\/|image\/|application\/pdf|application\/msword|application\/vnd\.openxmlformats-officedocument\.|application\/vnd\.ms-excel|application\/vnd\.ms-powerpoint|text\/csv|text\/plain|application\/octet-stream)/;
 
 /* ============================================================
    1. Creación del Form (ejecutar una sola vez desde el editor)
@@ -28,7 +28,8 @@ function setupForm() {
   var schema = JSON.parse(UrlFetchApp.fetch(url, { muteHttpExceptions: false }).getContentText());
   // Módulos + checklist: mismas reglas que js/readiness.js (buildModuleSchema).
   var mods = JSON.parse(UrlFetchApp.fetch(url.replace(/questions\.json.*$/, 'modules.json')).getContentText());
-  addModuleSchema_(schema, mods);
+  var agents = JSON.parse(UrlFetchApp.fetch(url.replace(/questions\.json.*$/, 'agents.json')).getContentText());
+  addModuleSchema_(schema, mods, agents);
 
   var form = FormApp.create('Onboarding ZAK · iTech');
   form.setDescription('Respuestas del asistente de onboarding de ZAK. Las respuestas llegan desde la app; no compartas este formulario con clientes.');
@@ -52,7 +53,10 @@ function setupForm() {
     }
     var item = addItem_(form, q);
     // Las condicionales no pueden ser obligatorias en el Form: solo se responden si aplican.
-    if (item.setRequired) item.setRequired(Boolean(q.required && !q.showIf));
+    // Las condicionales (por respuesta o por módulo contratado) no pueden ser obligatorias en el Form.
+    var sec = schema.sections.filter(function (x) { return x.id === q.section; })[0] || {};
+    var gated = Boolean(q.showIf || q.modules || sec.modules);
+    if (item.setRequired) item.setRequired(Boolean(q.required && !gated));
     map[q.id] = item.getId();
   });
 
@@ -84,8 +88,11 @@ function setupForm() {
   Logger.log('Pega esto en config/form-mapping.json →\n' + JSON.stringify({ items: map }, null, 2));
 }
 
-/** Inserta las secciones «Módulos de ZAK» y «Checklist» tras la primera sección (igual que la app). */
-function addModuleSchema_(schema, mod) {
+/**
+ * Inserta tras la primera sección «Módulos de ZAK», «Checklist» y «Agentes de IA por departamento»
+ * (mismas reglas que js/readiness.js: buildModuleSchema + buildAgentSchema).
+ */
+function addModuleSchema_(schema, mod, agents) {
   var all = [];
   mod.groups.forEach(function (g) { all = all.concat(g.modules); });
   var states = mod.checklist.states.map(function (s) { return s.label; });
@@ -96,17 +103,49 @@ function addModuleSchema_(schema, mod) {
   var questions = [{
     id: mod.selection.id, section: 'sM', formType: 'CHECKBOX', required: true, formValueField: 'modulos', formTitle: mod.selection.formTitle,
     fields: [{ id: 'modulos', options: all.map(function (m) { return m.name; }) }],
-  }].concat(all.map(function (m) {
+  }].concat(all.filter(function (m) { return m.requirements && m.requirements.length; }).map(function (m) {
     return {
       id: 'C.' + m.id, section: 'sC', formType: 'GRID', required: true, showIf: { q: mod.selection.id }, formValueField: 'estado',
       formTitle: 'Checklist · ' + m.name,
       fields: [{ id: 'estado', rows: m.requirements.map(function (r) { return r.text; }), columns: states }],
     };
   }));
-  var first = schema.sections[0].id;
+  if (agents) {
+    sections.push({ id: agents.section.id, number: 0, title: agents.section.title, intro: 'Agentes de IA por departamento (solo si se elige el módulo ' + agents.requiresModule + ').' });
+    questions.push({
+      id: agents.selection.id, section: agents.section.id, formType: 'CHECKBOX', required: true, showIf: { q: mod.selection.id },
+      formValueField: 'departamentos', formTitle: agents.selection.formTitle,
+      fields: [{ id: 'departamentos', options: agents.departments.map(function (d) { return d.name; }) }],
+    });
+    agents.departments.forEach(function (d) {
+      questions.push({
+        id: 'A.' + d.id, section: agents.section.id, formType: 'PARAGRAPH_TEXT', required: true, showIf: { q: agents.selection.id },
+        formTitle: agents.agent.formTitleTemplate.replace('{dept}', d.name), fields: [],
+      });
+    });
+  }
+  // Configuración técnica por módulo: antes del cierre (s13), igual que js/readiness.js (buildConfigSchema).
+  var cfgSecs = [], cfgQs = [];
+  all.forEach(function (m, i) {
+    if (!m.config || !m.config.length) return;
+    var sid = 'sX-' + m.id;
+    cfgSecs.push({ id: sid, number: 100 + i, modules: [m.id], title: mod.configSection.titleTemplate.replace('{module}', m.name), intro: 'Solo si se contrata ' + m.name + '.' });
+    m.config.forEach(function (c, k) {
+      cfgQs.push({ id: 'X.' + m.id + '.' + (k + 1), section: sid, formType: 'PARAGRAPH_TEXT', required: true, formTitle: c.prompt, fields: [] });
+    });
+  });
+  var s13 = 0, q13 = 0;
+  schema.sections.forEach(function (s, i) { if (s.id === 's13') s13 = i; });
+  schema.questions.forEach(function (q, i) { if (q.section === 's13' && !q13) q13 = i; });
+  Array.prototype.splice.apply(schema.sections, [s13, 0].concat(cfgSecs));
+  Array.prototype.splice.apply(schema.questions, [q13, 0].concat(cfgQs));
+
+  // Se insertan después de «Datos de la empresa» (s0), igual que en la app.
   var idx = 0;
-  schema.questions.forEach(function (q, i) { if (q.section === first) idx = i + 1; });
-  Array.prototype.splice.apply(schema.sections, [1, 0].concat(sections));
+  schema.questions.forEach(function (q, i) { if (q.section === 's0') idx = i + 1; });
+  var secIdx = 0;
+  schema.sections.forEach(function (s, i) { if (s.id === 's0') secIdx = i + 1; });
+  Array.prototype.splice.apply(schema.sections, [secIdx, 0].concat(sections));
   Array.prototype.splice.apply(schema.questions, [idx, 0].concat(questions));
 }
 
@@ -152,6 +191,7 @@ function handleSubmit_(body) {
   if (body.website) return fatal_('Solicitud rechazada'); // campo trampa anti-spam
   if (!body.sessionId || !/^[\w-]{8,64}$/.test(body.sessionId)) return fatal_('ID de sesión no válido');
   if (!Array.isArray(body.answers) || !body.answers.length) return fatal_('No hay respuestas');
+  if (!body.nda) return fatal_('Falta la aceptación del acuerdo de confidencialidad');
 
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
@@ -189,12 +229,19 @@ function handleSubmit_(body) {
     var rd = body.readiness || {};
     var ctl = {
       'ctl.reference': reference,
+      'ctl.nda': String(body.nda || ''),
       'ctl.session': body.sessionId,
       'ctl.doubts': String(body.doubts || '').slice(0, 20000),
       'ctl.readiness': rd.overall != null ? String(rd.overall) : '',
       'ctl.level': rd.level || '',
       'ctl.byModule': rd.byModule || '',
       'ctl.missing': rd.missing || '',
+      'ctl.info': body.info ? String(body.info.overall) : '',
+      'ctl.consulting': body.info ? body.info.consulting : '',
+      'ctl.infoDetail': body.info ? body.info.detail : '',
+      'ctl.infoPending': body.info ? body.info.pending : '',
+      'ctl.attachments': String(body.attachments || '').slice(0, 30000),
+      'ctl.consulting2': String(body.consulting || '').slice(0, 20000),
     };
     Object.keys(ctl).forEach(function (id) {
       var item = itemsById[map[id]] || findByTitle_(form, id);
@@ -235,9 +282,11 @@ function itemResponse_(item, value) {
 
 function findByTitle_(form, id) {
   var titles = {
-    'ctl.reference': 'Referencia de onboarding', 'ctl.session': 'ID de sesión', 'ctl.doubts': 'Dudas registradas durante el onboarding',
+    'ctl.reference': 'Referencia de onboarding', 'ctl.nda': 'Registro de aceptación del NDA (versión, huella SHA-256, fecha)', 'ctl.session': 'ID de sesión', 'ctl.doubts': 'Dudas registradas durante el onboarding',
     'ctl.readiness': 'Preparación global (%)', 'ctl.level': 'Calificación de preparación',
     'ctl.byModule': 'Preparación por módulo', 'ctl.missing': 'Requisitos pendientes',
+    'ctl.info': 'Información disponible (%)', 'ctl.consulting': 'Consultoría recomendada', 'ctl.infoDetail': 'Desglose de información',
+    'ctl.infoPending': 'Información por completar', 'ctl.attachments': 'Adjuntos por pregunta', 'ctl.consulting2': 'Consultoría solicitada por el cliente',
   };
   var hit = form.getItems().filter(function (it) { return it.getTitle() === titles[id]; });
   return hit[0] || null;
@@ -280,8 +329,12 @@ function notify_(body, reference) {
     '<div style="font-size:11px;letter-spacing:.24em">ONBOARDING · ZAK · iTech</div>' +
     '<div style="font-size:22px;margin-top:6px">Nuevo onboarding: ' + esc(body.company) + '</div>' +
     '<div style="margin-top:6px">Referencia <b>' + esc(reference) + '</b> · ' + esc(body.contactName) + ' · ' + esc(body.contactEmail) + '</div>' +
-    (body.readiness ? '<div style="margin-top:10px;font-size:18px">Preparación: <b>' + esc(body.readiness.overall) + ' %</b> · ' + esc(body.readiness.level) + '</div>' : '') +
+    (body.info ? '<div style="margin-top:10px;font-size:18px">Información: <b>' + esc(body.info.overall) + ' %</b> · ' + esc(body.info.consulting) + '</div>' : '') +
+    (body.readiness ? '<div style="margin-top:4px">Preparación de módulos: <b>' + esc(body.readiness.overall) + ' %</b> · ' + esc(body.readiness.level) + '</div>' : '') +
+    (body.taxId ? '<div style="margin-top:4px">RIF: ' + esc(body.taxId) + ' · ' + esc(body.legalName) + '</div>' : '') +
     '</div>' +
+    (body.consulting ? '<h3 style="color:#53037B">Consultoría solicitada</h3><p style="white-space:pre-line">' + esc(body.consulting) + '</p>' : '') +
+    (body.info ? '<h3 style="color:#53037B">Información por completar</h3><p style="white-space:pre-line">' + esc(body.info.pending) + '</p>' : '') +
     (body.readiness ? '<h3 style="color:#53037B">Preparación por módulo</h3><p style="white-space:pre-line">' + esc(body.readiness.byModule) + '</p>' +
       '<h3 style="color:#53037B">Requisitos pendientes</h3><p style="white-space:pre-line">' + esc(body.readiness.missing) + '</p>' : '') +
     (sheetUrl ? '<p><a href="' + sheetUrl + '" style="color:#53037B">Abrir la hoja de respuestas</a></p>' : '') +
@@ -290,7 +343,7 @@ function notify_(body, reference) {
     '</div>';
   MailApp.sendEmail({
     to: to,
-    subject: 'Nuevo onboarding ZAK · ' + (body.company || 'Sin nombre') + (body.readiness ? ' · ' + body.readiness.overall + ' % preparado' : '') + ' · ' + reference,
+    subject: 'Nuevo onboarding ZAK · ' + (body.company || 'Sin nombre') + (body.info ? ' · ' + body.info.overall + ' % info · ' + body.info.consulting : '') + ' · ' + reference,
     htmlBody: html,
     replyTo: body.contactEmail || undefined,
   });

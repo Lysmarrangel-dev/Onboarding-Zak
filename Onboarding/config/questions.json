@@ -4,581 +4,527 @@
     "source": "Cuestionario de Onboarding: Integración de ZAK (Onboarding.docx)",
     "version": "1.0.0",
     "estimatedMinutes": 35,
-    "notes": "Sección 0 añadida con aprobación de iTech (identificación). Después de la sección 0, la app inserta las secciones «Módulos de ZAK» y «Checklist de preparación», generadas desde config/modules.json. Secciones 1–13 = documento original, en el mismo orden. Cada pregunta del documento = 1 ítem del Google Form."
+    "moduleGate": {
+      "q": "M.1",
+      "f": "modulos"
+    },
+    "notes": "Sección 0 añadida con aprobación de iTech (identificación y RIF para la verificación en Meta). Después de la sección 0, la app inserta «Módulos de ZAK» y «Checklist de preparación» (config/modules.json) y «Agentes de IA por departamento» (config/agents.json). Todas las preguntas aceptan adjuntos opcionales. Secciones 1–13 = documento original, en el mismo orden. Cada pregunta del documento = 1 ítem del Google Form. Revisión 2026-10-14 (lista de mejoras de iTech): Kira lee las preguntas, checklist con opciones explicativas, CTA de consultoría, audio, usuarios con tipo y módulos, SLA, etc."
   },
 
   "sections": [
-    { "id": "s0",  "number": 0,  "title": "Datos de la empresa", "source": "itech", "intro": "Unos datos para identificar tu onboarding." },
-    { "id": "s1",  "number": 1,  "title": "Contexto del negocio y objetivos", "intro": "Queremos entender tu negocio y qué esperas lograr con ZAK." },
-    { "id": "s2",  "number": 2,  "title": "WhatsApp (vía Zernio / API)", "intro": "Ahora, la configuración de tu línea de WhatsApp." },
-    { "id": "s3",  "number": 3,  "title": "Instagram DMs", "intro": "Revisemos tu cuenta de Instagram para conectar los mensajes directos." },
-    { "id": "s4",  "number": 4,  "title": "Agentes de voz (Call Center IA)", "intro": "Definamos cómo trabajarán tus agentes de voz." },
-    { "id": "s5",  "number": 5,  "title": "Agente de texto (Inbox omnicanal)", "intro": "Ahora, el agente que responde por texto en todos tus canales." },
-    { "id": "s6",  "number": 6,  "title": "Integración con ERP (si aplica)", "intro": "Si usan un ERP o sistema contable, veamos cómo conectarlo." },
-    { "id": "s7",  "number": 7,  "title": "Estructura organizacional (equipo y roles)", "intro": "Conozcamos a tu equipo y quién verá qué dentro de ZAK." },
-    { "id": "s8",  "number": 8,  "title": "Ventas (Motor de Ventas)", "intro": "Pasemos a cobros, cotizaciones, suscripciones y contratos." },
-    { "id": "s9",  "number": 9,  "title": "Email marketing", "intro": "Unas preguntas sobre tus campañas de correo." },
-    { "id": "s10", "number": 10, "title": "Ad Studio", "intro": "Hablemos de tu publicidad." },
-    { "id": "s11", "number": 11, "title": "Web (sitios, formularios y análisis)", "intro": "Revisemos tu sitio web y tus formularios." },
-    { "id": "s12", "number": 12, "title": "Kira (copiloto de voz) y reportes IA", "intro": "Casi terminamos. Hablemos de Kira y de los reportes." },
-    { "id": "s13", "number": 13, "title": "Seguridad, cumplimiento y cierre", "intro": "Última sección: seguridad, cumplimiento y fechas." }
+    {"id": "sN", "number": 0, "tag": "CONFIDENCIALIDAD", "title": "Acuerdo de confidencialidad", "source": "itech", "intro": "Antes de compartir cualquier dato, firmemos un acuerdo de confidencialidad mutuo. Protege tu información y también nuestro sistema."},
+    {"id": "s0", "number": 0, "title": "Datos de la empresa", "source": "itech", "intro": "Unos datos para identificar tu onboarding."},
+    {"id": "s1", "number": 1, "title": "Contexto del negocio y objetivos", "intro": "Queremos entender tu negocio y qué esperas lograr con ZAK."},
+    {"id": "s2", "modules": ["call-center", "inbox", "agentes-ia"], "number": 2, "title": "WhatsApp (vía Zernio / API)", "intro": "Ahora, la configuración de tu línea de WhatsApp."},
+    {"id": "s3", "modules": ["inbox"], "number": 3, "title": "Instagram DMs", "intro": "Revisemos tu cuenta de Instagram para conectar los mensajes directos."},
+    {"id": "s4", "modules": ["call-center"], "number": 4, "title": "Agentes de voz (Call Center IA)", "intro": "Definamos cómo trabajarán tus agentes de voz."},
+    {"id": "s5", "modules": ["inbox", "agentes-ia", "piloto-automatico"], "number": 5, "title": "Agente de texto (Inbox omnicanal)", "intro": "Ahora, el agente que responde por texto en todos tus canales."},
+    {"id": "s6", "modules": ["contabilidad", "ventas"], "number": 6, "title": "Integración con ERP (si aplica)", "intro": "Si usan un ERP o sistema contable, veamos cómo conectarlo."},
+    {"id": "s7", "number": 7, "title": "Estructura organizacional (equipo y roles)", "intro": "Conozcamos a tu equipo y quién verá qué dentro de ZAK."},
+    {"id": "s8", "modules": ["ventas"], "number": 8, "title": "Ventas (Motor de Ventas)", "intro": "Pasemos a cobros, cotizaciones, suscripciones y contratos."},
+    {"id": "s9", "modules": ["email-marketing"], "number": 9, "title": "Email marketing", "intro": "Unas preguntas sobre tus campañas de correo."},
+    {"id": "s10", "modules": ["adstudio"], "number": 10, "title": "Ad Studio", "intro": "Hablemos de tu publicidad."},
+    {"id": "s11", "modules": ["web-funnels"], "number": 11, "title": "Web (sitios, formularios y análisis)", "intro": "Revisemos tu sitio web y tus formularios."},
+    {"id": "s12", "number": 12, "title": "Kira (copiloto de voz) y reportes IA", "intro": "Casi terminamos. Hablemos de Kira, la asistente que maneja ZAK hablando contigo, y de los reportes."},
+    {"id": "s13", "number": 13, "title": "Seguridad, cumplimiento y cierre", "intro": "Última sección: seguridad, cumplimiento y fechas."}
   ],
 
   "questions": [
     {
-      "id": "0.1", "section": "s0", "formType": "TEXT", "required": true,
-      "formTitle": "Nombre de la empresa",
-      "prompt": "¿Cuál es el nombre de tu empresa?",
-      "fields": [ { "id": "empresa", "type": "text", "label": "Nombre de la empresa", "placeholder": "Ej.: Comercial Andina, C.A." } ]
-    },
-    {
-      "id": "0.2", "section": "s0", "formType": "TEXT", "required": true,
-      "formTitle": "RIF o ID fiscal",
-      "prompt": "¿Cuál es el RIF o ID fiscal de la empresa?",
-      "hint": "En Venezuela, el formato es J-12345678-9.",
-      "fields": [ { "id": "rif", "type": "taxid", "label": "RIF o ID fiscal", "placeholder": "J-12345678-9" } ]
-    },
-    {
-      "id": "0.3", "section": "s0", "formType": "TEXT", "required": true,
-      "formTitle": "Nombre de la persona de contacto",
-      "prompt": "¿Con quién hablamos? Escribe tu nombre y apellido.",
-      "fields": [ { "id": "contacto", "type": "text", "label": "Nombre y apellido", "placeholder": "Ej.: María Pérez" } ]
-    },
-    {
-      "id": "0.4", "section": "s0", "formType": "TEXT", "required": true,
-      "formTitle": "Correo de contacto",
-      "prompt": "¿A qué correo te escribimos?",
-      "fields": [ { "id": "correo", "type": "email", "label": "Correo", "placeholder": "nombre@empresa.com" } ]
-    },
-    {
-      "id": "0.5", "section": "s0", "formType": "TEXT", "required": true,
-      "formTitle": "Teléfono de contacto",
-      "prompt": "¿Y a qué teléfono podemos llamarte?",
-      "hint": "Incluye el código de país, por ejemplo +58.",
-      "fields": [ { "id": "telefono", "type": "phone", "label": "Teléfono", "placeholder": "+58 412 1234567" } ]
-    },
-
-    {
-      "id": "1.1", "section": "s1", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Cuál es la actividad principal de la empresa y en qué países o ciudades opera?",
-      "prompt": "Empecemos por lo básico. ¿Cuál es la actividad principal de tu empresa y en qué países o ciudades opera?",
+      "id": "N.1", "label": "Acuerdo de confidencialidad", "section": "sN", "formType": "PARAGRAPH_TEXT", "required": true, "document": "nda", "noAttach": true, "formTitle": "Aceptación del Acuerdo de Confidencialidad y Protección de Datos", "prompt": "Lee el acuerdo y, si estás de acuerdo, acéptalo con tus datos.",
       "fields": [
-        { "id": "actividad", "type": "textarea", "label": "Actividad principal", "placeholder": "Ej.: distribución de repuestos automotrices" },
-        { "id": "ubicacion", "type": "text", "label": "Países o ciudades", "placeholder": "Ej.: Caracas, Valencia y Bogotá" }
+        {"id": "firmante", "type": "text", "label": "Nombre y apellido de quien acepta", "placeholder": "Ej.: María Pérez"},
+        {"id": "cedula", "type": "idcard", "label": "Cédula de identidad", "placeholder": "V-12345678"},
+        {"id": "cargo", "type": "text", "label": "Cargo en la empresa", "placeholder": "Ej.: Gerente general"},
+        {"id": "acepto", "type": "consent", "label": "He leído y acepto el Acuerdo de Confidencialidad y Protección de Datos."},
+        {"id": "facultad", "type": "consent", "label": "Declaro que tengo facultad para aceptarlo en nombre de la empresa."}
       ]
     },
     {
-      "id": "1.2", "section": "s1", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Qué problema concreto quieren resolver con ZAK en los próximos 90 días?",
-      "prompt": "¿Qué problema concreto quieren resolver con ZAK en los próximos 90 días?",
-      "fields": [ { "id": "problema", "type": "textarea", "label": "Problema a resolver", "placeholder": "Ej.: tardamos más de 4 horas en responder por WhatsApp" } ]
-    },
-    {
-      "id": "1.3", "section": "s1", "formType": "CHECKBOX", "required": true, "formValueField": "indicadores",
-      "formTitle": "¿Qué indicadores usarán para medir el éxito? Por ejemplo: tiempo de respuesta, tasa de conversión, ingresos cobrados o tickets resueltos.",
-      "prompt": "¿Qué indicadores usarán para medir el éxito?",
-      "hint": "Puedes elegir varios.",
-      "fields": [ { "id": "indicadores", "type": "multi", "label": "Indicadores", "options": ["Tiempo de respuesta", "Tasa de conversión", "Ingresos cobrados", "Tickets resueltos"], "other": true } ]
-    },
-    {
-      "id": "1.4", "section": "s1", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Qué herramientas usan hoy para ventas, atención, cobros y marketing? ¿Cuáles vamos a reemplazar y cuáles deben convivir con ZAK?",
-      "prompt": "¿Qué herramientas usan hoy para ventas, atención, cobros y marketing? Cuéntame también cuáles vamos a reemplazar y cuáles deben convivir con ZAK.",
+      "id": "0.1", "section": "s0", "formType": "TEXT", "required": true, "formTitle": "Nombre de la empresa", "prompt": "¿Cuál es el nombre de tu empresa?",
       "fields": [
-        { "id": "actuales", "type": "textarea", "label": "Herramientas que usan hoy", "placeholder": "Ej.: Excel para ventas, WhatsApp Business para atención" },
-        { "id": "reemplazar", "type": "text", "label": "¿Cuáles vamos a reemplazar?" },
-        { "id": "convivir", "type": "text", "label": "¿Cuáles deben convivir con ZAK?" }
+        {"id": "empresa", "type": "text", "label": "Nombre de la empresa", "placeholder": "Ej.: Comercial Andina, C.A."}
       ]
     },
     {
-      "id": "1.5", "section": "s1", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Tienen una base de contactos o clientes para migrar? ¿En qué formato está (Excel, CSV u otro CRM) y cuántos registros tiene aproximadamente?",
-      "prompt": "¿Tienen una base de contactos o clientes para migrar a ZAK?",
+      "id": "0.2", "section": "s0", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "RIF o ID fiscal, razón social y comprobante (verificación de WhatsApp Business)", "prompt": "¿Cuál es el RIF de la empresa? Lo usamos para verificar tu negocio ante Meta y activar WhatsApp Business.", "hint": "Meta compara el nombre legal y el documento fiscal con los datos de tu cuenta, por eso necesitamos el comprobante del RIF vigente.", "links": [{"label": "Consultar el RIF en el SENIAT", "href": "http://contribuyente.seniat.gob.ve/BuscaRif/BuscaRif.jsp"}],
       "fields": [
-        { "id": "tiene", "type": "single", "label": "¿Tienen una base para migrar?", "options": ["Sí", "No"] },
-        { "id": "formato", "type": "single", "label": "¿En qué formato está?", "options": ["Excel", "CSV", "Otro CRM"], "showIf": { "f": "tiene", "op": "eq", "value": "Sí" } },
-        { "id": "crm", "type": "text", "label": "¿Qué CRM?", "showIf": { "f": "formato", "op": "eq", "value": "Otro CRM" } },
-        { "id": "registros", "type": "number", "label": "Registros aproximados", "min": 1, "integer": true, "showIf": { "f": "tiene", "op": "eq", "value": "Sí" } }
+        {"id": "rif", "type": "taxid", "label": "RIF o ID fiscal", "placeholder": "J-12345678-9"},
+        {"id": "razonSocial", "type": "text", "label": "Razón social (tal como aparece en el RIF)", "placeholder": "Ej.: Comercial Andina, C.A."},
+        {"id": "comprobante", "type": "file", "label": "Comprobante del RIF (PDF o imagen)", "accept": ".pdf,image/*", "maxMB": 10, "hint": "Obligatorio: Meta lo pide para verificar tu empresa."}
       ]
     },
     {
-      "id": "1.6", "section": "s1", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Quién será el responsable interno del proyecto y quién tiene la autoridad para aprobar decisiones?",
-      "prompt": "¿Quién será el responsable interno del proyecto y quién tiene la autoridad para aprobar decisiones?",
+      "id": "0.3", "section": "s0", "formType": "TEXT", "required": true, "formTitle": "Nombre de la persona de contacto", "prompt": "¿Con quién hablamos? Escribe tu nombre y apellido.",
       "fields": [
-        { "id": "responsable", "type": "text", "label": "Responsable interno", "placeholder": "Nombre y cargo" },
-        { "id": "aprobador", "type": "text", "label": "Quién aprueba decisiones", "placeholder": "Nombre y cargo" }
-      ]
-    },
-
-    {
-      "id": "2.1", "section": "s2", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Qué número usaremos? ¿Está activo hoy en la app de WhatsApp o WhatsApp Business de algún celular?",
-      "prompt": "¿Qué número usaremos para WhatsApp? ¿Está activo hoy en la app de WhatsApp o WhatsApp Business de algún celular?",
-      "fields": [
-        { "id": "numero", "type": "phone", "label": "Número", "placeholder": "+58 412 1234567" },
-        { "id": "estado", "type": "single", "label": "¿Está activo en un celular?", "options": ["No está activo", "Activo en WhatsApp", "Activo en WhatsApp Business"] }
+        {"id": "contacto", "type": "text", "label": "Nombre y apellido", "placeholder": "Ej.: María Pérez"}
       ]
     },
     {
-      "id": "2.2", "section": "s2", "formType": "MULTIPLE_CHOICE", "required": true, "formValueField": "decision",
-      "showIf": { "q": "2.1", "f": "estado", "op": "in", "value": ["Activo en WhatsApp", "Activo en WhatsApp Business"] },
-      "formTitle": "Si está en uso, ¿aceptan migrarlo a la API? Deben saber que dejará de funcionar en la app móvil. ¿O prefieren habilitar una línea nueva?",
-      "prompt": "Ese número está en uso. Si lo migramos a la API, dejará de funcionar en la app móvil. ¿Aceptan migrarlo o prefieren habilitar una línea nueva?",
-      "fields": [ { "id": "decision", "type": "single", "label": "Decisión", "options": ["Migrar el número actual a la API", "Habilitar una línea nueva"] } ]
-    },
-    {
-      "id": "2.3", "section": "s2", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Tienen acceso de administrador al Meta Business Portfolio (Business Manager) de la empresa? ¿Quién es el titular?",
-      "prompt": "¿Tienen acceso de administrador al Meta Business Portfolio (Business Manager) de la empresa? ¿Quién es el titular?",
+      "id": "0.4", "section": "s0", "formType": "TEXT", "required": true, "formTitle": "Correo de contacto", "prompt": "¿A qué correo te escribimos?",
       "fields": [
-        { "id": "acceso", "type": "single", "label": "¿Tienen acceso de administrador?", "options": ["Sí", "No", "No sé"] },
-        { "id": "titular", "type": "text", "label": "Titular del Business Portfolio", "placeholder": "Nombre de la persona o empresa" }
+        {"id": "correo", "type": "email", "label": "Correo", "placeholder": "nombre@empresa.com"}
       ]
     },
     {
-      "id": "2.4", "section": "s2", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Cuál es el nombre comercial oficial que debe aparecer en el perfil verificado? ¿Coincide con el registro legal o fiscal?",
-      "prompt": "¿Cuál es el nombre comercial oficial que debe aparecer en el perfil verificado? ¿Coincide con el registro legal o fiscal?",
+      "id": "0.5", "section": "s0", "formType": "TEXT", "required": true, "formTitle": "Teléfono de contacto", "prompt": "¿Y a qué teléfono podemos llamarte?", "hint": "Incluye el código de país, por ejemplo +58.",
       "fields": [
-        { "id": "nombre", "type": "text", "label": "Nombre comercial oficial" },
-        { "id": "coincide", "type": "single", "label": "¿Coincide con el registro legal o fiscal?", "options": ["Sí", "No", "No sé"] }
+        {"id": "telefono", "type": "phone", "label": "Teléfono", "placeholder": "+58 412 1234567"}
       ]
     },
     {
-      "id": "2.5", "section": "s2", "formType": "MULTIPLE_CHOICE", "required": true, "formValueField": "tarjeta",
-      "formTitle": "¿Hay una tarjeta de pago registrada en Meta para cubrir las tarifas por conversación?",
-      "prompt": "¿Hay una tarjeta de pago registrada en Meta para cubrir las tarifas por conversación?",
-      "fields": [ { "id": "tarjeta", "type": "single", "label": "Tarjeta registrada", "options": ["Sí", "No", "No sé"] } ]
-    },
-    {
-      "id": "2.6", "section": "s2", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Cuántos mensajes o conversaciones reciben al día? ¿Harán envíos masivos o de plantillas, como recordatorios, promociones o cobros?",
-      "prompt": "¿Cuántos mensajes o conversaciones reciben al día? ¿Harán envíos masivos o de plantillas?",
+      "id": "1.1", "section": "s1", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Cuál es la actividad principal de la empresa y en qué países o ciudades opera?", "prompt": "Empecemos por lo básico. ¿Cuál es la actividad principal de tu empresa y en qué países o ciudades opera?",
       "fields": [
-        { "id": "volumen", "type": "number", "label": "Mensajes o conversaciones al día (aprox.)", "min": 0, "integer": true },
-        { "id": "envios", "type": "multi", "label": "Envíos masivos o de plantillas", "options": ["Recordatorios", "Promociones", "Cobros", "No haremos envíos masivos"], "exclusive": ["No haremos envíos masivos"], "other": true }
-      ]
-    },
-
-    {
-      "id": "3.1", "section": "s3", "formType": "MULTIPLE_CHOICE", "required": true, "formValueField": "profesional",
-      "formTitle": "¿La cuenta de Instagram ya está configurada como Profesional o Empresa?",
-      "prompt": "¿La cuenta de Instagram ya está configurada como Profesional o Empresa?",
-      "fields": [ { "id": "profesional", "type": "single", "label": "Cuenta Profesional o Empresa", "options": ["Sí", "No", "No sé"] } ]
-    },
-    {
-      "id": "3.2", "section": "s3", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Está vinculada a la página de Facebook del negocio? ¿Quién administra esa página?",
-      "prompt": "¿Está vinculada a la página de Facebook del negocio? ¿Quién administra esa página?",
-      "fields": [
-        { "id": "vinculada", "type": "single", "label": "¿Está vinculada?", "options": ["Sí", "No", "No sé"] },
-        { "id": "admin", "type": "text", "label": "¿Quién administra la página?", "placeholder": "Nombre o área" }
+        {"id": "actividad", "type": "textarea", "label": "Actividad principal", "placeholder": "Ej.: distribución de repuestos automotrices"},
+        {"id": "ubicacion", "type": "text", "label": "Países o ciudades", "placeholder": "Ej.: Caracas, Valencia y Bogotá"}
       ]
     },
     {
-      "id": "3.3", "section": "s3", "formType": "MULTIPLE_CHOICE", "required": true, "formValueField": "permisos",
-      "formTitle": "¿Tienen permisos de administrador sobre la página y la cuenta de Instagram dentro del Business Portfolio?",
-      "prompt": "¿Tienen permisos de administrador sobre la página y la cuenta de Instagram dentro del Business Portfolio?",
-      "fields": [ { "id": "permisos", "type": "single", "label": "Permisos de administrador", "options": ["Sí", "No", "No sé"] } ]
-    },
-    {
-      "id": "3.4", "section": "s3", "formType": "MULTIPLE_CHOICE", "required": true, "formValueField": "acceso",
-      "formTitle": "¿Tienen activado el acceso a mensajes? La ruta es Configuración ➔ Mensajes y respuestas a historias ➔ Permitir acceso a los mensajes.",
-      "prompt": "¿Tienen activado el acceso a mensajes en Instagram?",
-      "hint": "Lo encuentras en Configuración ➔ Mensajes y respuestas a historias ➔ Permitir acceso a los mensajes.",
-      "fields": [ { "id": "acceso", "type": "single", "label": "Acceso a mensajes", "options": ["Sí", "No", "No sé"] } ]
-    },
-    {
-      "id": "3.5", "section": "s3", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Qué tipo de mensajes llegan por Instagram (consultas de precio, respuestas a historias, reclamos)? ¿Deben tratarse igual que los de WhatsApp?",
-      "prompt": "¿Qué tipo de mensajes llegan por Instagram? ¿Deben tratarse igual que los de WhatsApp?",
+      "id": "1.2", "section": "s1", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Qué problema concreto quieren resolver con ZAK en los próximos 90 días?", "prompt": "¿Qué problema concreto quieren resolver con ZAK en los próximos 90 días?",
       "fields": [
-        { "id": "tipos", "type": "multi", "label": "Tipos de mensajes", "options": ["Consultas de precio", "Respuestas a historias", "Reclamos"], "other": true },
-        { "id": "igual", "type": "single", "label": "¿Igual que WhatsApp?", "options": ["Sí, igual que WhatsApp", "No, con otro tratamiento"] }
-      ]
-    },
-
-    {
-      "id": "4.1", "section": "s4", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Cuántos agentes de voz necesitan y qué rol tendrá cada uno? Por ejemplo: prospección en frío, soporte técnico, confirmación de citas o cobranza.",
-      "prompt": "¿Cuántos agentes de voz necesitan y qué rol tendrá cada uno?",
-      "fields": [
-        { "id": "cantidad", "type": "number", "label": "Número de agentes", "min": 0, "integer": true },
-        { "id": "roles", "type": "multi", "label": "Roles", "options": ["Prospección en frío", "Soporte técnico", "Confirmación de citas", "Cobranza"], "other": true },
-        { "id": "detalle", "type": "textarea", "label": "Detalle por agente", "required": false, "placeholder": "Opcional. Ej.: Agente 1 cobranza, Agente 2 citas" }
+        {"id": "problema", "type": "textarea", "label": "Problema a resolver", "placeholder": "Ej.: tardamos más de 4 horas en responder por WhatsApp"}
       ]
     },
     {
-      "id": "4.2", "section": "s4", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Las llamadas serán entrantes, salientes o ambas? ¿Qué volumen diario estiman?",
-      "prompt": "¿Las llamadas serán entrantes, salientes o ambas? ¿Qué volumen diario estiman?",
+      "id": "1.3", "modules": ["dashboard", "number-master", "workforce"], "section": "s1", "formType": "CHECKBOX", "required": true, "formValueField": "indicadores", "formTitle": "¿Qué indicadores usarán para medir el éxito? Por ejemplo: tiempo de respuesta, tasa de conversión, ingresos cobrados o tickets resueltos.", "prompt": "¿Qué indicadores usarán para medir el éxito?", "hint": "Puedes elegir varios. En «Otro» verás la lista completa de indicadores con su descripción.",
       "fields": [
-        { "id": "direccion", "type": "single", "label": "Tipo de llamadas", "options": ["Entrantes", "Salientes", "Ambas"] },
-        { "id": "volumen", "type": "number", "label": "Llamadas al día (aprox.)", "min": 0, "integer": true }
+        {"id": "indicadores", "type": "multi", "label": "Indicadores", "options": ["Tiempo de respuesta", "Tasa de conversión", "Ingresos cobrados", "Tickets resueltos"], "other": true, "otherCatalog": [{"label": "Tiempo de primera respuesta", "desc": "Minutos que tarda el primer contacto con un cliente."}, {"label": "Tasa de conversión", "desc": "Porcentaje de interesados que terminan comprando."}, {"label": "Ingresos cobrados", "desc": "Dinero que efectivamente entró en el período."}, {"label": "Tickets resueltos", "desc": "Casos de soporte cerrados en el período."}, {"label": "Ticket promedio", "desc": "Monto promedio de cada venta."}, {"label": "Ciclo de venta", "desc": "Días promedio desde el primer contacto hasta el cierre."}, {"label": "Tasa de cierre por vendedor", "desc": "Porcentaje de tratos que gana cada vendedor."}, {"label": "Cuentas por cobrar vencidas", "desc": "Monto que ya pasó su fecha de pago."}, {"label": "Satisfacción del cliente (CSAT)", "desc": "Calificación que dan los clientes después de la atención."}, {"label": "Retención de clientes", "desc": "Porcentaje de clientes que vuelven a comprar."}, {"label": "Costo por lead", "desc": "Inversión publicitaria dividida entre los interesados captados."}, {"label": "Retorno de la publicidad (ROAS)", "desc": "Ventas generadas por cada unidad invertida en anuncios."}, {"label": "Citas agendadas vs. asistidas", "desc": "Cuántas citas se cumplen frente a las agendadas."}, {"label": "Tareas vencidas por persona", "desc": "Pendientes fuera de plazo de cada colaborador."}]}
       ]
     },
     {
-      "id": "4.3", "section": "s4", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Qué tono debe usar el agente (formal, cercano o corporativo)? ¿Qué saludo, modismos regionales o expresiones deben usarse o evitarse?",
-      "prompt": "¿Qué tono debe usar el agente? ¿Qué saludo, modismos regionales o expresiones deben usarse o evitarse?",
+      "id": "1.4", "section": "s1", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Qué herramientas usan hoy para ventas, atención, cobros y marketing? ¿Cuáles vamos a reemplazar y cuáles deben convivir con ZAK?", "prompt": "¿Qué herramientas usan hoy para ventas, atención, cobros y marketing? Cuéntame también cuáles vamos a reemplazar y cuáles deben convivir con ZAK.",
       "fields": [
-        { "id": "tono", "type": "single", "label": "Tono", "options": ["Formal", "Cercano", "Corporativo"] },
-        { "id": "usar", "type": "textarea", "label": "Saludo y expresiones que sí debe usar", "placeholder": "Ej.: «Buenos días, le habla Ana de…»" },
-        { "id": "evitar", "type": "textarea", "label": "Expresiones o modismos que debe evitar" }
+        {"id": "actuales", "type": "textarea", "label": "Herramientas que usan hoy", "placeholder": "Ej.: Excel para ventas, WhatsApp Business para atención"},
+        {"id": "reemplazar", "type": "text", "label": "¿Cuáles vamos a reemplazar?"},
+        {"id": "convivir", "type": "text", "label": "¿Cuáles deben convivir con ZAK?"}
       ]
     },
     {
-      "id": "4.4", "section": "s4", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Quieren clonar la voz de alguien del equipo? Si es así, ¿pueden enviar un audio limpio de 1 a 2 minutos, con la autorización de esa persona? ¿O prefieren una voz de catálogo?",
-      "prompt": "¿Quieren clonar la voz de alguien del equipo o prefieren una voz de catálogo?",
+      "id": "1.5", "modules": ["contactos", "pipelines", "inbox", "ventas", "email-marketing"], "section": "s1", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Tienen una base de contactos o clientes para migrar? ¿En qué formato está (Excel, CSV u otro CRM) y cuántos registros tiene aproximadamente?", "prompt": "¿Tienen una base de contactos o clientes para migrar a ZAK?", "noAttach": true,
       "fields": [
-        { "id": "voz", "type": "single", "label": "Voz", "options": ["Clonar la voz de alguien del equipo", "Usar una voz de catálogo"] },
-        { "id": "audio", "type": "file", "label": "Audio limpio de 1 a 2 minutos", "accept": "audio/*", "maxMB": 10, "required": false, "hint": "Si aún no lo tienes, puedes enviarlo después.", "showIf": { "f": "voz", "op": "eq", "value": "Clonar la voz de alguien del equipo" } },
-        { "id": "autorizacion", "type": "single", "label": "¿Cuentan con la autorización de esa persona?", "options": ["Sí", "No", "En trámite"], "showIf": { "f": "voz", "op": "eq", "value": "Clonar la voz de alguien del equipo" } }
+        {"id": "tiene", "type": "single", "label": "¿Tienen una base para migrar?", "options": ["Sí", "No"]},
+        {"id": "formato", "type": "single", "label": "¿En qué formato está?", "options": ["Excel", "CSV", "Otro CRM"], "showIf": {"f": "tiene", "op": "eq", "value": "Sí"}},
+        {"id": "crm", "type": "text", "label": "¿Qué CRM?", "showIf": {"f": "formato", "op": "eq", "value": "Otro CRM"}},
+        {"id": "registros", "type": "number", "label": "Registros aproximados", "min": 1, "integer": true, "showIf": {"f": "tiene", "op": "eq", "value": "Sí"}},
+        {"id": "aviso", "type": "notice", "icon": "shield", "text": "¿Tienen una base de contactos o clientes para migrar al ZAK? Recuerda que tenemos un NDA: tus datos están seguros. Por favor, envíala formalmente a través de zak@itech.com.ve para mayor resguardo. No la subas en este onboarding.", "link": {"label": "Escribir a zak@itech.com.ve", "href": "mailto:zak@itech.com.ve?subject=Base%20de%20contactos%20para%20migrar%20a%20ZAK"}, "showIf": {"f": "tiene", "op": "eq", "value": "Sí"}}
       ]
     },
     {
-      "id": "4.5", "section": "s4", "formType": "CHECKBOX", "required": true, "formValueField": "acciones",
-      "formTitle": "¿Qué debe pasar al final de cada llamada? Por ejemplo: crear un contacto, agendar una cita, mover un trato o transferir a un humano.",
-      "prompt": "¿Qué debe pasar al final de cada llamada?",
-      "hint": "Puedes elegir varias acciones.",
-      "fields": [ { "id": "acciones", "type": "multi", "label": "Acciones", "options": ["Crear un contacto", "Agendar una cita", "Mover un trato", "Transferir a un humano"], "other": true } ]
-    },
-    {
-      "id": "4.6", "section": "s4", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿En qué horario deben operar los agentes? ¿Qué hacen fuera de ese horario?",
-      "prompt": "¿En qué horario deben operar los agentes? ¿Qué hacen fuera de ese horario?",
+      "id": "1.6", "section": "s1", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Quién será el responsable interno del proyecto y quién tiene la autoridad para aprobar decisiones?", "prompt": "¿Quiénes serán los responsables internos del proyecto y quién tiene la autoridad para aprobar decisiones?", "hint": "Puedes agregar varias personas.",
       "fields": [
-        { "id": "dias", "type": "multi", "label": "Días", "options": ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"] },
-        { "id": "desde", "type": "time", "label": "Desde" },
-        { "id": "hasta", "type": "time", "label": "Hasta" },
-        { "id": "fuera", "type": "textarea", "label": "¿Qué hacen fuera de ese horario?", "placeholder": "Ej.: tomar el mensaje y devolver la llamada al día siguiente" }
-      ]
-    },
-
-    {
-      "id": "5.1", "section": "s5", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Tienen documentado el catálogo, la lista de precios, los enlaces de pago y las políticas de garantía o devolución (PDF, Word o Excel)?",
-      "prompt": "¿Tienen documentado el catálogo, la lista de precios, los enlaces de pago y las políticas de garantía o devolución?",
-      "fields": [
-        { "id": "docs", "type": "multi", "label": "Lo que tienen documentado", "options": ["Catálogo", "Lista de precios", "Enlaces de pago", "Políticas de garantía o devolución", "Aún no tenemos nada documentado"], "exclusive": ["Aún no tenemos nada documentado"] },
-        { "id": "formato", "type": "multi", "label": "¿En qué formato?", "options": ["PDF", "Word", "Excel"], "other": true, "showIf": { "f": "docs", "op": "hasAnyExcept", "value": ["Aún no tenemos nada documentado"] } }
+        {"id": "responsables", "type": "rows", "label": "Responsables internos del proyecto", "rowLabel": "Responsable", "addLabel": "Agregar responsable", "minLabel": "un responsable", "columns": [{"id": "nombre", "label": "Nombre y apellido", "type": "text"}, {"id": "cargo", "label": "Cargo", "type": "text"}, {"id": "correo", "label": "Correo", "type": "email"}, {"id": "telefono", "label": "Teléfono", "type": "phone", "required": false}]},
+        {"id": "aprobador", "type": "text", "label": "¿Quién aprueba las decisiones?", "placeholder": "Nombre y cargo"}
       ]
     },
     {
-      "id": "5.2", "section": "s5", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Quién mantendrá actualizada esa base de conocimiento y con qué frecuencia cambian precios y promociones?",
-      "prompt": "¿Quién mantendrá actualizada esa base de conocimiento? ¿Con qué frecuencia cambian precios y promociones?",
+      "id": "2.1", "section": "s2", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Qué número usaremos? ¿Está activo hoy en la app de WhatsApp o WhatsApp Business de algún celular?", "prompt": "¿Qué número usaremos para WhatsApp? ¿Está activo hoy en la app de WhatsApp o WhatsApp Business de algún celular?",
       "fields": [
-        { "id": "responsable", "type": "text", "label": "Responsable", "placeholder": "Nombre y cargo" },
-        { "id": "frecuencia", "type": "single", "label": "Frecuencia de cambios", "options": ["Diaria", "Semanal", "Mensual", "Ocasional"] }
+        {"id": "numero", "type": "phone", "label": "Número", "placeholder": "+58 412 1234567"},
+        {"id": "estado", "type": "single", "label": "¿Está activo en un celular?", "options": ["No está activo", "Activo en WhatsApp", "Activo en WhatsApp Business"]}
       ]
     },
     {
-      "id": "5.3", "section": "s5", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿En qué casos exactos debe pausarse la IA y pasar a un humano? Por ejemplo: si piden un supervisor, si el presupuesto supera un monto determinado, si hay un reclamo o si detecta un lenguaje agresivo.",
-      "prompt": "¿En qué casos exactos debe pausarse la IA y pasar la conversación a un humano?",
+      "id": "2.2", "section": "s2", "formType": "MULTIPLE_CHOICE", "required": true, "formValueField": "decision", "showIf": {"q": "2.1", "f": "estado", "op": "in", "value": ["Activo en WhatsApp", "Activo en WhatsApp Business"]}, "formTitle": "Si está en uso, ¿aceptan migrarlo a la API? Deben saber que dejará de funcionar en la app móvil. ¿O prefieren habilitar una línea nueva?", "prompt": "Ese número está en uso. Si lo migramos a la API, dejará de funcionar en la app móvil. ¿Aceptan migrarlo o prefieren habilitar una línea nueva?",
       "fields": [
-        { "id": "casos", "type": "multi", "label": "Casos", "options": ["Si piden un supervisor", "Si el presupuesto supera un monto", "Si hay un reclamo", "Si detecta lenguaje agresivo"], "other": true },
-        { "id": "monto", "type": "number", "label": "Monto a partir del cual escala", "min": 0, "showIf": { "f": "casos", "op": "includes", "value": "Si el presupuesto supera un monto" } }
+        {"id": "decision", "type": "single", "label": "Decisión", "options": ["Migrar el número actual a la API", "Habilitar una línea nueva"]}
       ]
     },
     {
-      "id": "5.4", "section": "s5", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Quién recibe esas conversaciones escaladas y en cuánto tiempo deben responder?",
-      "prompt": "¿Quién recibe esas conversaciones escaladas y en cuánto tiempo deben responder?",
+      "id": "2.3", "section": "s2", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Tienen acceso de administrador al Meta Business Portfolio (Business Manager) de la empresa? ¿Quién es el titular?", "prompt": "¿Tienen acceso de administrador al Meta Business Portfolio (Business Manager) de la empresa? ¿Quién es el titular?",
       "fields": [
-        { "id": "quien", "type": "text", "label": "¿Quién las recibe?", "placeholder": "Nombre, cargo o equipo" },
-        { "id": "tiempo", "type": "single", "label": "Tiempo de respuesta", "options": ["Menos de 15 minutos", "Menos de 1 hora", "Menos de 4 horas", "El mismo día hábil"], "other": true }
+        {"id": "acceso", "type": "single", "label": "¿Tienen acceso de administrador?", "options": ["Sí", "No", "No sé"]},
+        {"id": "titular", "type": "text", "label": "Titular del Business Portfolio", "placeholder": "Nombre de la persona o empresa"}
       ]
     },
     {
-      "id": "5.5", "section": "s5", "formType": "CHECKBOX", "required": true, "formValueField": "temas",
-      "formTitle": "¿Hay temas que la IA nunca debe responder, como descuentos no autorizados, diagnósticos o asesoría legal?",
-      "prompt": "¿Hay temas que la IA nunca debe responder?",
-      "fields": [ { "id": "temas", "type": "multi", "label": "Temas prohibidos", "options": ["Descuentos no autorizados", "Diagnósticos", "Asesoría legal", "Ninguno en particular"], "exclusive": ["Ninguno en particular"], "other": true } ]
-    },
-
-    {
-      "id": "6.1", "section": "s6", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Qué ERP o sistema contable usan (Odoo, Siigo, Alegra, SAP, QuickBooks u otro) y en qué versión?",
-      "prompt": "¿Qué ERP o sistema contable usan y en qué versión?",
-      "hint": "Si no usan ninguno, elige «No usamos ERP» y saltamos esta sección.",
+      "id": "2.4", "section": "s2", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Cuál es el nombre comercial oficial que debe aparecer en el perfil verificado? ¿Coincide con el registro legal o fiscal?", "prompt": "¿Cuál es el nombre comercial oficial que debe aparecer en el perfil verificado? ¿Coincide con el registro legal o fiscal?",
       "fields": [
-        { "id": "erp", "type": "select", "label": "ERP o sistema contable", "options": ["Odoo", "Siigo", "Alegra", "SAP", "QuickBooks", "Otro", "No usamos ERP"] },
-        { "id": "otro", "type": "text", "label": "¿Cuál?", "showIf": { "f": "erp", "op": "eq", "value": "Otro" } },
-        { "id": "version", "type": "text", "label": "Versión", "placeholder": "Ej.: Odoo 17 Enterprise", "showIf": { "f": "erp", "op": "notIn", "value": ["No usamos ERP", ""] } }
+        {"id": "nombre", "type": "text", "label": "Nombre comercial oficial"},
+        {"id": "coincide", "type": "single", "label": "¿Coincide con el registro legal o fiscal?", "options": ["Sí", "No", "No sé"]}
       ]
     },
     {
-      "id": "6.2", "section": "s6", "formType": "PARAGRAPH_TEXT", "required": true,
-      "showIf": { "q": "6.1", "f": "erp", "op": "notIn", "value": ["No usamos ERP"] },
-      "formTitle": "¿Pueden generar una API Key o un Token con permisos de lectura y escritura? ¿Quién de su equipo o proveedor puede hacerlo?",
-      "prompt": "¿Pueden generar una API Key o un Token con permisos de lectura y escritura? ¿Quién de su equipo o proveedor puede hacerlo?",
-      "hint": "Solo necesitamos saber si es posible. No escribas la clave aquí: la configuramos contigo de forma segura.",
+      "id": "2.5", "section": "s2", "formType": "MULTIPLE_CHOICE", "required": true, "formValueField": "tarjeta", "formTitle": "¿Hay una tarjeta de pago registrada en Meta para cubrir las tarifas por conversación?", "prompt": "¿Hay una tarjeta de pago registrada en Meta para cubrir las tarifas por conversación?",
       "fields": [
-        { "id": "puede", "type": "single", "label": "¿Pueden generarla?", "options": ["Sí", "No", "No sé"] },
-        { "id": "quien", "type": "text", "label": "¿Quién puede hacerlo?", "placeholder": "Nombre, cargo o proveedor" }
+        {"id": "tarjeta", "type": "single", "label": "Tarjeta registrada", "options": ["Sí", "No", "No sé"]}
       ]
     },
     {
-      "id": "6.3", "section": "s6", "formType": "PARAGRAPH_TEXT", "required": true,
-      "showIf": { "q": "6.1", "f": "erp", "op": "notIn", "value": ["No usamos ERP"] },
-      "formTitle": "¿En qué momento exacto debe sincronizarse? Por ejemplo: cuando un trato pasa a \"Ganado\" en ZAK, se crea la factura o el cliente en el ERP.",
-      "prompt": "¿En qué momento exacto debe sincronizarse ZAK con el ERP?",
-      "hint": "Por ejemplo: cuando un trato pasa a «Ganado» en ZAK, se crea la factura o el cliente en el ERP.",
-      "fields": [ { "id": "momento", "type": "textarea", "label": "Momento de sincronización" } ]
-    },
-    {
-      "id": "6.4", "section": "s6", "formType": "GRID", "required": true, "formValueField": "prioridad",
-      "showIf": { "q": "6.1", "f": "erp", "op": "notIn", "value": ["No usamos ERP"] },
-      "formTitle": "¿Qué dato manda en caso de conflicto, ZAK o el ERP? Por ejemplo, para precios, stock o datos del cliente.",
-      "prompt": "Si hay un conflicto entre ZAK y el ERP, ¿qué dato manda?",
-      "fields": [ { "id": "prioridad", "type": "grid", "label": "Fuente que manda", "rows": ["Precios", "Stock", "Datos del cliente"], "columns": ["ZAK", "ERP"] } ]
-    },
-
-    {
-      "id": "7.1", "section": "s7", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Pueden enviarnos la lista de usuarios con nombre, apellido y correo?",
-      "prompt": "¿Nos compartes la lista de usuarios con nombre, apellido y correo?",
+      "id": "2.6", "section": "s2", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Cuántos mensajes o conversaciones reciben al día? ¿Harán envíos masivos o de plantillas, como recordatorios, promociones o cobros?", "prompt": "¿Cuántos mensajes o conversaciones reciben al día? ¿Harán envíos masivos o de plantillas?",
       "fields": [
-        { "id": "modo", "type": "single", "label": "¿Cómo prefieres enviarla?", "options": ["La escribo aquí", "Subo un archivo (Excel o CSV)"] },
-        { "id": "usuarios", "type": "users", "label": "Usuarios", "showIf": { "f": "modo", "op": "eq", "value": "La escribo aquí" } },
-        { "id": "archivo", "type": "file", "label": "Archivo con la lista", "accept": ".xlsx,.xls,.csv", "maxMB": 10, "showIf": { "f": "modo", "op": "eq", "value": "Subo un archivo (Excel o CSV)" } }
+        {"id": "volumen", "type": "number", "label": "Mensajes o conversaciones al día (aprox.)", "min": 0, "integer": true},
+        {"id": "envios", "type": "multi", "label": "Envíos masivos o de plantillas", "options": ["Recordatorios", "Promociones", "Cobros", "No haremos envíos masivos"], "exclusive": ["No haremos envíos masivos"], "other": true}
       ]
     },
     {
-      "id": "7.2", "section": "s7", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Quiénes serán Administradores y quiénes Colaboradores?",
-      "prompt": "¿Quiénes serán Administradores y quiénes Colaboradores?",
+      "id": "3.1", "section": "s3", "formType": "MULTIPLE_CHOICE", "required": true, "formValueField": "profesional", "formTitle": "¿La cuenta de Instagram ya está configurada como Profesional o Empresa?", "prompt": "¿La cuenta de Instagram ya está configurada como Profesional o Empresa?",
       "fields": [
-        { "id": "roles", "type": "userRoles", "label": "Rol de cada usuario", "source": { "q": "7.1", "f": "usuarios" }, "options": ["Administrador", "Colaborador"], "showIf": { "q": "7.1", "f": "modo", "op": "eq", "value": "La escribo aquí" } },
-        { "id": "rolesTexto", "type": "textarea", "label": "Administradores y Colaboradores", "placeholder": "Ej.: Administradores: Ana y Luis. El resto, Colaboradores.", "showIf": { "q": "7.1", "f": "modo", "op": "neq", "value": "La escribo aquí" } }
+        {"id": "profesional", "type": "single", "label": "Cuenta Profesional o Empresa", "options": ["Sí", "No", "No sé"]}
       ]
     },
     {
-      "id": "7.3", "section": "s7", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Qué módulos debe ver cada persona? Por ejemplo: un asesor solo Pipelines e Inbox; un contador solo Contabilidad y RR. HH.",
-      "prompt": "¿Qué módulos debe ver cada persona?",
-      "hint": "Por ejemplo: un asesor solo Pipelines e Inbox; un contador solo Contabilidad y RR. HH.",
-      "fields": [ { "id": "modulos", "type": "textarea", "label": "Módulos por persona o rol" } ]
-    },
-    {
-      "id": "7.4", "section": "s7", "formType": "MULTIPLE_CHOICE", "required": true, "formValueField": "asignacion",
-      "formTitle": "¿Cómo se asignan hoy los clientes a los vendedores (por zona, por turno o round-robin)?",
-      "prompt": "¿Cómo se asignan hoy los clientes a los vendedores?",
-      "fields": [ { "id": "asignacion", "type": "single", "label": "Asignación", "options": ["Por zona", "Por turno", "Round-robin"], "other": true } ]
-    },
-    {
-      "id": "7.5", "section": "s7", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Hay usuarios externos (agencias, freelancers) que necesiten acceso limitado?",
-      "prompt": "¿Hay usuarios externos, como agencias o freelancers, que necesiten acceso limitado?",
+      "id": "3.2", "section": "s3", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Está vinculada a la página de Facebook del negocio? ¿Quién administra esa página?", "prompt": "¿La página de Instagram está vinculada a la página de Facebook del negocio? ¿Quién administra esa página?",
       "fields": [
-        { "id": "hay", "type": "single", "label": "¿Hay usuarios externos?", "options": ["Sí", "No"] },
-        { "id": "detalle", "type": "textarea", "label": "¿Quiénes y a qué necesitan acceder?", "showIf": { "f": "hay", "op": "eq", "value": "Sí" } }
-      ]
-    },
-
-    {
-      "id": "8.1", "section": "s8", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "Pagos: ¿Qué métodos de cobro usan (Pago Móvil, transferencia, tarjeta, Zelle, efectivo)? ¿En qué monedas facturan (USD, MXN, EUR, moneda local)?",
-      "prompt": "Hablemos de pagos. ¿Qué métodos de cobro usan y en qué monedas facturan?",
-      "fields": [
-        { "id": "metodos", "type": "multi", "label": "Métodos de cobro", "options": ["Pago Móvil", "Transferencia", "Tarjeta", "Zelle", "Efectivo"], "other": true },
-        { "id": "monedas", "type": "multi", "label": "Monedas", "options": ["USD", "MXN", "EUR", "Moneda local"], "other": true }
+        {"id": "vinculada", "type": "single", "label": "¿La página de Instagram está vinculada a la página de Facebook del negocio?", "options": ["Sí", "No", "No sé"]},
+        {"id": "admin", "type": "text", "label": "¿Quién administra esa página?", "placeholder": "Nombre o área"}
       ]
     },
     {
-      "id": "8.2", "section": "s8", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "Cotizaciones: ¿Qué tasa de impuesto aplican? ¿Hay descuentos máximos por vendedor? ¿Tienen un formato o logo de cotización que debamos replicar?",
-      "prompt": "Sobre las cotizaciones: ¿qué tasa de impuesto aplican, hay descuentos máximos por vendedor y tienen un formato o logo que debamos replicar?",
+      "id": "3.3", "section": "s3", "formType": "MULTIPLE_CHOICE", "required": true, "formValueField": "permisos", "formTitle": "¿Tienen permisos de administrador sobre la página y la cuenta de Instagram dentro del Business Portfolio?", "prompt": "¿Tienen permisos de administrador sobre la página y la cuenta de Instagram dentro del Business Portfolio?",
       "fields": [
-        { "id": "impuesto", "type": "number", "label": "Tasa de impuesto (%)", "min": 0, "max": 100 },
-        { "id": "descuento", "type": "single", "label": "¿Hay descuento máximo por vendedor?", "options": ["Sí", "No"] },
-        { "id": "descuentoPct", "type": "number", "label": "Descuento máximo (%)", "min": 0, "max": 100, "showIf": { "f": "descuento", "op": "eq", "value": "Sí" } },
-        { "id": "formato", "type": "single", "label": "¿Tienen formato o logo de cotización?", "options": ["Sí", "No"] },
-        { "id": "formatoArchivo", "type": "file", "label": "Formato o logo", "accept": ".pdf,.doc,.docx,.xls,.xlsx,image/*", "maxMB": 10, "required": false, "hint": "Opcional. También puedes enviarlo después.", "showIf": { "f": "formato", "op": "eq", "value": "Sí" } }
+        {"id": "permisos", "type": "single", "label": "Permisos de administrador", "options": ["Sí", "No", "No sé"]}
       ]
     },
     {
-      "id": "8.3", "section": "s8", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "Suscripciones: ¿Venden planes recurrentes? ¿Cuáles son sus nombres, precios y ciclos de cobro?",
-      "prompt": "¿Venden planes recurrentes o suscripciones?",
+      "id": "3.4", "section": "s3", "formType": "MULTIPLE_CHOICE", "required": true, "formValueField": "acceso", "formTitle": "¿Tienen activado el acceso a mensajes? La ruta es Configuración ➔ Mensajes y respuestas a historias ➔ Permitir acceso a los mensajes.", "prompt": "¿Tienen activado el acceso a mensajes en Instagram?", "hint": "Lo encuentras en Configuración ➔ Mensajes y respuestas a historias ➔ Permitir acceso a los mensajes.",
       "fields": [
-        { "id": "recurrentes", "type": "single", "label": "¿Venden planes recurrentes?", "options": ["Sí", "No"] },
-        { "id": "planes", "type": "plans", "label": "Planes", "cycles": ["Mensual", "Trimestral", "Semestral", "Anual"], "showIf": { "f": "recurrentes", "op": "eq", "value": "Sí" } }
+        {"id": "acceso", "type": "single", "label": "Acceso a mensajes", "options": ["Sí", "No", "No sé"]}
       ]
     },
     {
-      "id": "8.4", "section": "s8", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "Contratos: ¿Pueden compartir sus plantillas o un contrato de ejemplo? ¿Quién firma por la empresa? ¿Aceptan la firma electrónica?",
-      "prompt": "Sobre contratos: ¿pueden compartir sus plantillas o un contrato de ejemplo? ¿Quién firma por la empresa y aceptan la firma electrónica?",
+      "id": "3.5", "section": "s3", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Qué tipo de mensajes llegan por Instagram (consultas de precio, respuestas a historias, reclamos)? ¿Deben tratarse igual que los de WhatsApp?", "prompt": "¿Qué tipo de mensajes llegan por Instagram? ¿Deben tratarse igual que los de WhatsApp?",
       "fields": [
-        { "id": "plantillas", "type": "file", "label": "Plantillas o contrato de ejemplo", "accept": ".pdf,.doc,.docx", "maxMB": 10, "multiple": true, "required": false, "hint": "Opcional. También puedes enviarlas después." },
-        { "id": "firmante", "type": "text", "label": "¿Quién firma por la empresa?", "placeholder": "Nombre y cargo" },
-        { "id": "firmaElectronica", "type": "single", "label": "¿Aceptan la firma electrónica?", "options": ["Sí", "No", "No sé"] }
+        {"id": "tipos", "type": "multi", "label": "Tipos de mensajes", "options": ["Consultas de precio", "Respuestas a historias", "Reclamos"], "other": true},
+        {"id": "igual", "type": "single", "label": "¿Igual que WhatsApp?", "options": ["Sí, igual que WhatsApp", "No, con otro tratamiento"]}
       ]
     },
     {
-      "id": "8.5", "section": "s8", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "Revenue Engine: ¿Qué productos o servicios son candidatos a upsell?",
-      "prompt": "Para el Revenue Engine: ¿qué productos o servicios son candidatos a upsell?",
-      "fields": [ { "id": "upsell", "type": "textarea", "label": "Candidatos a upsell" } ]
-    },
-
-    {
-      "id": "9.1", "section": "s9", "formType": "CHECKBOX", "required": true, "formValueField": "segmentos",
-      "formTitle": "¿Cómo quieren segmentar sus contactos (por ejemplo: VIP, prospectos, inactivos)?",
-      "prompt": "¿Cómo quieren segmentar sus contactos?",
-      "fields": [ { "id": "segmentos", "type": "multi", "label": "Segmentos", "options": ["VIP", "Prospectos", "Inactivos"], "other": true } ]
-    },
-    {
-      "id": "9.2", "section": "s9", "formType": "MULTIPLE_CHOICE", "required": true, "formValueField": "manual",
-      "formTitle": "¿Tienen manual de marca (logo, colores, tipografías) para las plantillas?",
-      "prompt": "¿Tienen manual de marca (logo, colores, tipografías) para las plantillas?",
-      "fields": [ { "id": "manual", "type": "single", "label": "Manual de marca", "options": ["Sí", "No"] } ]
-    },
-    {
-      "id": "9.3", "section": "s9", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Con qué frecuencia planean enviar campañas? ¿Tienen el consentimiento (opt-in) de sus contactos?",
-      "prompt": "¿Con qué frecuencia planean enviar campañas? ¿Tienen el consentimiento (opt-in) de sus contactos?",
+      "id": "4.1", "section": "s4", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Cuántos agentes de voz necesitan y qué rol tendrá cada uno? Por ejemplo: prospección en frío, soporte técnico, confirmación de citas o cobranza.", "prompt": "¿Cuántos agentes de voz necesitan y qué rol tendrá cada uno?",
       "fields": [
-        { "id": "frecuencia", "type": "single", "label": "Frecuencia", "options": ["Semanal", "Quincenal", "Mensual", "Solo en fechas especiales"], "other": true },
-        { "id": "optin", "type": "single", "label": "Consentimiento (opt-in)", "options": ["Sí", "No", "Parcialmente"] }
-      ]
-    },
-
-    {
-      "id": "10.1", "section": "s10", "formType": "CHECKBOX", "required": true, "formValueField": "plataformas",
-      "formTitle": "¿En qué plataformas publicitan (Meta, TikTok, Google, YouTube)?",
-      "prompt": "¿En qué plataformas publicitan?",
-      "fields": [ { "id": "plataformas", "type": "multi", "label": "Plataformas", "options": ["Meta", "TikTok", "Google", "YouTube", "Aún no publicitamos"], "exclusive": ["Aún no publicitamos"], "other": true } ]
-    },
-    {
-      "id": "10.2", "section": "s10", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Cuál es el público objetivo y la propuesta de valor principal?",
-      "prompt": "¿Cuál es su público objetivo y su propuesta de valor principal?",
-      "fields": [
-        { "id": "publico", "type": "textarea", "label": "Público objetivo" },
-        { "id": "propuesta", "type": "textarea", "label": "Propuesta de valor principal" }
+        {"id": "cantidad", "type": "number", "label": "Número de agentes", "min": 0, "integer": true},
+        {"id": "roles", "type": "multi", "label": "Roles", "options": ["Prospección", "Ventas", "Soporte técnico", "Confirmación de citas", "Cobranza"], "other": true},
+        {"id": "detalle", "type": "textarea", "label": "Detalle por agente", "required": false, "placeholder": "Opcional. Ej.: Agente 1 cobranza, Agente 2 citas"}
       ]
     },
     {
-      "id": "10.3", "section": "s10", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Quieren crear un avatar propio? ¿Quién aparecerá, con qué fondo y con qué tono? ¿Cuentan con su autorización de imagen?",
-      "prompt": "¿Quieren crear un avatar propio para sus anuncios?",
+      "id": "4.2", "section": "s4", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Las llamadas serán entrantes, salientes o ambas? ¿Qué volumen diario estiman?", "prompt": "¿Las llamadas serán entrantes, salientes o ambas? ¿Qué volumen diario estiman?",
       "fields": [
-        { "id": "quiere", "type": "single", "label": "¿Avatar propio?", "options": ["Sí", "No"] },
-        { "id": "quien", "type": "text", "label": "¿Quién aparecerá?", "showIf": { "f": "quiere", "op": "eq", "value": "Sí" } },
-        { "id": "fondo", "type": "text", "label": "¿Con qué fondo?", "showIf": { "f": "quiere", "op": "eq", "value": "Sí" } },
-        { "id": "tono", "type": "text", "label": "¿Con qué tono?", "showIf": { "f": "quiere", "op": "eq", "value": "Sí" } },
-        { "id": "autorizacion", "type": "single", "label": "¿Cuentan con su autorización de imagen?", "options": ["Sí", "No", "En trámite"], "showIf": { "f": "quiere", "op": "eq", "value": "Sí" } }
+        {"id": "direccion", "type": "single", "label": "Tipo de llamadas", "options": ["Entrantes", "Salientes", "Ambas"]},
+        {"id": "volumen", "type": "number", "label": "Llamadas al día (aprox.)", "min": 0, "integer": true}
       ]
     },
     {
-      "id": "10.4", "section": "s10", "formType": "MULTIPLE_CHOICE", "required": true, "formValueField": "video",
-      "formTitle": "¿Necesitan generar video real? Eso implica un costo adicional. ¿O les basta con la biblioteca de muestra al inicio?",
-      "prompt": "¿Necesitan generar video real? Implica un costo adicional. ¿O les basta con la biblioteca de muestra al inicio?",
-      "fields": [ { "id": "video", "type": "single", "label": "Video", "options": ["Necesitamos video real (costo adicional)", "Nos basta la biblioteca de muestra al inicio"] } ]
-    },
-
-    {
-      "id": "11.1", "section": "s11", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Tienen sitio web actual y dominio propio? ¿Necesitan landings para campañas, embudos o lanzamientos?",
-      "prompt": "¿Tienen sitio web y dominio propio? ¿Necesitan landings para campañas, embudos o lanzamientos?",
+      "id": "4.3", "section": "s4", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Qué tono debe usar el agente (formal, cercano o corporativo)? ¿Qué saludo, modismos regionales o expresiones deben usarse o evitarse?", "prompt": "¿Qué tono debe usar el agente? ¿Qué saludo, modismos regionales o expresiones deben usarse o evitarse?",
       "fields": [
-        { "id": "sitio", "type": "single", "label": "Sitio web", "options": ["Sí, con dominio propio", "Sí, sin dominio propio", "No tenemos sitio web"] },
-        { "id": "url", "type": "url", "label": "Dirección del sitio", "placeholder": "https://www.tuempresa.com", "showIf": { "f": "sitio", "op": "in", "value": ["Sí, con dominio propio", "Sí, sin dominio propio"] } },
-        { "id": "landings", "type": "single", "label": "¿Necesitan landings?", "options": ["Sí", "No", "Aún no sé"] }
+        {"id": "tono", "type": "single", "label": "Tono", "options": ["Formal", "Cercano", "Corporativo"]},
+        {"id": "usar", "type": "textarea", "label": "Saludo y expresiones que sí debe usar", "placeholder": "Ej.: «Buenos días, le habla Ana de…»"},
+        {"id": "evitar", "type": "textarea", "label": "Expresiones o modismos que debe evitar"}
       ]
     },
     {
-      "id": "11.2", "section": "s11", "formType": "CHECKBOX", "required": true, "formValueField": "formularios",
-      "formTitle": "¿Usan formularios externos (Google Forms, Typeform) que debamos conectar para que cada envío cree un contacto?",
-      "prompt": "¿Usan formularios externos que debamos conectar para que cada envío cree un contacto?",
-      "fields": [ { "id": "formularios", "type": "multi", "label": "Formularios externos", "options": ["Google Forms", "Typeform", "No usamos formularios externos"], "exclusive": ["No usamos formularios externos"], "other": true } ]
-    },
-    {
-      "id": "11.3", "section": "s11", "formType": "CHECKBOX", "required": true, "formValueField": "campos",
-      "formTitle": "¿Qué campos mínimos debe capturar un formulario de lead?",
-      "prompt": "¿Qué campos mínimos debe capturar un formulario de lead?",
-      "fields": [ { "id": "campos", "type": "multi", "label": "Campos", "options": ["Nombre", "Correo", "Teléfono", "Empresa", "Ciudad"], "other": true } ]
-    },
-    {
-      "id": "11.4", "section": "s11", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Qué reportes en Excel o CSV revisan hoy y les gustaría convertir en dashboards?",
-      "prompt": "¿Qué reportes en Excel o CSV revisan hoy y les gustaría convertir en dashboards?",
-      "fields": [ { "id": "reportes", "type": "textarea", "label": "Reportes", "placeholder": "Ej.: ventas semanales por vendedor, cuentas por cobrar" } ]
-    },
-
-    {
-      "id": "12.1", "section": "s12", "formType": "CHECKBOX", "required": true, "formValueField": "acciones",
-      "formTitle": "¿Qué acciones repetitivas del día a día les gustaría ejecutar por voz? Por ejemplo: crear contactos, mover tratos o agendar citas.",
-      "prompt": "¿Qué acciones repetitivas del día a día les gustaría ejecutar por voz con Kira?",
-      "fields": [ { "id": "acciones", "type": "multi", "label": "Acciones por voz", "options": ["Crear contactos", "Mover tratos", "Agendar citas"], "other": true } ]
-    },
-    {
-      "id": "12.2", "section": "s12", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Qué KPIs quiere ver la gerencia en el resumen diario y en los reportes ejecutivos de cada módulo?",
-      "prompt": "¿Qué KPIs quiere ver la gerencia en el resumen diario y en los reportes ejecutivos de cada módulo?",
-      "fields": [ { "id": "kpis", "type": "textarea", "label": "KPIs", "placeholder": "Ej.: ventas del día, tickets abiertos, cobros pendientes" } ]
-    },
-    {
-      "id": "12.3", "section": "s12", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Hay restricciones para que ciertos usuarios usen Kira o consulten datos financieros?",
-      "prompt": "¿Hay restricciones para que ciertos usuarios usen Kira o consulten datos financieros?",
+      "id": "4.4", "section": "s4", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Quieren clonar la voz de alguien del equipo? Si es así, ¿pueden enviar un audio limpio de 1 a 2 minutos, con la autorización de esa persona? ¿O prefieren una voz de catálogo?", "prompt": "¿Quieren clonar la voz de alguien del equipo o prefieren una voz de catálogo?",
       "fields": [
-        { "id": "hay", "type": "single", "label": "¿Hay restricciones?", "options": ["Sí", "No"] },
-        { "id": "detalle", "type": "textarea", "label": "¿Cuáles?", "showIf": { "f": "hay", "op": "eq", "value": "Sí" } }
-      ]
-    },
-
-    {
-      "id": "13.1", "section": "s13", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Existen políticas internas o legales sobre el manejo de datos personales, grabación de llamadas o uso de IA?",
-      "prompt": "¿Existen políticas internas o legales sobre el manejo de datos personales, la grabación de llamadas o el uso de IA?",
-      "fields": [
-        { "id": "hay", "type": "single", "label": "¿Existen políticas?", "options": ["Sí", "No", "No sé"] },
-        { "id": "detalle", "type": "textarea", "label": "Resumen de las políticas", "showIf": { "f": "hay", "op": "eq", "value": "Sí" } },
-        { "id": "archivo", "type": "file", "label": "Documento de políticas", "accept": ".pdf,.doc,.docx", "maxMB": 10, "required": false, "hint": "Opcional.", "showIf": { "f": "hay", "op": "eq", "value": "Sí" } }
+        {"id": "voz", "type": "single", "label": "Voz", "options": ["Clonar la voz de alguien del equipo", "Usar una voz de catálogo"]},
+        {"id": "genero", "type": "single", "label": "Género de la voz", "options": ["Femenino", "Masculino"]},
+        {"id": "audio", "type": "file", "label": "Audio limpio de 1 a 2 minutos", "accept": "audio/*", "maxMB": 10, "required": false, "hint": "Si aún no lo tienes, puedes enviarlo después.", "showIf": {"f": "voz", "op": "eq", "value": "Clonar la voz de alguien del equipo"}},
+        {"id": "autorizacion", "type": "single", "label": "¿Cuentan con la autorización de esa persona?", "options": ["Sí", "No", "En trámite"], "showIf": {"f": "voz", "op": "eq", "value": "Clonar la voz de alguien del equipo"}}
       ]
     },
     {
-      "id": "13.2", "section": "s13", "formType": "CHECKBOX", "required": true, "formValueField": "informar",
-      "formTitle": "¿Deben informar al cliente final que habla con una IA o que la llamada se graba?",
-      "prompt": "¿Deben informar al cliente final que habla con una IA o que la llamada se graba?",
-      "fields": [ { "id": "informar", "type": "multi", "label": "Qué informar", "options": ["Que habla con una IA", "Que la llamada se graba", "No es obligatorio informar"], "exclusive": ["No es obligatorio informar"] } ]
-    },
-    {
-      "id": "13.3", "section": "s13", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Qué fecha de salida a producción esperan? ¿Prefieren un lanzamiento por fases (por ejemplo: WhatsApp e Inbox primero, luego voz y ERP)?",
-      "prompt": "¿Qué fecha de salida a producción esperan? ¿Prefieren un lanzamiento por fases?",
-      "hint": "Por ejemplo: WhatsApp e Inbox primero, luego voz y ERP.",
+      "id": "4.5", "section": "s4", "formType": "CHECKBOX", "required": true, "formValueField": "acciones", "formTitle": "Objetivos de la llamada", "prompt": "¿Cuáles son los objetivos de la llamada?", "hint": "Elige todo lo que el agente debe lograr o dejar registrado al terminar.",
       "fields": [
-        { "id": "fecha", "type": "date", "label": "Fecha de salida a producción", "minToday": true },
-        { "id": "fases", "type": "single", "label": "¿Lanzamiento por fases?", "options": ["Sí, por fases", "No, todo a la vez", "Lo definimos con iTech"] },
-        { "id": "detalle", "type": "textarea", "label": "Orden de las fases", "required": false, "placeholder": "Opcional", "showIf": { "f": "fases", "op": "eq", "value": "Sí, por fases" } }
+        {"id": "acciones", "type": "multi", "label": "Objetivos de la llamada", "options": ["Crear o actualizar el contacto", "Calificar al interesado", "Agendar una cita", "Confirmar o reprogramar una cita", "Mover el trato de etapa", "Enviar una cotización", "Enviar un enlace de pago", "Registrar un reclamo o ticket", "Cobrar o acordar un pago", "Enviar un resumen por WhatsApp o correo", "Transferir a un humano"], "other": true}
       ]
     },
     {
-      "id": "13.4", "section": "s13", "formType": "PARAGRAPH_TEXT", "required": true,
-      "formTitle": "¿Qué capacitación necesita el equipo y en qué horarios?",
-      "prompt": "Por último: ¿qué capacitación necesita el equipo y en qué horarios?",
+      "id": "4.6", "section": "s4", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿En qué horario deben operar los agentes? ¿Qué hacen fuera de ese horario?", "prompt": "¿En qué horario deben operar los agentes? ¿Qué hacen fuera de ese horario?", "hint": "Si eliges 24/7, no hace falta indicar días ni horas.",
       "fields": [
-        { "id": "capacitacion", "type": "textarea", "label": "Capacitación necesaria", "placeholder": "Ej.: sesión para asesores sobre Inbox y Pipelines" },
-        { "id": "horarios", "type": "text", "label": "Horarios disponibles", "placeholder": "Ej.: martes y jueves de 9:00 a 11:00" }
+        {"id": "dias", "type": "multi", "label": "Días", "options": ["24/7", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"], "exclusive": ["24/7"]},
+        {"id": "desde", "type": "time", "label": "Desde", "showIf": {"f": "dias", "op": "notIncludes", "value": "24/7"}},
+        {"id": "hasta", "type": "time", "label": "Hasta", "showIf": {"f": "dias", "op": "notIncludes", "value": "24/7"}},
+        {"id": "fuera", "type": "textarea", "label": "¿Qué debe indicar el agente autorizado fuera del horario de atención?", "placeholder": "Ej.: «Nuestro horario es de 8:00 a 18:00. Te devolvemos la llamada mañana a primera hora.»", "showIf": {"f": "dias", "op": "notIncludes", "value": "24/7"}}
+      ]
+    },
+    {
+      "id": "5.1", "section": "s5", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Tienen documentado el catálogo, la lista de precios, los enlaces de pago y las políticas de garantía o devolución (PDF, Word o Excel)?", "prompt": "¿Tienen documentado el catálogo, la lista de precios, los enlaces de pago y las políticas de garantía o devolución?", "hint": "Son la base de lo que responde el agente. Adjúntalos aquí o indica cuáles enviarás después.",
+      "fields": [
+        {"id": "docs", "type": "multi", "label": "Lo que tienen documentado", "options": ["Catálogo", "Lista de precios", "Enlaces de pago", "Políticas de garantía o devolución", "Aún no tenemos nada documentado"], "exclusive": ["Aún no tenemos nada documentado"]},
+        {"id": "formato", "type": "multi", "label": "¿En qué formato?", "options": ["PDF", "Word", "Excel"], "other": true, "showIf": {"f": "docs", "op": "hasAnyExcept", "value": ["Aún no tenemos nada documentado"]}},
+        {"id": "claves", "type": "notice", "icon": "doc", "text": "Documentos clave: catálogo con precios, lista de precios vigente, enlaces de pago, políticas de garantía y devolución, preguntas frecuentes de tus clientes, horarios y ubicaciones."},
+        {"id": "archivos", "type": "file", "label": "Adjunta los documentos clave", "accept": ".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.ppt,.pptx,image/*", "maxMB": 10, "multiple": true, "required": false},
+        {"id": "pendientes", "type": "textarea", "label": "Documentos que enviarás después", "required": false, "placeholder": "Opcional. Ej.: políticas de devolución (las estamos actualizando)"}
+      ]
+    },
+    {
+      "id": "5.2", "section": "s5", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Quién mantendrá actualizada esa base de conocimiento y con qué frecuencia cambian precios y promociones?", "prompt": "¿Quién mantendrá actualizada esa base de conocimiento? ¿Con qué frecuencia cambian precios y promociones?",
+      "fields": [
+        {"id": "responsable", "type": "text", "label": "Responsable", "placeholder": "Nombre y cargo"},
+        {"id": "frecuencia", "type": "single", "label": "Frecuencia de cambios", "options": ["Diaria", "Semanal", "Mensual", "Ocasional"]}
+      ]
+    },
+    {
+      "id": "5.3", "section": "s5", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿En qué casos exactos debe pausarse la IA y pasar a un humano? Por ejemplo: si piden un supervisor, si el presupuesto supera un monto determinado, si hay un reclamo o si detecta un lenguaje agresivo.", "prompt": "¿En qué casos exactos debe pausarse la IA y pasar la conversación a un humano?",
+      "fields": [
+        {"id": "casos", "type": "multi", "label": "Casos", "options": ["Si piden un supervisor", "Si el presupuesto supera un monto", "Si hay un reclamo", "Si detecta lenguaje agresivo"], "other": true},
+        {"id": "monto", "type": "number", "label": "Monto a partir del cual escala", "min": 0, "showIf": {"f": "casos", "op": "includes", "value": "Si el presupuesto supera un monto"}}
+      ]
+    },
+    {
+      "id": "5.4", "section": "s5", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Quién recibe esas conversaciones escaladas y en cuánto tiempo deben responder?", "prompt": "¿Quién recibe las conversaciones escaladas, a quién se delegan si no responde y en cuánto tiempo deben responder?",
+      "fields": [
+        {"id": "quien", "type": "text", "label": "¿Quién las recibe?", "placeholder": "Nombre, cargo o equipo"},
+        {"id": "respaldo", "type": "text", "label": "Si la persona encargada no responde a las conversaciones escaladas, ¿a quién se le debe delegar?", "placeholder": "Nombre, cargo o equipo"},
+        {"id": "sla", "type": "grid", "label": "Tiempos de respuesta (SLA)", "display": "select", "stacked": true, "hint": "Si aún no los tienes definidos, elige «No lo tengo definido» y te ofrecemos consultoría.", "rows": ["WhatsApp", "Instagram", "Messenger", "Correo", "Llamadas", "Conversaciones escaladas"], "columns": ["Menos de 5 minutos", "Menos de 15 minutos", "Menos de 1 hora", "Menos de 4 horas", "El mismo día hábil", "No lo tengo definido", "No aplica"], "consultOptions": ["No lo tengo definido"]}
+      ]
+    },
+    {
+      "id": "5.5", "section": "s5", "formType": "CHECKBOX", "required": true, "formValueField": "temas", "formTitle": "¿Hay temas que la IA nunca debe hacer o responder, como descuentos no autorizados, diagnósticos o asesoría legal?", "prompt": "¿Hay temas que la IA nunca debe hacer o responder?",
+      "fields": [
+        {"id": "temas", "type": "multi", "label": "Temas que la IA nunca debe hacer o responder", "options": ["Descuentos no autorizados", "Diagnósticos", "Asesoría legal", "Ninguno en particular"], "exclusive": ["Ninguno en particular"], "other": true}
+      ]
+    },
+    {
+      "id": "6.1", "section": "s6", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Qué ERP o sistema contable usan (Odoo, Siigo, Alegra, SAP, QuickBooks u otro) y en qué versión?", "prompt": "¿Qué ERP o sistema contable usan y en qué versión?", "hint": "Si no usan ninguno, elige «No usamos ERP» y saltamos esta sección.",
+      "fields": [
+        {"id": "erp", "type": "select", "label": "ERP o sistema contable", "options": ["Odoo", "Siigo", "Alegra", "SAP", "QuickBooks", "Otro", "No usamos ERP"]},
+        {"id": "otro", "type": "text", "label": "¿Cuál?", "showIf": {"f": "erp", "op": "eq", "value": "Otro"}},
+        {"id": "version", "type": "text", "label": "Versión", "placeholder": "Ej.: Odoo 17 Enterprise", "showIf": {"f": "erp", "op": "notIn", "value": ["No usamos ERP", ""]}}
+      ]
+    },
+    {
+      "id": "6.2", "section": "s6", "formType": "PARAGRAPH_TEXT", "required": true, "showIf": {"q": "6.1", "f": "erp", "op": "notIn", "value": ["No usamos ERP"]}, "formTitle": "¿Pueden generar una API Key o un Token con permisos de lectura y escritura? ¿Quién de su equipo o proveedor puede hacerlo?", "prompt": "¿Pueden generar una API Key o un Token con permisos de lectura y escritura? ¿Quién de su equipo o proveedor puede hacerlo?", "hint": "Solo necesitamos saber si es posible. No escribas la clave aquí: la configuramos contigo de forma segura.",
+      "fields": [
+        {"id": "puede", "type": "single", "label": "¿Pueden generarla?", "options": ["Sí", "No", "No sé"]},
+        {"id": "quien", "type": "text", "label": "¿Quién puede hacerlo?", "placeholder": "Nombre, cargo o proveedor"}
+      ]
+    },
+    {
+      "id": "6.3", "section": "s6", "formType": "PARAGRAPH_TEXT", "required": true, "showIf": {"q": "6.1", "f": "erp", "op": "notIn", "value": ["No usamos ERP"]}, "formTitle": "¿En qué momento exacto debe sincronizarse? Por ejemplo: cuando un trato pasa a \"Ganado\" en ZAK, se crea la factura o el cliente en el ERP.", "prompt": "¿En qué momento exacto debe sincronizarse ZAK con el ERP?", "hint": "Para responder esta pregunta es necesaria la participación de cada líder de departamento y de las directrices de la empresa a los fines de obtener la precisión necesaria para el óptimo funcionamiento de la automatización. Te invitamos a que nos otorgues una breve descripción departamental de tu empresa y las funciones que consideras necesarias en cada departamento para lograr cada objetivo.",
+      "fields": [
+        {"id": "momento", "type": "textarea", "label": "Momento de sincronización"},
+        {"id": "departamentos", "type": "textarea", "label": "Descripción departamental y funciones necesarias en cada departamento", "placeholder": "Ej.: Ventas: cotiza y cierra; Administración: factura y concilia; Almacén: despacha"}
+      ]
+    },
+    {
+      "id": "6.4", "section": "s6", "formType": "GRID", "required": true, "formValueField": "prioridad", "showIf": {"q": "6.1", "f": "erp", "op": "notIn", "value": ["No usamos ERP"]}, "formTitle": "¿Qué dato manda en caso de conflicto, ZAK o el ERP? Por ejemplo, para precios, stock o datos del cliente.", "prompt": "Si hay un conflicto entre ZAK y el ERP, ¿qué dato manda?",
+      "fields": [
+        {"id": "prioridad", "type": "grid", "label": "Fuente que manda", "rows": ["Precios", "Stock", "Datos del cliente"], "columns": ["ZAK", "ERP"]}
+      ]
+    },
+    {
+      "id": "7.1", "section": "s7", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Pueden enviarnos la lista de usuarios con nombre, apellido y correo?", "prompt": "Registra a los usuarios que tendrán acceso a ZAK, con su tipo y los módulos que podrán usar.",
+      "fields": [
+        {"id": "modo", "type": "single", "label": "¿Cómo prefieres enviarla?", "options": ["La escribo aquí", "Subo la plantilla (Excel)"]},
+        {"id": "usuarios", "type": "rows", "label": "Usuarios", "rowLabel": "Usuario", "addLabel": "Agregar usuario", "minLabel": "un usuario", "showIf": {"f": "modo", "op": "eq", "value": "La escribo aquí"}, "columns": [{"id": "nombre", "label": "Nombre", "type": "text"}, {"id": "apellido", "label": "Apellido", "type": "text"}, {"id": "correo", "label": "Correo", "type": "email"}, {"id": "telefono", "label": "Teléfono", "type": "phone"}, {"id": "tipo", "label": "Tipo de usuario", "type": "select", "options": ["Colaborador", "Administrador"]}, {"id": "modulos", "label": "Módulos autorizados", "type": "multiselect", "optionsFrom": "modules", "requiredIf": {"col": "tipo", "eq": "Colaborador"}, "showIf": {"col": "tipo", "eq": "Colaborador"}}]},
+        {"id": "plantilla", "type": "notice", "icon": "download", "text": "Descarga la plantilla, complétala con Nombre, Apellido, Correo y Teléfono de cada usuario, y súbela aquí.", "link": {"label": "Descargar plantilla de usuarios (Excel)", "href": "assets/plantillas/plantilla-usuarios-zak.xlsx", "download": "plantilla-usuarios-zak.xlsx"}, "showIf": {"f": "modo", "op": "eq", "value": "Subo la plantilla (Excel)"}},
+        {"id": "archivo", "type": "file", "label": "Plantilla completada", "accept": ".xlsx,.xls,.csv", "maxMB": 10, "showIf": {"f": "modo", "op": "eq", "value": "Subo la plantilla (Excel)"}}
+      ]
+    },
+    {
+      "id": "7.2", "section": "s7", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Quiénes serán Administradores y quiénes Colaboradores?", "prompt": "¿Quiénes serán Administradores y quiénes Colaboradores?", "showIf": {"q": "7.1", "f": "modo", "op": "eq", "value": "Subo la plantilla (Excel)"},
+      "fields": [
+        {"id": "rolesTexto", "type": "textarea", "label": "Administradores y Colaboradores", "placeholder": "Ej.: Administradores: Ana y Luis. El resto, Colaboradores."}
+      ]
+    },
+    {
+      "id": "7.3", "section": "s7", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Qué módulos debe ver cada persona? Por ejemplo: un asesor solo Pipelines e Inbox; un contador solo Contabilidad y RR. HH.", "prompt": "¿Qué módulos debe ver cada persona?", "hint": "Por ejemplo: un asesor solo Pipelines e Inbox; un contador solo Contabilidad y RR. HH.", "showIf": {"q": "7.1", "f": "modo", "op": "eq", "value": "Subo la plantilla (Excel)"},
+      "fields": [
+        {"id": "modulos", "type": "textarea", "label": "Módulos por persona o rol"}
+      ]
+    },
+    {
+      "id": "7.4", "modules": ["pipelines", "inbox", "ventas", "contactos", "call-center"], "section": "s7", "formType": "MULTIPLE_CHOICE", "required": true, "formValueField": "asignacion", "formTitle": "¿Cómo se asignan hoy los clientes a los vendedores (por zona, por turno o round-robin)?", "prompt": "¿Cómo se asignan hoy los clientes a los vendedores?",
+      "fields": [
+        {"id": "asignacion", "type": "single", "label": "Asignación", "options": ["Por zona", "Por turno", "Round-robin"], "other": true}
+      ]
+    },
+    {
+      "id": "7.5", "section": "s7", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Hay usuarios externos (agencias, freelancers) que necesiten acceso limitado?", "prompt": "¿Hay usuarios externos, como agencias o freelancers, que necesiten acceso limitado?",
+      "fields": [
+        {"id": "hay", "type": "single", "label": "¿Hay agencias o freelancers que necesiten acceso?", "options": ["Sí", "No"]},
+        {"id": "externos", "type": "rows", "label": "Usuarios externos", "rowLabel": "Externo", "addLabel": "Agregar externo", "minLabel": "un usuario externo", "showIf": {"f": "hay", "op": "eq", "value": "Sí"}, "columns": [{"id": "nombre", "label": "Nombre y apellido", "type": "text"}, {"id": "empresa", "label": "Agencia o empresa", "type": "text", "required": false}, {"id": "correo", "label": "Correo", "type": "email"}, {"id": "telefono", "label": "Teléfono", "type": "phone"}, {"id": "modulos", "label": "Módulos autorizados", "type": "multiselect", "optionsFrom": "modules"}]}
+      ]
+    },
+    {
+      "id": "8.1", "section": "s8", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "Pagos: ¿Qué métodos de cobro usan (Pago Móvil, transferencia, tarjeta, Zelle, efectivo)? ¿En qué monedas facturan (USD, MXN, EUR, moneda local)?", "prompt": "Hablemos de pagos. ¿Qué métodos de cobro usan y en qué monedas facturan?",
+      "fields": [
+        {"id": "metodos", "type": "multi", "label": "Métodos de cobro", "options": ["Pago Móvil", "Transferencia", "Tarjeta", "Zelle", "Efectivo"], "other": true},
+        {"id": "monedas", "type": "multi", "label": "Monedas", "options": ["USD", "MXN", "EUR", "Moneda local"], "other": true}
+      ]
+    },
+    {
+      "id": "8.2", "section": "s8", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "Cotizaciones: ¿Qué tasa de impuesto aplican? ¿Hay descuentos máximos por vendedor? ¿Tienen un formato o logo de cotización que debamos replicar?", "prompt": "Sobre las cotizaciones: ¿qué tasa de impuesto aplican, hay descuentos máximos por vendedor y tienen un formato o logo que debamos replicar?",
+      "fields": [
+        {"id": "impuesto", "type": "number", "label": "Tasa de impuesto (%)", "min": 0, "max": 100},
+        {"id": "descuento", "type": "single", "label": "¿Hay descuento máximo por vendedor?", "options": ["Sí", "No"]},
+        {"id": "descuentoPct", "type": "number", "label": "Descuento máximo (%)", "min": 0, "max": 100, "showIf": {"f": "descuento", "op": "eq", "value": "Sí"}},
+        {"id": "formato", "type": "single", "label": "¿Tienen formato o logo de cotización?", "options": ["Sí", "No"]},
+        {"id": "formatoArchivo", "type": "file", "label": "Formato o logo", "accept": ".pdf,.doc,.docx,.xls,.xlsx,image/*", "maxMB": 10, "required": false, "hint": "Opcional. También puedes enviarlo después.", "showIf": {"f": "formato", "op": "eq", "value": "Sí"}}
+      ]
+    },
+    {
+      "id": "8.3", "section": "s8", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "Suscripciones: ¿Venden planes recurrentes? ¿Cuáles son sus nombres, precios y ciclos de cobro?", "prompt": "¿Venden planes recurrentes o suscripciones?",
+      "fields": [
+        {"id": "recurrentes", "type": "single", "label": "¿Venden planes recurrentes?", "options": ["Sí", "No"]},
+        {"id": "planes", "type": "plans", "label": "Planes", "cycles": ["Mensual", "Trimestral", "Semestral", "Anual"], "showIf": {"f": "recurrentes", "op": "eq", "value": "Sí"}}
+      ]
+    },
+    {
+      "id": "8.4", "section": "s8", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "Contratos: ¿Pueden compartir sus plantillas o un contrato de ejemplo? ¿Quién firma por la empresa? ¿Aceptan la firma electrónica?", "prompt": "Sobre contratos: ¿pueden compartir sus plantillas o un contrato de ejemplo? ¿Quién firma por la empresa y aceptan la firma electrónica?",
+      "fields": [
+        {"id": "plantillas", "type": "file", "label": "Plantillas o contrato de ejemplo", "accept": ".pdf,.doc,.docx", "maxMB": 10, "multiple": true, "required": false, "hint": "Opcional. También puedes enviarlas después."},
+        {"id": "firmante", "type": "text", "label": "¿Quién firma por la empresa?", "placeholder": "Nombre y cargo"},
+        {"id": "firmaElectronica", "type": "single", "label": "¿Aceptan la firma electrónica?", "options": ["Sí", "No", "No sé"]}
+      ]
+    },
+    {
+      "id": "8.5", "modules": ["ventas", "pipelines"], "section": "s8", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "Revenue Engine: ¿Qué productos o servicios son candidatos a post-venta?", "prompt": "Para el Revenue Engine: ¿qué productos o servicios son candidatos a post-venta?",
+      "fields": [
+        {"id": "upsell", "type": "textarea", "label": "Candidatos a post-venta"}
+      ]
+    },
+    {
+      "id": "9.1", "modules": ["email-marketing", "contactos"], "section": "s9", "formType": "CHECKBOX", "required": true, "formValueField": "segmentos", "formTitle": "¿Cómo quieren segmentar sus contactos (por ejemplo: VIP, prospectos, inactivos)?", "prompt": "¿Cómo quieren segmentar sus contactos?",
+      "fields": [
+        {"id": "segmentos", "type": "multi", "label": "Segmentos", "options": ["VIP", "Prospectos", "Inactivos"], "other": true}
+      ]
+    },
+    {
+      "id": "9.2", "section": "s9", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Tienen manual de marca (logo, colores, tipografías) para las plantillas?", "prompt": "¿Tienen manual de marca (logo, colores, tipografías) para las plantillas?",
+      "fields": [
+        {"id": "manual", "type": "single", "label": "Manual de marca", "options": ["Sí, lo adjunto", "No, quiero crearlo con iTech", "No lo necesito"], "consultOptions": ["No, quiero crearlo con iTech"]},
+        {"id": "archivo", "type": "file", "label": "Manual de marca", "accept": ".pdf,.ppt,.pptx,image/*", "maxMB": 10, "multiple": true, "showIf": {"f": "manual", "op": "eq", "value": "Sí, lo adjunto"}}
+      ]
+    },
+    {
+      "id": "9.3", "section": "s9", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Con qué frecuencia planean enviar campañas? ¿Tienen el consentimiento (opt-in) de sus contactos?", "prompt": "¿Con qué frecuencia planean enviar campañas? ¿Tienen el consentimiento (opt-in) de sus contactos?",
+      "fields": [
+        {"id": "frecuencia", "type": "single", "label": "Frecuencia", "options": ["Semanal", "Quincenal", "Mensual", "Solo en fechas especiales"], "other": true},
+        {"id": "optin", "type": "single", "label": "Consentimiento (opt-in)", "options": ["Sí", "No", "Parcialmente"]}
+      ]
+    },
+    {
+      "id": "9.4", "modules": ["email-marketing"], "section": "s9", "formType": "PARAGRAPH_TEXT", "required": true, "source": "itech", "formTitle": "Dirección de envío, responsable del DNS y primeras campañas", "prompt": "¿Desde qué dirección se enviarán los correos, quién administra el DNS del dominio y qué campañas lanzarán primero?", "hint": "El DNS es necesario para autenticar el dominio y que los correos no lleguen a spam.",
+      "fields": [
+        {"id": "remitente", "type": "email", "label": "Dirección de envío", "placeholder": "novedades@tuempresa.com"},
+        {"id": "dns", "type": "text", "label": "Responsable del DNS", "placeholder": "Persona o proveedor"},
+        {"id": "campanas", "type": "multi", "label": "Primeras campañas", "options": ["Bienvenida", "Promociones", "Recordatorios", "Boletín", "Reactivación de clientes"], "other": true}
+      ]
+    },
+    {
+      "id": "10.1", "modules": ["adstudio", "web-funnels"], "section": "s10", "formType": "CHECKBOX", "required": true, "formValueField": "plataformas", "formTitle": "¿En qué plataformas publicitan (Meta, TikTok, Google, YouTube)?", "prompt": "¿En qué plataformas publicitan?",
+      "fields": [
+        {"id": "plataformas", "type": "multi", "label": "Plataformas", "options": ["Meta", "TikTok", "Google", "YouTube", "Aún no publicitamos"], "exclusive": ["Aún no publicitamos"], "other": true, "optionInputs": {"label": "Usuario o enlace de {opt}", "placeholder": "Ej.: @tuempresa o https://…"}}
+      ]
+    },
+    {
+      "id": "10.2", "modules": ["adstudio", "web-funnels"], "section": "s10", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Cuál es el público objetivo y la propuesta de valor principal?", "prompt": "¿Cuál es su público objetivo y su propuesta de valor principal?",
+      "fields": [
+        {"id": "publico", "type": "multi", "label": "Público objetivo", "options": ["Consumidores finales (B2C)", "Empresas (B2B)", "Pymes", "Profesionales independientes", "Jóvenes de 18 a 24 años", "Adultos de 25 a 44 años", "Adultos de 45 años o más", "Gobierno e instituciones"], "other": true},
+        {"id": "detalle", "type": "textarea", "label": "Detalle del público", "required": false, "placeholder": "Opcional. Ciudad, intereses, nivel de ingreso…"},
+        {"id": "propuesta", "type": "textarea", "label": "Propuesta de valor principal"}
+      ]
+    },
+    {
+      "id": "10.3", "section": "s10", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Quieren crear un avatar propio? ¿Quién aparecerá, con qué fondo y con qué tono? ¿Cuentan con su autorización de imagen?", "prompt": "¿Quieren crear un avatar propio para sus anuncios?",
+      "fields": [
+        {"id": "quiere", "type": "single", "label": "¿Avatar propio?", "options": ["Sí", "No"]},
+        {"id": "quien", "type": "text", "label": "¿Quién aparecerá?", "showIf": {"f": "quiere", "op": "eq", "value": "Sí"}},
+        {"id": "genero", "type": "single", "label": "Género del avatar", "options": ["Femenino", "Masculino"], "showIf": {"f": "quiere", "op": "eq", "value": "Sí"}},
+        {"id": "fondo", "type": "text", "label": "¿Con qué fondo?", "showIf": {"f": "quiere", "op": "eq", "value": "Sí"}},
+        {"id": "tono", "type": "text", "label": "¿Con qué tono?", "showIf": {"f": "quiere", "op": "eq", "value": "Sí"}},
+        {"id": "autorizacion", "type": "single", "label": "¿Cuentan con su autorización de imagen?", "options": ["Sí", "No", "En trámite"], "showIf": {"f": "quiere", "op": "eq", "value": "Sí"}}
+      ]
+    },
+    {
+      "id": "10.4", "section": "s10", "formType": "MULTIPLE_CHOICE", "required": true, "formValueField": "video", "formTitle": "¿Necesitan generar video real? Eso implica un costo adicional. ¿O les basta con la biblioteca de muestra al inicio?", "prompt": "¿Necesitan generar video real? Implica un costo adicional. ¿O les basta con la biblioteca de muestra al inicio?",
+      "fields": [
+        {"id": "video", "type": "single", "label": "Video", "options": ["Necesitamos video real (costo adicional)", "Nos basta la biblioteca de muestra al inicio"]}
+      ]
+    },
+    {
+      "id": "11.1", "section": "s11", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Tienen sitio web actual y dominio propio? ¿Necesitan landings para campañas, embudos o lanzamientos?", "prompt": "¿Tienen sitio web y dominio propio? ¿Necesitan landings para campañas, embudos o lanzamientos?",
+      "fields": [
+        {"id": "sitio", "type": "single", "label": "Sitio web", "options": ["Sí, con dominio propio", "Sí, sin dominio propio", "No tenemos sitio web"]},
+        {"id": "url", "type": "url", "label": "Dirección del sitio", "placeholder": "https://www.tuempresa.com", "showIf": {"f": "sitio", "op": "in", "value": ["Sí, con dominio propio", "Sí, sin dominio propio"]}},
+        {"id": "landings", "type": "single", "label": "¿Necesitan landings?", "options": ["Sí", "No", "Aún no sé"]},
+        {"id": "cuales", "type": "textarea", "label": "¿Qué landings o embudos necesitas primero?", "required": false, "showIf": {"f": "landings", "op": "eq", "value": "Sí"}},
+        {"id": "dns", "type": "text", "label": "¿Quién administra el dominio y el DNS?", "required": false, "placeholder": "Persona, proveedor o hosting", "showIf": {"f": "sitio", "op": "eq", "value": "Sí, con dominio propio"}},
+        {"id": "medicion", "type": "multi", "label": "Herramientas de medición en tu web", "options": ["Meta Pixel", "Google Analytics", "Google Tag Manager", "Ninguna"], "exclusive": ["Ninguna"], "other": true, "showIf": {"f": "sitio", "op": "neq", "value": "No tenemos sitio web"}}
+      ]
+    },
+    {
+      "id": "11.2", "section": "s11", "formType": "CHECKBOX", "required": true, "formValueField": "formularios", "formTitle": "¿Usan formularios externos (Google Forms, Typeform) que debamos conectar para que cada envío cree un contacto?", "prompt": "¿Usan formularios externos que debamos conectar para que cada envío cree un contacto?",
+      "fields": [
+        {"id": "formularios", "type": "multi", "label": "Formularios externos", "options": ["Google Forms", "Typeform", "No usamos formularios externos"], "exclusive": ["No usamos formularios externos"], "other": true}
+      ]
+    },
+    {
+      "id": "11.3", "section": "s11", "formType": "CHECKBOX", "required": true, "formValueField": "campos", "formTitle": "¿Qué campos mínimos debe capturar un formulario de lead?", "prompt": "¿Qué campos mínimos debe capturar un formulario de lead?",
+      "fields": [
+        {"id": "campos", "type": "multi", "label": "Campos", "options": ["Nombre", "Correo", "Teléfono", "Empresa", "Ciudad"], "other": true}
+      ]
+    },
+    {
+      "id": "11.4", "modules": ["web-funnels", "dashboard", "number-master"], "section": "s11", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Qué reportes en Excel o CSV revisan hoy y les gustaría convertir en dashboards?", "prompt": "¿Qué reportes en Excel o CSV revisan hoy y les gustaría convertir en dashboards?",
+      "fields": [
+        {"id": "reportes", "type": "textarea", "label": "Reportes", "placeholder": "Ej.: ventas semanales por vendedor, cuentas por cobrar"}
+      ]
+    },
+    {
+      "id": "12.1", "section": "s12", "formType": "CHECKBOX", "required": true, "formValueField": "acciones", "formTitle": "¿Qué acciones repetitivas del día a día les gustaría ejecutar por voz? Por ejemplo: crear contactos, mover tratos o agendar citas.", "prompt": "¿Qué acciones repetitivas del día a día les gustaría ejecutar por voz con Kira?",
+      "fields": [
+        {"id": "acciones", "type": "multi", "label": "Acciones por voz", "options": ["Crear contactos", "Mover tratos", "Agendar citas"], "other": true}
+      ]
+    },
+    {
+      "id": "12.2", "section": "s12", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Qué KPIs desea visualizar la gerencia en los resúmenes diarios y reportes ejecutivos de cada módulo?", "prompt": "¿Qué KPIs desea visualizar la gerencia en los resúmenes diarios y reportes ejecutivos de cada módulo?", "hint": "Selecciona todos los indicadores que apliquen a tu operación y marca con qué frecuencia y por qué canal quieres recibir la información.",
+      "fields": [
+        {"id": "kpis", "type": "kpiGroups", "label": "KPIs por módulo", "frequencies": ["Diaria", "Semanal", "Mensual"], "channels": ["Correo electrónico", "Notificación en el Panel ZAK / Dashboard", "Mensaje directo de Kira (Agente IA)"], "groups": [{"id": "ia", "title": "Agentes de IA y Conversaciones (Inbox y Voz)", "modules": ["agentes-ia", "inbox", "call-center", "piloto-automatico"], "kpis": [{"label": "Tasa de Resolución en Primer Contacto (FCR)", "desc": "Porcentaje de casos o dudas resueltas por la IA sin requerir intervención humana."}, {"label": "Tiempo Medio de Respuesta (FRT)", "desc": "Tiempo promedio en minutos o segundos que tarda el agente en responder un mensaje o llamada."}, {"label": "Tasa de Escalado a Humanos", "desc": "Porcentaje de conversaciones que deben ser derivadas a un agente o supervisor humano."}, {"label": "Satisfacción del Cliente (CSAT / NPS)", "desc": "Calificación o sentimiento promedio expresado por los usuarios al finalizar la interacción."}, {"label": "Volumen de Conversaciones / Llamadas Atendidas", "desc": "Cantidad total de interacciones procesadas por la IA por día o período."}, {"label": "Tasa de Abandono de Llamadas / Conversaciones", "desc": "Porcentaje de llamadas o chats interrumpidos por el cliente antes de ser atendidos o completar la acción."}, {"label": "Costo por Interacción", "desc": "Ahorro o costo asociado al procesamiento automático frente al procesamiento manual."}]}, {"id": "crm", "title": "CRM y Ventas (Pipeline y Post-Venta)", "modules": ["pipelines", "ventas", "contactos", "web-funnels", "adstudio", "email-marketing"], "kpis": [{"label": "Leads Generados / Calificados (MQL y SQL)", "desc": "Cantidad total de nuevos contactos captados y evaluados como listos para venta."}, {"label": "Tasa de Conversión de Leads a Clientes", "desc": "Porcentaje de contactos que completan el embudo y realizan una compra."}, {"label": "Valor del Pipeline Activo", "desc": "Monto total proyectado de las oportunidades abiertas en el embudo comercial."}, {"label": "Ticket Promedio", "desc": "Valor promedio de cada venta efectuada."}, {"label": "Ciclo Medio de Venta", "desc": "Tiempo transcurrido (en días) desde el primer contacto hasta el cierre de la venta."}, {"label": "Tasa de Retención de Clientes / Churn Rate", "desc": "Porcentaje de clientes recurrentes frente a los clientes perdidos en el período."}, {"label": "Tasa de Conversión Post-Venta", "desc": "Desempeño de campañas de fidelización o recompras gestionadas por el sistema."}]}, {"id": "equipo", "title": "Equipo y Productividad (Workforce y Tareas)", "modules": ["workforce", "cowork", "rrhh", "calendario", "workflows"], "kpis": [{"label": "Tiempo de Ejecución por Tarea", "desc": "Duración media dedicada por cada colaborador en completar asignaciones."}, {"label": "Tareas Vencidas / Retrasadas", "desc": "Número total de tareas que superaron la fecha límite establecida."}, {"label": "Tasa de Cumplimiento de Tareas (On-Time Delivery)", "desc": "Porcentaje de tareas finalizadas dentro del plazo establecido."}, {"label": "Carga de Trabajo por Colaborador", "desc": "Distribución de tickets o tareas asignadas por usuario o departamento."}, {"label": "Tiempo Promedio de Cierre de Casos Escalados", "desc": "Tiempo total que toma el personal humano en resolver conversaciones derivadas."}]}, {"id": "finanzas", "title": "Finanzas, Cobranza y ERP", "modules": ["contabilidad", "ventas", "number-master"], "kpis": [{"label": "Ingresos Facturados vs. Recaudados", "desc": "Comparativo entre lo vendido y lo efectivamente cobrado en el día o el mes."}, {"label": "Efectividad de Cobranza (Tasa de Recuperación)", "desc": "Porcentaje de cuentas por cobrar gestionadas exitosamente por la IA o el equipo."}, {"label": "Antigüedad de la Cartera (Morosidad)", "desc": "Desglose de facturas pendientes por tramos de días (30, 60, 90+ días)."}, {"label": "Conciliación Bancaria Diaria", "desc": "Resumen de pagos registrados en bancos nacionales e internacionales listos para conciliar."}]}]}
+      ]
+    },
+    {
+      "id": "12.3", "section": "s12", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Hay restricciones para que ciertos usuarios usen Kira o consulten datos financieros?", "prompt": "¿Hay restricciones para que ciertos usuarios usen Kira o consulten datos financieros?",
+      "fields": [
+        {"id": "hay", "type": "single", "label": "¿Hay restricciones?", "options": ["Sí", "No"]},
+        {"id": "detalle", "type": "textarea", "label": "¿Cuáles?", "showIf": {"f": "hay", "op": "eq", "value": "Sí"}}
+      ]
+    },
+    {
+      "id": "13.1", "section": "s13", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Existen políticas internas o legales sobre el manejo de datos personales, grabación de llamadas o uso de IA?", "prompt": "¿Existen políticas internas o legales sobre el manejo de datos personales, la grabación de llamadas o el uso de IA?",
+      "fields": [
+        {"id": "hay", "type": "single", "label": "¿Existen políticas?", "options": ["Sí", "No", "No sé"]},
+        {"id": "detalle", "type": "textarea", "label": "Resumen de las políticas", "showIf": {"f": "hay", "op": "eq", "value": "Sí"}},
+        {"id": "archivo", "type": "file", "label": "Documento de políticas", "accept": ".pdf,.doc,.docx", "maxMB": 10, "required": false, "hint": "Opcional.", "showIf": {"f": "hay", "op": "eq", "value": "Sí"}}
+      ]
+    },
+    {
+      "id": "13.2", "modules": ["call-center", "agentes-ia", "inbox", "piloto-automatico"], "section": "s13", "formType": "CHECKBOX", "required": true, "formValueField": "informar", "formTitle": "¿Deben informar al cliente final que habla con una IA o que la llamada se graba?", "prompt": "¿Deben informar al cliente final que habla con una IA o que la llamada se graba?",
+      "fields": [
+        {"id": "informar", "type": "multi", "label": "Qué informar", "options": ["Que habla con una IA", "Que la llamada se graba", "No es obligatorio informar"], "exclusive": ["No es obligatorio informar"]}
+      ]
+    },
+    {
+      "id": "13.3", "section": "s13", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Qué fecha de salida a producción esperan? ¿Prefieren un lanzamiento por fases (por ejemplo: WhatsApp e Inbox primero, luego voz y ERP)?", "prompt": "¿Qué fecha de salida a producción esperan? ¿Prefieren un lanzamiento por fases?", "hint": "Por ejemplo: WhatsApp e Inbox primero, luego voz y ERP.",
+      "fields": [
+        {"id": "fecha", "type": "date", "label": "Fecha de salida a producción", "minToday": true},
+        {"id": "fases", "type": "single", "label": "¿Lanzamiento por fases?", "options": ["Sí, por fases", "No, todo a la vez", "Lo definimos con iTech"]},
+        {"id": "detalle", "type": "textarea", "label": "Orden de las fases", "required": false, "placeholder": "Opcional", "showIf": {"f": "fases", "op": "eq", "value": "Sí, por fases"}}
+      ]
+    },
+    {
+      "id": "13.4", "section": "s13", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Qué capacitación necesita el equipo y en qué horarios?", "prompt": "Por último: ¿qué capacitación necesita el equipo y en qué horarios?",
+      "fields": [
+        {"id": "capacitacion", "type": "textarea", "label": "Capacitación necesaria", "placeholder": "Ej.: sesión para asesores sobre Inbox y Pipelines"},
+        {"id": "horarios", "type": "text", "label": "Horarios disponibles", "placeholder": "Ej.: martes y jueves de 9:00 a 11:00"}
       ]
     }
   ],
 
   "controlItems": [
-    { "id": "ctl.reference", "formTitle": "Referencia de onboarding", "formType": "TEXT" },
-    { "id": "ctl.session", "formTitle": "ID de sesión", "formType": "TEXT" },
-    { "id": "ctl.doubts", "formTitle": "Dudas registradas durante el onboarding", "formType": "PARAGRAPH_TEXT" },
-    { "id": "ctl.readiness", "formTitle": "Preparación global (%)", "formType": "TEXT" },
-    { "id": "ctl.level", "formTitle": "Calificación de preparación", "formType": "TEXT" },
-    { "id": "ctl.byModule", "formTitle": "Preparación por módulo", "formType": "PARAGRAPH_TEXT" },
-    { "id": "ctl.missing", "formTitle": "Requisitos pendientes", "formType": "PARAGRAPH_TEXT" }
+    {"id": "ctl.reference", "formTitle": "Referencia de onboarding", "formType": "TEXT"},
+    {"id": "ctl.nda", "formTitle": "Registro de aceptación del NDA (versión, huella SHA-256, fecha)", "formType": "PARAGRAPH_TEXT"},
+    {"id": "ctl.session", "formTitle": "ID de sesión", "formType": "TEXT"},
+    {"id": "ctl.doubts", "formTitle": "Dudas registradas durante el onboarding", "formType": "PARAGRAPH_TEXT"},
+    {"id": "ctl.readiness", "formTitle": "Preparación global (%)", "formType": "TEXT"},
+    {"id": "ctl.level", "formTitle": "Calificación de preparación", "formType": "TEXT"},
+    {"id": "ctl.byModule", "formTitle": "Preparación por módulo", "formType": "PARAGRAPH_TEXT"},
+    {"id": "ctl.missing", "formTitle": "Requisitos pendientes", "formType": "PARAGRAPH_TEXT"},
+    {"id": "ctl.info", "formTitle": "Información disponible (%)", "formType": "TEXT"},
+    {"id": "ctl.consulting", "formTitle": "Consultoría recomendada", "formType": "TEXT"},
+    {"id": "ctl.infoDetail", "formTitle": "Desglose de información", "formType": "TEXT"},
+    {"id": "ctl.infoPending", "formTitle": "Información por completar", "formType": "PARAGRAPH_TEXT"},
+    {"id": "ctl.attachments", "formTitle": "Adjuntos por pregunta", "formType": "PARAGRAPH_TEXT"},
+    {"id": "ctl.consulting2", "formTitle": "Consultoría solicitada por el cliente", "formType": "PARAGRAPH_TEXT"}
   ]
 }

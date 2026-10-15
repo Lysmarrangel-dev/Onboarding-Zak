@@ -15,7 +15,7 @@ const ISO_WHITE = 'assets/brand/itech-isotipo-blanco.svg';
 // Guion por defecto (el real se carga desde config/intro.json).
 // `say` es lo que se narra; `caption`, lo que se lee en pantalla.
 export let SCRIPT = [
-  { id: 'hello', min: 3600, caption: 'Hola, soy ZAK Assistant. Te acompaño en el onboarding de ZAK.' },
+  { id: 'hello', min: 3600, caption: 'Hola, soy Kira, la asistente que maneja ZAK hablando contigo. Te acompaño en este onboarding.' },
   { id: 'zak', min: 4600, caption: 'ZAK es el sistema de automatización empresarial de iTech: tu empresa en un solo lugar.' },
   { id: 'stats', min: 4200, caption: '18 módulos, 6 canales y un solo panel.', say: 'Dieciocho módulos, seis canales y un solo panel.' },
   { id: 'voice', min: 5400, caption: 'Captas, vendes, cobras y diriges a tu equipo… incluso hablando.' },
@@ -50,7 +50,7 @@ function buildStage() {
   return h('div', { class: 'iv-stage brand-surface', 'aria-hidden': 'true' },
     scene('hello',
       h('div', { class: 'iv-iso' }, h('span', { class: 'iv-ring' }), h('img', { src: ISO_WHITE, alt: '' })),
-      h('div', { class: 'iv-title' }, 'Hola, soy ZAK Assistant')),
+      h('div', { class: 'iv-title' }, 'Hola, soy Kira')),
     scene('zak',
       h('div', { class: 'iv-zak' }, ...'ZAK'.split('').map((c, i) => h('span', { style: { animationDelay: `${120 + i * 140}ms` } }, c))),
       h('div', { class: 'iv-acro' }, ['Central', 'Automated', 'Kinetic', 'System'].map((w, i) =>
@@ -74,7 +74,7 @@ function buildStage() {
     scene('go',
       h('div', { class: 'iv-iso iv-iso-sm' }, h('img', { src: ISO_WHITE, alt: '' })),
       h('div', { class: 'iv-title' }, 'Empecemos'),
-      h('div', { class: 'iv-sub' }, '≈ 35 minutos · puedes editar cualquier respuesta'),
+      h('div', { class: 'iv-sub' }, 'Solo lo de tus módulos · puedes editar cualquier respuesta'),
       h('div', { class: 'iv-tag' }, 'Inteligencia que construye.')),
   );
 }

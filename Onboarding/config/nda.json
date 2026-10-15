@@ -1,0 +1,28 @@
+{
+  "_comment": "Acuerdo de confidencialidad mutuo que el cliente acepta al inicio del onboarding (pregunta N.1). BORRADOR: debe revisarlo el asesor legal de iTech antes de usarlo con clientes. Si cambias el texto, sube la versión: cada aceptación queda registrada con la versión y la huella SHA-256 del texto aceptado.",
+  "version": "1.0",
+  "title": "Acuerdo de Confidencialidad y Protección de Datos",
+  "subtitle": "Onboarding e implementación de ZAK",
+  "parties": "Entre iTech C.A. («iTech»), desarrolladora del sistema ZAK, y la empresa identificada en este onboarding («el Cliente»), representada por la persona que acepta este acuerdo, se establece lo siguiente:",
+  "summary": [
+    "Tu información solo se usa para configurar y operar ZAK, y solo la ve el equipo de iTech que la necesita.",
+    "No la compartimos con terceros ni la usamos para otros fines.",
+    "A cambio, el Cliente mantiene en reserva el sistema ZAK, su documentación y las condiciones comerciales de iTech.",
+    "Puedes pedir que eliminemos tu información al terminar la relación."
+  ],
+  "clauses": [
+    { "title": "1. Objeto", "text": "Proteger la información que ambas partes comparten durante el onboarding, la implementación y el uso de ZAK." },
+    { "title": "2. Información confidencial del Cliente", "text": "Datos de la empresa y de sus clientes, contactos, empleados y proveedores; precios, procesos, estrategias, información financiera, documentos adjuntos y cualquier dato personal que el Cliente comparta en este onboarding o después." },
+    { "title": "3. Información confidencial de iTech", "text": "El sistema ZAK, su funcionamiento, arquitectura, metodología de implementación, documentación, materiales técnicos, accesos de prueba, precios y condiciones comerciales." },
+    { "title": "4. Obligaciones de ambas partes", "text": "Usar la información recibida solo para la implementación y prestación del servicio; no divulgarla a terceros; darle acceso solo al personal que la necesite y que esté sujeto a obligaciones de confidencialidad equivalentes; y protegerla con medidas de seguridad razonables." },
+    { "title": "5. Datos personales", "text": "iTech trata los datos personales que el Cliente comparte únicamente para configurar y operar ZAK. El Cliente declara que cuenta con la autorización necesaria de los titulares para compartirlos. iTech atenderá las solicitudes de acceso, rectificación o eliminación de esos datos, conforme a la legislación venezolana aplicable, incluido el derecho de habeas data." },
+    { "title": "6. Claves y accesos", "text": "En este onboarding no se solicitan contraseñas ni claves de API. Los accesos necesarios se configuran por un canal seguro acordado entre las partes." },
+    { "title": "7. Excepciones", "text": "No es confidencial la información que sea pública sin culpa de la parte receptora, que esta ya conociera legítimamente, que desarrolle de forma independiente o que deba entregar por orden de una autoridad competente. En este último caso, avisará a la otra parte cuando la ley lo permita." },
+    { "title": "8. Propiedad y uso del sistema", "text": "Cada parte conserva la propiedad de su información. El Cliente no podrá copiar, descompilar, replicar ni usar ZAK, su documentación o sus materiales para desarrollar productos o servicios competidores." },
+    { "title": "9. Vigencia", "text": "Este acuerdo rige desde su aceptación, durante toda la relación comercial y por tres (3) años después de terminada. Para los datos personales y los secretos comerciales, la obligación se mantiene mientras conserven ese carácter." },
+    { "title": "10. Devolución o eliminación", "text": "Al terminar la relación, y a solicitud de la otra parte, cada parte devolverá o eliminará la información confidencial recibida, salvo la que deba conservar por obligación legal." },
+    { "title": "11. Incumplimiento", "text": "La parte que incumpla este acuerdo responderá por los daños y perjuicios causados, conforme a la ley." },
+    { "title": "12. Ley aplicable", "text": "Este acuerdo se rige por las leyes de la República Bolivariana de Venezuela. Cualquier controversia se someterá a los tribunales competentes de la República." },
+    { "title": "13. Aceptación electrónica", "text": "La aceptación de este acuerdo por medios electrónicos tiene la misma validez que una firma autógrafa, conforme al Decreto con Fuerza de Ley sobre Mensajes de Datos y Firmas Electrónicas. Quien acepta declara tener facultad para obligar al Cliente. Queda registro de la fecha y hora, la versión del acuerdo y los datos de quien acepta." }
+  ]
+}

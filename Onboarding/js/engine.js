@@ -5,6 +5,15 @@
 
 /* ---------- Condiciones ---------- */
 
+/** Adjuntos opcionales que acepta cualquier pregunta (documento o imagen de respaldo). */
+export const ATTACH = {
+  id: '__adjuntos', type: 'file', label: 'Adjuntos', multiple: true, required: false, maxMB: 10,
+  accept: '.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.ppt,.pptx,image/*,audio/*',
+};
+
+/** ¿La respuesta incluye una nota de voz? (sustituye a las respuestas escritas). */
+export const hasAudio = (draft) => [].concat(draft?.[ATTACH.id] || []).some((f) => /\.(webm|ogg|m4a|mp3|wav|aac)$/i.test(f.name || '') || /^audio\//.test(f.type || ''));
+
 const isEmpty = (v) =>
   v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0);
 
@@ -14,6 +23,7 @@ const isEmpty = (v) =>
  */
 export function evalCondition(cond, answers, local) {
   if (!cond) return true;
+  if (cond.all) return cond.all.every((c) => evalCondition(c, answers, local));
   const src = cond.q ? answers[cond.q] || {} : local || {};
   const v = src[cond.f];
   switch (cond.op) {
@@ -22,6 +32,7 @@ export function evalCondition(cond, answers, local) {
     case 'in': return cond.value.includes(v);
     case 'notIn': return !cond.value.includes(v ?? '');
     case 'includes': return Array.isArray(v) && v.includes(cond.value);
+    case 'notIncludes': return !(Array.isArray(v) && v.includes(cond.value));
     case 'hasAnyExcept': return Array.isArray(v) && v.some((x) => !cond.value.includes(x));
     case 'notEmpty': return !isEmpty(v);
     default: return true;
@@ -33,7 +44,22 @@ export function createEngine(schema) {
   const byId = Object.fromEntries(questions.map((q) => [q.id, q]));
   const sectionById = Object.fromEntries(sections.map((s) => [s.id, s]));
 
-  const isVisible = (q, answers) => evalCondition(q.showIf, answers);
+  /**
+   * Módulos a los que pertenece una pregunta: los suyos («modules») o los de su sección.
+   * Sin módulos = pregunta general, se hace siempre.
+   */
+  const gate = schema.meta?.moduleGate;
+  const modulesOf = (q) => q.modules || sectionById[q.section]?.modules || null;
+
+  /** Solo se pregunta lo de los módulos contratados (si ya se eligieron). */
+  const moduleAllowed = (q, answers) => {
+    const mods = modulesOf(q);
+    if (!gate || !mods) return true;
+    const chosen = answers[gate.q]?.[gate.f] || [];
+    return mods.some((m) => chosen.includes(m));
+  };
+
+  const isVisible = (q, answers) => moduleAllowed(q, answers) && evalCondition(q.showIf, answers);
 
   const visibleFields = (q, answers, draft) =>
     q.fields.filter((f) => evalCondition(f.showIf, answers, draft));
@@ -58,16 +84,45 @@ export function createEngine(schema) {
   const RE_RIF = /^[VEJPG]-?\d{7,9}-?\d$/i;
   const RE_TAXID = /^[A-Z0-9][A-Z0-9.\- ]{4,19}$/i;
 
+  /** Grupos de KPIs de los módulos contratados (si ninguno aplica, todos). */
+  function kpiGroupsFor(field, answers) {
+    const chosen = gate ? answers[gate.q]?.[gate.f] || [] : [];
+    const mine = field.groups.filter((g) => !g.modules || g.modules.some((m) => chosen.includes(m)));
+    return mine.length ? mine : field.groups;
+  }
+
+  /** Tablas de filas (responsables, usuarios, citas…): valida cada columna de cada fila con datos. */
+  function validateRows(field, value) {
+    const rows = (value || []).filter((r) => Object.values(r).some((x) => !isEmpty(x)));
+    if (field.required !== false && !rows.length) return `Agrega al menos ${field.minLabel || 'una fila'}.`;
+    for (const [i, r] of rows.entries()) {
+      for (const c of field.columns) {
+        const v = r[c.id];
+        const needed = c.requiredIf ? r[c.requiredIf.col] === c.requiredIf.eq : c.required !== false;
+        if (needed && isEmpty(typeof v === 'string' ? v.trim() : v)) return `${field.rowLabel || 'Fila'} ${i + 1}: completa «${c.label}».`;
+        if (!isEmpty(v) && c.type === 'email' && !RE_EMAIL.test(String(v).trim())) return `${field.rowLabel || 'Fila'} ${i + 1}: revisa el correo.`;
+        if (!isEmpty(v) && c.type === 'phone' && String(v).replace(/\D/g, '').length < 8) return `${field.rowLabel || 'Fila'} ${i + 1}: revisa el teléfono.`;
+      }
+    }
+    return null;
+  }
+
   function validateField(field, value, draft) {
     const required = field.required !== false;
     const t = typeof value === 'string' ? value.trim() : value;
 
     if (field.type === 'modules') return required && isEmpty(t) ? 'Elige al menos un módulo.' : null;
+    if (field.type === 'notice') return null;
+    if (field.type === 'kpiGroups') return null; // se valida en validate(): necesita los grupos visibles
+    if (field.type === 'multiselect') return required && isEmpty(t) ? 'Elige al menos una opción.' : null;
+    if (field.type === 'rows') return validateRows(field, t);
+    if (field.type === 'consent') return required && !t ? 'Debes marcar esta casilla para continuar.' : null;
     if (field.type === 'multi' || field.type === 'single' || field.type === 'select') {
       if (required && isEmpty(t)) return field.type === 'multi' ? 'Elige al menos una opción.' : 'Elige una opción.';
       const other = draft[`${field.id}__other`];
       const choseOther = field.type === 'multi' ? (t || []).includes('Otro') : t === 'Otro' && field.other;
-      if (choseOther && isEmpty(other?.trim?.())) return 'Cuéntanos cuál es la otra opción.';
+      const catalog = draft[`${field.id}__cat`] || [];
+      if (choseOther && isEmpty(other?.trim?.()) && !catalog.length) return field.otherCatalog ? 'Elige un indicador de la lista o escribe cuál.' : 'Cuéntanos cuál es la otra opción.';
       return null;
     }
     if (field.type === 'file') {
@@ -119,6 +174,11 @@ export function createEngine(schema) {
           return RE_RIF.test(up) ? null : 'Revisa el RIF. El formato es J-12345678-9.';
         return RE_TAXID.test(up) ? null : 'Revisa el ID fiscal: usa solo letras, números y guiones.';
       }
+      case 'idcard': {
+        const up = t.toUpperCase().replace(/\s|\./g, '');
+        if (/^[VE]-?\d/.test(up)) return /^[VE]-?\d{6,9}$/.test(up) ? null : 'Revisa la cédula. El formato es V-12345678.';
+        return /^[A-Z0-9-]{5,20}$/.test(up) ? null : 'Revisa el documento de identidad.';
+      }
       case 'url': {
         const withProto = /^https?:\/\//i.test(t) ? t : `https://${t}`;
         try {
@@ -157,9 +217,26 @@ export function createEngine(schema) {
   function validate(q, draft, answers) {
     const errors = {};
     const fields = visibleFields(q, answers, draft);
+    const audio = hasAudio(draft);
     for (const f of fields) {
+      // Una nota de voz adjunta sustituye a las respuestas escritas.
+      if (audio && ['text', 'textarea'].includes(f.type)) continue;
       const msg = validateField(f, draft[f.id], draft);
       if (msg) errors[f.id] = msg;
+    }
+    // KPIs por módulo: al menos un indicador; y por cada grupo con indicadores, su frecuencia y su canal.
+    for (const f of fields.filter((x) => x.type === 'kpiGroups')) {
+      const v = draft[f.id] || {};
+      const groups = kpiGroupsFor(f, answers).filter((g) => (v[g.id] || []).length);
+      if (!groups.length) { errors[f.id] = 'Elige al menos un indicador.'; continue; }
+      const freq = draft[`${f.id}__freq`] || {};
+      const canal = draft[`${f.id}__canal`] || {};
+      const g = groups.find((x) => !(freq[x.id] || []).length || !(canal[x.id] || []).length);
+      if (g) errors[f.id] = `Elige la frecuencia y el canal de «${g.title}».`;
+    }
+    // «Responde al menos uno de estos campos» (p. ej. organigrama: archivo o descripción).
+    if (q.requireOneOf && !audio && q.requireOneOf.every((id) => isEmpty(draft[id]))) {
+      errors[q.requireOneOf[0]] = q.requireOneOfMsg || (q.fields.some((f) => f.type === 'file') ? 'Adjunta un archivo o escribe una descripción.' : 'Elige al menos una opción.');
     }
     for (const f of fields.filter((x) => x.type === 'userRoles')) {
       const users = (answers[f.source.q]?.[f.source.f] || []).filter((u) => u.nombre);
@@ -208,7 +285,10 @@ export function createEngine(schema) {
     const v = draft[field.id];
     if (field.type === 'modules') return (v || []).map((id) => field.labels[id]).filter(Boolean);
     const other = (draft[`${field.id}__other`] || '').trim();
-    if (field.type === 'multi') return (v || []).map((x) => (x === 'Otro' ? other : x)).filter(Boolean);
+    if (field.type === 'multi') {
+      const cat = draft[`${field.id}__cat`] || [];
+      return (v || []).flatMap((x) => (x === 'Otro' ? [...cat, other] : [x])).filter(Boolean);
+    }
     return v === 'Otro' ? other : v;
   }
 
@@ -216,19 +296,41 @@ export function createEngine(schema) {
     const v = draft[field.id];
     if (isEmpty(v)) return null;
     switch (field.type) {
-      case 'multi': return choiceValue(field, draft).join(', ');
+      case 'multi': {
+        const det = draft[`${field.id}__det`] || {};
+        return choiceValue(field, draft).map((x) => (det[x]?.trim() ? `${x} (${det[x].trim()})` : x)).join(', ');
+      }
+      case 'multiselect': return [].concat(v).join(', ');
+      case 'notice': return null;
+      case 'kpiGroups': {
+        const freq = draft[`${field.id}__freq`] || {};
+        const canal = draft[`${field.id}__canal`] || {};
+        return kpiGroupsFor(field, answers).filter((g) => (v[g.id] || []).length)
+          .map((g) => `${g.title}: ${v[g.id].join(', ')} · Frecuencia: ${(freq[g.id] || []).join(', ') || '—'} · Canal: ${(canal[g.id] || []).join(', ') || '—'}`)
+          .join('\n') || null;
+      }
+      case 'rows':
+        return v.filter((r) => Object.values(r).some((x) => !isEmpty(x)))
+          .map((r) => field.columns.map((c) => [].concat(r[c.id] ?? []).join(', ')).filter(Boolean).join(' · ')).join('\n');
       case 'modules': return choiceValue(field, draft).join(', ');
       case 'single':
       case 'select': return choiceValue(field, draft);
       case 'number': return fmtNumber(v) + (/\(%\)/.test(field.label) ? ' %' : '');
       case 'date': return fmtDate(v);
+      case 'consent': {
+        const d = new Date(v);
+        return Number.isNaN(d.getTime()) ? 'Aceptado' : `Aceptado el ${d.toLocaleString('es-VE', { dateStyle: 'long', timeStyle: 'short' })}`;
+      }
       case 'file': return (Array.isArray(v) ? v : [v]).map((x) => x.name).join(', ');
       case 'users':
         return v.filter((r) => r.nombre || r.correo).map((r) => `${r.nombre} ${r.apellido} <${r.correo}>`).join('; ');
       case 'plans':
         return v.filter((r) => r.nombre).map((r) => `${r.nombre} · ${fmtNumber(r.precio)} · ${r.ciclo}`).join('; ');
-      case 'grid':
-        return field.rows.map((r) => `${r}: ${v[r] || '—'}`).join('\n');
+      case 'grid': {
+        const det = draft[`${field.id}__det`] || {};
+        const cons = draft[`${field.id}__cons`] || {};
+        return field.rows.map((r) => `${r}: ${v[r] || '—'}${det[r]?.trim() ? ` — ${det[r].trim()}` : ''}${cons[r] ? ' [pide consultoría]' : ''}`).join('\n');
+      }
       case 'userRoles': {
         const users = answers[field.source.q]?.[field.source.f] || [];
         return users
@@ -244,9 +346,19 @@ export function createEngine(schema) {
   /** Lista [{label, value}] con los campos visibles respondidos. */
   function formatAnswer(q, answers) {
     const draft = answers[q.id] || {};
-    return visibleFields(q, answers, draft)
+    const fields = [...visibleFields(q, answers, draft), ATTACH];
+    return fields
       .map((f) => ({ label: f.label, value: formatField(f, draft, answers), field: f }))
       .filter((x) => x.value);
+  }
+
+  /** «ID · archivo (enlace)» de todas las preguntas con adjuntos, para el ítem de control del Form. */
+  function attachmentsText(answers) {
+    return flow(answers)
+      .map((q) => ({ q, files: [].concat(answers[q.id]?.[ATTACH.id] || []) }))
+      .filter((x) => x.files.length)
+      .map(({ q, files }) => `${q.id} · ${files.map((f) => `${f.name}${f.url ? ` (${f.url})` : ''}`).join(', ')}`)
+      .join('\n');
   }
 
   /* ---------- Serialización para Google Forms ---------- */
@@ -271,7 +383,7 @@ export function createEngine(schema) {
       return f.rows.map((r) => draft[f.id]?.[r] || '');
     }
     const parts = formatAnswer(q, answers);
-    if (q.formType === 'TEXT') return parts.map((p) => p.value).join(' ');
+    if (q.formType === 'TEXT') return parts.filter((p) => p.field !== ATTACH).map((p) => p.value).join(' ');
     // PARAGRAPH_TEXT: una línea por parte; los archivos incluyen su enlace de Drive.
     return parts
       .map(({ label, value, field }) => {
@@ -286,7 +398,7 @@ export function createEngine(schema) {
 
   return {
     sections, questions, byId, sectionById,
-    isVisible, visibleFields, flow, nextPending, progress, isAnswered,
-    validate, softCheck, formatAnswer, serialize, isEmpty,
+    isVisible, visibleFields, flow, nextPending, progress, isAnswered, modulesOf,
+    validate, softCheck, formatAnswer, serialize, isEmpty, attachmentsText, kpiGroupsFor,
   };
 }

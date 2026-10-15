@@ -8,22 +8,41 @@
   },
   "checklist": {
     "promptTemplate": "Revisemos lo que necesitas para {module}. ¿Con qué cuentas hoy?",
-    "hint": "Marca cada requisito. Si todavía no lo tienes, no pasa nada: así sabemos por dónde empezar.",
+    "hint": "Para cada requisito, elige la opción que mejor te describa. Según tu respuesta te pediremos un detalle.",
     "states": [
       {
         "id": "tengo",
-        "label": "Lo tengo",
-        "score": 1
+        "label": "Sí, lo tengo",
+        "score": 1,
+        "input": {
+          "label": "Detalle (opcional)",
+          "placeholder": "Ej.: dónde está, cómo se llama o quién lo tiene"
+        }
       },
       {
         "id": "proceso",
-        "label": "En proceso",
-        "score": 0.5
+        "label": "Lo estoy preparando",
+        "score": 0.5,
+        "input": {
+          "label": "¿Para cuándo lo tendrás?",
+          "placeholder": "Ej.: a fin de mes"
+        }
       },
       {
         "id": "no",
         "label": "No lo tengo",
-        "score": 0
+        "score": 0,
+        "input": {
+          "label": "¿Qué te falta?",
+          "placeholder": "Cuéntanos qué te falta o qué necesitas para tenerlo"
+        },
+        "consult": true
+      },
+      {
+        "id": "nose",
+        "label": "No sé / necesito orientación",
+        "score": 0,
+        "consult": true
       }
     ]
   },
@@ -73,6 +92,67 @@
               "id": "usuarios",
               "text": "Quién verá el panel (dueño, gerencia, líderes)"
             }
+          ],
+          "config": [
+            {
+              "prompt": "¿Qué indicadores quieres ver al entrar al panel de ZAK?",
+              "hint": "Abre la lista y elige los indicadores de tu vista principal.",
+              "fields": [
+                {
+                  "id": "tarjetas",
+                  "type": "multiselect",
+                  "label": "Indicadores de la vista principal",
+                  "options": [
+                    "Cobrado hoy",
+                    "Por cobrar",
+                    "Ventas del mes",
+                    "Conversaciones abiertas",
+                    "Llamadas atendidas y perdidas",
+                    "Citas de hoy",
+                    "Tareas por persona",
+                    "Costo y control de IA",
+                    "Tratos por etapa",
+                    "Tareas vencidas"
+                  ]
+                },
+                {
+                  "id": "otros",
+                  "type": "text",
+                  "label": "Otro indicador",
+                  "required": false,
+                  "placeholder": "Opcional"
+                }
+              ]
+            },
+            {
+              "prompt": "¿A qué objetivos mensuales responderá el panel?",
+              "fields": [
+                {
+                  "id": "cuantitativos",
+                  "type": "textarea",
+                  "label": "Objetivos cuantitativos",
+                  "placeholder": "Ej.: vender USD 40.000; cobrar el 90 %; 120 citas"
+                },
+                {
+                  "id": "cualitativos",
+                  "type": "textarea",
+                  "label": "Objetivos cualitativos",
+                  "required": false,
+                  "placeholder": "Opcional. Ej.: mejorar la atención por WhatsApp"
+                }
+              ]
+            },
+            {
+              "prompt": "¿Quiénes verán el panel y qué datos no deben ver algunos roles?",
+              "fields": [
+                {
+                  "id": "acceso",
+                  "type": "textarea",
+                  "label": "Quién ve qué",
+                  "placeholder": "Ej.: gerencia ve todo; vendedores no ven cobranza ni costos"
+                }
+              ]
+            }
           ]
         },
         {
@@ -96,6 +176,91 @@
             {
               "id": "cuentas",
               "text": "Acceso a tus redes y cuentas publicitarias (Meta, TikTok, Google)"
+            }
+          ],
+          "config": [
+            {
+              "prompt": "¿Quién aprueba los anuncios antes de publicarlos?",
+              "hint": "ZAK pide aprobación interna antes de publicar.",
+              "fields": [
+                {
+                  "id": "aprobador",
+                  "type": "text",
+                  "label": "Responsable de aprobación",
+                  "placeholder": "Nombre y cargo"
+                }
+              ]
+            },
+            {
+              "prompt": "¿En qué idiomas y países se publicarán las campañas?",
+              "fields": [
+                {
+                  "id": "idiomas",
+                  "type": "text",
+                  "label": "Idiomas",
+                  "placeholder": "Ej.: español, inglés"
+                },
+                {
+                  "id": "paises",
+                  "type": "text",
+                  "label": "Países",
+                  "placeholder": "Ej.: Venezuela, Colombia"
+                }
+              ]
+            },
+            {
+              "prompt": "¿Cuál es el presupuesto mensual aproximado de publicidad?",
+              "fields": [
+                {
+                  "id": "presupuesto",
+                  "type": "number",
+                  "label": "Presupuesto mensual",
+                  "min": 0
+                },
+                {
+                  "id": "moneda",
+                  "type": "single",
+                  "label": "Moneda",
+                  "options": [
+                    "USD",
+                    "EUR",
+                    "Moneda local"
+                  ]
+                }
+              ]
+            },
+            {
+              "prompt": "¿Tienes manual de marca y material de tus productos?",
+              "fields": [
+                {
+                  "id": "manual",
+                  "type": "single",
+                  "label": "Manual de marca",
+                  "options": [
+                    "Sí, lo adjunto",
+                    "No, quiero crearlo con iTech",
+                    "No lo necesito"
+                  ],
+                  "consultOptions": [
+                    "No, quiero crearlo con iTech"
+                  ]
+                },
+                {
+                  "id": "material",
+                  "type": "file",
+                  "label": "Manual de marca y fotos o videos de productos",
+                  "accept": ".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,image/*,video/*",
+                  "maxMB": 10,
+                  "multiple": true,
+                  "required": false,
+                  "hint": "Puedes enviarlos después.",
+                  "showIf": {
+                    "f": "manual",
+                    "op": "eq",
+                    "value": "Sí, lo adjunto"
+                  }
+                }
+              ]
             }
           ]
         },
@@ -121,6 +286,80 @@
               "id": "canales",
               "text": "Canal de cada agente (WhatsApp, teléfono o web)"
             }
+          ],
+          "config": [
+            {
+              "prompt": "¿Qué límite de uso o gasto mensual de IA quieres fijar?",
+              "hint": "El panel muestra el costo de la IA. El tope evita sorpresas.",
+              "fields": [
+                {
+                  "id": "tope",
+                  "type": "textarea",
+                  "label": "Tope de uso o gasto",
+                  "placeholder": "Ej.: máximo USD 150 al mes; avisar al llegar al 80 %"
+                }
+              ]
+            },
+            {
+              "prompt": "¿En qué horario deben atender los agentes de IA?",
+              "hint": "Si eliges 24/7, no hace falta indicar días ni horas.",
+              "showIf": {
+                "q": "M.1",
+                "f": "modulos",
+                "op": "notIncludes",
+                "value": "call-center"
+              },
+              "fields": [
+                {
+                  "id": "dias",
+                  "type": "multi",
+                  "label": "Días",
+                  "options": [
+                    "24/7",
+                    "Lun",
+                    "Mar",
+                    "Mié",
+                    "Jue",
+                    "Vie",
+                    "Sáb",
+                    "Dom"
+                  ],
+                  "exclusive": [
+                    "24/7"
+                  ]
+                },
+                {
+                  "id": "desde",
+                  "type": "time",
+                  "label": "Desde",
+                  "showIf": {
+                    "f": "dias",
+                    "op": "notIncludes",
+                    "value": "24/7"
+                  }
+                },
+                {
+                  "id": "hasta",
+                  "type": "time",
+                  "label": "Hasta",
+                  "showIf": {
+                    "f": "dias",
+                    "op": "notIncludes",
+                    "value": "24/7"
+                  }
+                },
+                {
+                  "id": "fuera",
+                  "type": "textarea",
+                  "label": "¿Qué debe indicar el agente autorizado fuera del horario de atención?",
+                  "showIf": {
+                    "f": "dias",
+                    "op": "notIncludes",
+                    "value": "24/7"
+                  }
+                }
+              ]
+            }
           ]
         },
         {
@@ -140,6 +379,57 @@
             {
               "id": "etiquetas",
               "text": "Etiquetas o segmentos que usan hoy"
+            }
+          ],
+          "config": [
+            {
+              "prompt": "¿Qué datos guardan de cada contacto?",
+              "fields": [
+                {
+                  "id": "campos",
+                  "type": "multi",
+                  "label": "Campos del contacto",
+                  "options": [
+                    "Nombre",
+                    "Teléfono",
+                    "Correo",
+                    "Empresa",
+                    "Cédula o RIF",
+                    "Dirección",
+                    "Ciudad",
+                    "Fecha de nacimiento",
+                    "Origen del contacto"
+                  ],
+                  "other": true
+                }
+              ]
+            },
+            {
+              "prompt": "¿Qué etiquetas o segmentos usan para clasificar a los contactos?",
+              "fields": [
+                {
+                  "id": "etiquetas",
+                  "type": "textarea",
+                  "label": "Etiquetas o segmentos",
+                  "placeholder": "Ej.: VIP, mayorista, prospecto frío"
+                }
+              ]
+            },
+            {
+              "prompt": "Si un contacto llega repetido, ¿cómo lo unimos?",
+              "fields": [
+                {
+                  "id": "duplicados",
+                  "type": "single",
+                  "label": "Contactos duplicados",
+                  "options": [
+                    "Unir por teléfono",
+                    "Unir por correo",
+                    "Unir por teléfono o correo",
+                    "Revisarlos a mano"
+                  ]
+                }
+              ]
             }
           ]
         },
@@ -173,6 +463,66 @@
               "id": "plantillas",
               "text": "Mensajes de plantilla definidos (recordatorios, cobros, promociones)"
             }
+          ],
+          "config": [
+            {
+              "prompt": "Además de WhatsApp e Instagram, ¿qué canales conectamos al inbox?",
+              "fields": [
+                {
+                  "id": "canales",
+                  "type": "multi",
+                  "label": "Otros canales",
+                  "options": [
+                    "Messenger",
+                    "Correo Gmail",
+                    "Correo Outlook",
+                    "Chat de la web",
+                    "Ninguno más"
+                  ],
+                  "exclusive": [
+                    "Ninguno más"
+                  ]
+                }
+              ]
+            },
+            {
+              "prompt": "¿Cómo se reparten las conversaciones entre las personas del equipo?",
+              "fields": [
+                {
+                  "id": "reparto",
+                  "type": "single",
+                  "label": "Reparto de conversaciones",
+                  "options": [
+                    "Por turno",
+                    "Round-robin",
+                    "Por área",
+                    "Manual"
+                  ],
+                  "other": true
+                }
+              ]
+            },
+            {
+              "prompt": "¿Tienen respuestas rápidas o mensajes predefinidos que usan hoy?",
+              "fields": [
+                {
+                  "id": "respuestas",
+                  "type": "textarea",
+                  "label": "Respuestas rápidas",
+                  "required": false,
+                  "placeholder": "Opcional. Escríbelas o súbelas en un archivo."
+                },
+                {
+                  "id": "archivo",
+                  "type": "file",
+                  "label": "Archivo con respuestas rápidas",
+                  "accept": ".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,image/*",
+                  "maxMB": 10,
+                  "multiple": true,
+                  "required": false
+                }
+              ]
+            }
           ]
         },
         {
@@ -190,16 +540,88 @@
               "text": "Guiones aprobados (citas, cobranza, prospección)"
             },
             {
-              "id": "horario",
-              "text": "Horario de atención y qué hacer fuera de él"
-            },
-            {
               "id": "voz",
               "text": "Voz elegida (de catálogo, o audio de 1 a 2 minutos con autorización)"
             },
             {
               "id": "grabacion",
               "text": "Política de grabación y aviso al cliente"
+            }
+          ],
+          "config": [
+            {
+              "prompt": "¿Usarán un número nuevo o el actual? ¿De qué país y ciudad?",
+              "fields": [
+                {
+                  "id": "numero",
+                  "type": "single",
+                  "label": "Número del call center",
+                  "options": [
+                    "Número nuevo",
+                    "Portar el número actual",
+                    "Aún no sé"
+                  ]
+                },
+                {
+                  "id": "ubicacion",
+                  "type": "text",
+                  "label": "País y ciudad del número",
+                  "placeholder": "Ej.: Venezuela, Caracas"
+                }
+              ]
+            },
+            {
+              "prompt": "Cuando la IA transfiere a un humano, ¿a qué número o persona va la llamada?",
+              "fields": [
+                {
+                  "id": "transferencia",
+                  "type": "text",
+                  "label": "Destino de la transferencia",
+                  "placeholder": "Nombre, área y número"
+                }
+              ]
+            },
+            {
+              "prompt": "¿Tienes guiones para las llamadas?",
+              "noAttach": true,
+              "fields": [
+                {
+                  "id": "guiones",
+                  "type": "single",
+                  "label": "Guiones",
+                  "options": [
+                    "Sí, los adjunto",
+                    "Necesito consultoría de iTech para elaborarlos",
+                    "Aún no los necesito"
+                  ],
+                  "consultOptions": [
+                    "Necesito consultoría de iTech para elaborarlos"
+                  ]
+                },
+                {
+                  "id": "archivos",
+                  "type": "file",
+                  "label": "Guiones de llamada",
+                  "accept": ".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,image/*",
+                  "maxMB": 10,
+                  "multiple": true,
+                  "showIf": {
+                    "f": "guiones",
+                    "op": "eq",
+                    "value": "Sí, los adjunto"
+                  }
+                },
+                {
+                  "id": "listas",
+                  "type": "notice",
+                  "icon": "shield",
+                  "text": "Las listas de clientes para llamadas salientes no se suben aquí. Envíalas formalmente a zak@itech.com.ve (tenemos un NDA: tus datos están seguros).",
+                  "link": {
+                    "label": "Escribir a zak@itech.com.ve",
+                    "href": "mailto:zak@itech.com.ve?subject=Listas%20de%20llamadas%20para%20ZAK"
+                  }
+                }
+              ]
             }
           ]
         },
@@ -225,6 +647,51 @@
               "id": "seguimiento",
               "text": "Tiempos de seguimiento por etapa"
             }
+          ],
+          "config": [
+            {
+              "prompt": "¿Qué embudos necesitas y cuáles son sus etapas?",
+              "hint": "Puedes tener un embudo por área: ventas, postventa, cobranza, soporte o reclutamiento.",
+              "fields": [
+                {
+                  "id": "embudos",
+                  "type": "textarea",
+                  "label": "Embudos y etapas",
+                  "placeholder": "Ej.: Ventas: Nuevo → Contactado → Cotizado → Negociación → Ganado / Perdido"
+                }
+              ]
+            },
+            {
+              "prompt": "¿Qué datos debe tener cada trato?",
+              "fields": [
+                {
+                  "id": "datos",
+                  "type": "multi",
+                  "label": "Datos del trato",
+                  "options": [
+                    "Monto",
+                    "Producto o servicio",
+                    "Fecha estimada de cierre",
+                    "Origen",
+                    "Vendedor asignado",
+                    "Probabilidad"
+                  ],
+                  "other": true
+                }
+              ]
+            },
+            {
+              "prompt": "¿Por qué motivos se pierden las ventas hoy?",
+              "hint": "Los usamos como opciones al marcar un trato como perdido.",
+              "fields": [
+                {
+                  "id": "perdida",
+                  "type": "textarea",
+                  "label": "Motivos de pérdida",
+                  "placeholder": "Ej.: precio, sin respuesta, compró a la competencia"
+                }
+              ]
+            }
           ]
         },
         {
@@ -249,7 +716,8 @@
               "id": "formularios",
               "text": "Formularios externos que quieren conectar (Google Forms, Typeform)"
             }
-          ]
+          ],
+          "config": []
         },
         {
           "id": "ventas",
@@ -281,6 +749,34 @@
               "id": "pasarela",
               "text": "Cuenta bancaria o pasarela activa (Stripe, Mercado Pago, Conekta)"
             }
+          ],
+          "config": [
+            {
+              "prompt": "Sube tu catálogo o lista de precios para cargarlo en ZAK.",
+              "fields": [
+                {
+                  "id": "catalogo",
+                  "type": "file",
+                  "label": "Catálogo o lista de precios",
+                  "accept": ".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,image/*",
+                  "maxMB": 10,
+                  "multiple": true,
+                  "required": false,
+                  "hint": "Opcional, pero acelera la configuración de cotizaciones."
+                }
+              ]
+            },
+            {
+              "prompt": "¿Qué numeración usan para cotizaciones y facturas?",
+              "fields": [
+                {
+                  "id": "numeracion",
+                  "type": "text",
+                  "label": "Formato de numeración",
+                  "placeholder": "Ej.: COT-2026-0001; última factura N.º 1520"
+                }
+              ]
+            }
           ]
         },
         {
@@ -288,24 +784,8 @@
           "name": "Email Marketing",
           "icon": "mail",
           "desc": "Campañas de correo segmentadas, con tu marca.",
-          "requirements": [
-            {
-              "id": "correo",
-              "text": "Correo corporativo con acceso de administrador"
-            },
-            {
-              "id": "optin",
-              "text": "Base de contactos con consentimiento (opt-in)"
-            },
-            {
-              "id": "segmentos",
-              "text": "Segmentos de clientes definidos"
-            },
-            {
-              "id": "marca",
-              "text": "Manual de marca para las plantillas"
-            }
-          ]
+          "requirements": [],
+          "config": []
         },
         {
           "id": "calendario",
@@ -324,6 +804,153 @@
             {
               "id": "disponibilidad",
               "text": "Horarios disponibles de cada persona"
+            }
+          ],
+          "config": [
+            {
+              "prompt": "¿Qué tipos de cita manejan, cuánto dura cada una y son presenciales o virtuales?",
+              "fields": [
+                {
+                  "id": "tipos",
+                  "type": "rows",
+                  "label": "Tipos de cita",
+                  "rowLabel": "Tipo de cita",
+                  "addLabel": "Agregar tipo de cita",
+                  "minLabel": "un tipo de cita",
+                  "columns": [
+                    {
+                      "id": "tipo",
+                      "label": "Tipo de cita",
+                      "type": "text",
+                      "placeholder": "Ej.: demostración"
+                    },
+                    {
+                      "id": "duracion",
+                      "label": "Duración",
+                      "type": "select",
+                      "options": [
+                        "15 min",
+                        "30 min",
+                        "45 min",
+                        "1 hora",
+                        "1 h 30 min",
+                        "2 horas",
+                        "Más de 2 horas"
+                      ]
+                    },
+                    {
+                      "id": "modalidad",
+                      "label": "Modalidad",
+                      "type": "select",
+                      "options": [
+                        "Presencial",
+                        "Virtual",
+                        "Ambas"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "prompt": "¿Quiénes reciben citas y en qué horario?",
+              "fields": [
+                {
+                  "id": "agendas",
+                  "type": "rows",
+                  "label": "Agendas",
+                  "rowLabel": "Persona",
+                  "addLabel": "Agregar persona",
+                  "minLabel": "una persona",
+                  "columns": [
+                    {
+                      "id": "persona",
+                      "label": "Nombre",
+                      "type": "text"
+                    },
+                    {
+                      "id": "dias",
+                      "label": "Días",
+                      "type": "multiselect",
+                      "options": [
+                        "Lun",
+                        "Mar",
+                        "Mié",
+                        "Jue",
+                        "Vie",
+                        "Sáb",
+                        "Dom"
+                      ]
+                    },
+                    {
+                      "id": "desde",
+                      "label": "Desde",
+                      "type": "time"
+                    },
+                    {
+                      "id": "hasta",
+                      "label": "Hasta",
+                      "type": "time"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "prompt": "¿Cuándo y por dónde se envían los recordatorios?",
+              "fields": [
+                {
+                  "id": "anticipacion",
+                  "type": "single",
+                  "label": "Anticipación",
+                  "options": [
+                    "24 horas antes",
+                    "2 horas antes",
+                    "1 hora antes",
+                    "24 h y 1 h antes"
+                  ],
+                  "other": true
+                },
+                {
+                  "id": "canal",
+                  "type": "multi",
+                  "label": "Canal del recordatorio",
+                  "options": [
+                    "WhatsApp",
+                    "Correo"
+                  ]
+                },
+                {
+                  "id": "detalle",
+                  "type": "textarea",
+                  "label": "Detalle de los recordatorios",
+                  "required": false,
+                  "placeholder": "Opcional. Ej.: texto que debe decir el recordatorio"
+                }
+              ]
+            },
+            {
+              "prompt": "¿Qué calendario usan hoy?",
+              "fields": [
+                {
+                  "id": "calendario",
+                  "type": "single",
+                  "label": "Calendario actual",
+                  "options": [
+                    "Google Calendar",
+                    "Outlook",
+                    "Ninguno"
+                  ],
+                  "other": true
+                },
+                {
+                  "id": "cuenta",
+                  "type": "text",
+                  "label": "Cuenta o correo del calendario",
+                  "required": false,
+                  "placeholder": "Opcional. Ej.: agenda@tuempresa.com"
+                }
+              ]
             }
           ]
         },
@@ -349,6 +976,103 @@
               "id": "supervisores",
               "text": "Supervisor o líder de cada equipo"
             }
+          ],
+          "config": [
+            {
+              "prompt": "Muéstrame tu organigrama en el Workforce.",
+              "hint": "Adjunta una imagen o PDF, o descríbelo con tus palabras.",
+              "requireOneOf": [
+                "archivo",
+                "descripcion"
+              ],
+              "fields": [
+                {
+                  "id": "archivo",
+                  "type": "file",
+                  "label": "Organigrama (imagen o PDF)",
+                  "accept": ".pdf,.png,.jpg,.jpeg,.webp,.xlsx,.ppt,.pptx",
+                  "maxMB": 10,
+                  "multiple": true,
+                  "required": false
+                },
+                {
+                  "id": "descripcion",
+                  "type": "textarea",
+                  "label": "O descríbelo",
+                  "required": false,
+                  "placeholder": "Ej.: Gerencia general → Ventas (Ana, 4 personas), Cobranza (Luis, 2 personas)"
+                }
+              ]
+            },
+            {
+              "prompt": "¿Qué indicadores se miden por colaborador?",
+              "fields": [
+                {
+                  "id": "indicadores",
+                  "type": "multi",
+                  "label": "Indicadores por colaborador",
+                  "options": [
+                    "Tareas completadas",
+                    "Tareas vencidas",
+                    "Tiempo de ejecución",
+                    "Tiempo vencido de la tarea",
+                    "Tiempo total en completar la tarea",
+                    "Ventas",
+                    "Llamadas",
+                    "Tiempo de respuesta"
+                  ],
+                  "other": true
+                }
+              ]
+            },
+            {
+              "prompt": "¿Qué resúmenes del equipo quieres recibir y con qué frecuencia?",
+              "fields": [
+                {
+                  "id": "pipeline",
+                  "type": "multiselect",
+                  "label": "Resúmenes del Pipeline",
+                  "options": [
+                    "Tratos nuevos",
+                    "Tratos por etapa",
+                    "Tratos ganados y perdidos",
+                    "Valor total del pipeline",
+                    "Tratos sin actividad",
+                    "Tasa de cierre por vendedor"
+                  ],
+                  "required": false
+                },
+                {
+                  "id": "ventas",
+                  "type": "multiselect",
+                  "label": "Resúmenes de Ventas",
+                  "options": [
+                    "Ventas del día",
+                    "Ventas por vendedor",
+                    "Cotizaciones enviadas",
+                    "Cobrado vs. por cobrar",
+                    "Ticket promedio",
+                    "Avance de la meta del mes"
+                  ],
+                  "required": false
+                },
+                {
+                  "id": "frecuencia",
+                  "type": "single",
+                  "label": "Frecuencia",
+                  "options": [
+                    "Diario",
+                    "Semanal",
+                    "Mensual"
+                  ]
+                }
+              ],
+              "requireOneOf": [
+                "pipeline",
+                "ventas"
+              ],
+              "hint": "Elige al menos un resumen de Pipeline o de Ventas."
+            }
           ]
         },
         {
@@ -372,6 +1096,64 @@
             {
               "id": "sistemas",
               "text": "Sistemas externos que quieren conectar"
+            }
+          ],
+          "config": [
+            {
+              "prompt": "¿Cuántos empleados tiene la empresa?",
+              "fields": [
+                {
+                  "id": "empleados",
+                  "type": "number",
+                  "label": "Número de empleados",
+                  "min": 1,
+                  "integer": true
+                }
+              ]
+            },
+            {
+              "prompt": "¿Qué procesos de Recursos Humanos quieres gestionar en ZAK?",
+              "fields": [
+                {
+                  "id": "procesos",
+                  "type": "multi",
+                  "label": "Procesos de RR. HH.",
+                  "options": [
+                    "Reclutamiento",
+                    "Ingreso de personal",
+                    "Vacaciones y permisos",
+                    "Evaluaciones",
+                    "Documentos del personal"
+                  ],
+                  "other": true
+                }
+              ]
+            },
+            {
+              "prompt": "Sube la lista de empleados con su cargo y área.",
+              "fields": [
+                {
+                  "id": "lista",
+                  "type": "file",
+                  "label": "Lista de empleados",
+                  "accept": ".xlsx,.xls,.csv,.pdf",
+                  "maxMB": 10,
+                  "multiple": true,
+                  "required": false,
+                  "hint": "Opcional. Puedes enviarla después."
+                }
+              ]
+            },
+            {
+              "prompt": "¿Usan algún sistema de nómina o RR. HH. que debamos conectar?",
+              "fields": [
+                {
+                  "id": "sistema",
+                  "type": "text",
+                  "label": "Sistema de nómina o RR. HH.",
+                  "placeholder": "Nombre del sistema, o «Ninguno»"
+                }
+              ]
             }
           ]
         },
@@ -397,6 +1179,48 @@
               "id": "soporte",
               "text": "Responsable que gestionará los casos con el soporte de ZAK"
             }
+          ],
+          "config": [
+            {
+              "prompt": "¿Qué grupos o canales internos necesitas crear en Cowork?",
+              "fields": [
+                {
+                  "id": "grupos",
+                  "type": "textarea",
+                  "label": "Grupos internos",
+                  "placeholder": "Ej.: Ventas, Cobranza, Gerencia, Proyecto apertura Valencia"
+                }
+              ]
+            },
+            {
+              "prompt": "¿Qué usan hoy para comunicarse internamente?",
+              "fields": [
+                {
+                  "id": "actual",
+                  "type": "single",
+                  "label": "Herramienta actual",
+                  "options": [
+                    "WhatsApp",
+                    "Slack",
+                    "Microsoft Teams",
+                    "Correo",
+                    "Ninguna"
+                  ],
+                  "other": true
+                }
+              ]
+            },
+            {
+              "prompt": "¿Quién abrirá los casos con el soporte de ZAK?",
+              "fields": [
+                {
+                  "id": "soporte",
+                  "type": "text",
+                  "label": "Responsable de soporte",
+                  "placeholder": "Nombre, cargo y correo"
+                }
+              ]
+            }
           ]
         },
         {
@@ -416,6 +1240,51 @@
             {
               "id": "duenos",
               "text": "Responsable por cada área"
+            }
+          ],
+          "config": [
+            {
+              "prompt": "Completa el Excel de Number Master: indicador, peso, meta y responsable por área.",
+              "noAttach": true,
+              "hint": "Es obligatorio para configurar Number Master. Si prefieres, lo completamos contigo en una consultoría.",
+              "fields": [
+                {
+                  "id": "plantilla",
+                  "type": "notice",
+                  "icon": "download",
+                  "text": "Descarga la plantilla, complétala y súbela aquí.",
+                  "link": {
+                    "label": "Descargar Excel de Number Master",
+                    "href": "assets/plantillas/plantilla-number-master-zak.xlsx",
+                    "download": "plantilla-number-master-zak.xlsx"
+                  }
+                },
+                {
+                  "id": "modo",
+                  "type": "single",
+                  "label": "¿Cómo lo prefieres?",
+                  "options": [
+                    "Lo completo y lo subo",
+                    "Prefiero completarlo con consultoría de iTech"
+                  ],
+                  "consultOptions": [
+                    "Prefiero completarlo con consultoría de iTech"
+                  ]
+                },
+                {
+                  "id": "excel",
+                  "type": "file",
+                  "label": "Excel de Number Master completado",
+                  "accept": ".xlsx,.xls,.csv",
+                  "maxMB": 10,
+                  "multiple": false,
+                  "showIf": {
+                    "f": "modo",
+                    "op": "eq",
+                    "value": "Lo completo y lo subo"
+                  }
+                }
+              ]
             }
           ]
         },
@@ -441,6 +1310,58 @@
               "id": "bancos",
               "text": "Acceso a los estados de cuenta bancarios"
             }
+          ],
+          "config": [
+            {
+              "prompt": "¿Qué cuentas bancarias se concilian?",
+              "fields": [
+                {
+                  "id": "nacionales",
+                  "type": "textarea",
+                  "label": "Cuentas bancarias nacionales a conciliar",
+                  "placeholder": "Ej.: Banesco corriente VES; Mercantil corriente USD"
+                },
+                {
+                  "id": "internacionales",
+                  "type": "textarea",
+                  "label": "Cuentas bancarias internacionales (si aplica)",
+                  "required": false,
+                  "placeholder": "Ej.: Bank of America USD; Zelle"
+                }
+              ]
+            },
+            {
+              "prompt": "¿Cómo obtendremos los movimientos bancarios?",
+              "hint": "Si el banco no tiene API pública, se trabaja con el estado de cuenta.",
+              "fields": [
+                {
+                  "id": "origen",
+                  "type": "single",
+                  "label": "Origen de los movimientos",
+                  "options": [
+                    "Conexión por API con el banco",
+                    "Archivo de estado de cuenta (Excel, CSV o PDF)",
+                    "Carga manual",
+                    "Aún no sé"
+                  ]
+                }
+              ]
+            },
+            {
+              "prompt": "Sube tu plan de cuentas o catálogo contable.",
+              "fields": [
+                {
+                  "id": "plan",
+                  "type": "file",
+                  "label": "Plan de cuentas",
+                  "accept": ".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,image/*",
+                  "maxMB": 10,
+                  "multiple": true,
+                  "required": false,
+                  "hint": "Opcional. Puedes enviarlo después."
+                }
+              ]
+            }
           ]
         },
         {
@@ -460,6 +1381,50 @@
             {
               "id": "aprobador",
               "text": "Responsable de aprobar cada automatización"
+            }
+          ],
+          "config": [
+            {
+              "prompt": "Describe los procesos repetitivos que quieres automatizar.",
+              "hint": "Usa la forma «cuando pasa…, entonces…».",
+              "fields": [
+                {
+                  "id": "procesos",
+                  "type": "textarea",
+                  "label": "Procesos a automatizar",
+                  "placeholder": "Ej.: cuando llega un formulario de la web, crear el contacto, asignarlo a un vendedor y enviarle un WhatsApp de bienvenida"
+                }
+              ]
+            },
+            {
+              "prompt": "¿Qué eventos deben disparar automatizaciones?",
+              "fields": [
+                {
+                  "id": "eventos",
+                  "type": "multi",
+                  "label": "Eventos",
+                  "options": [
+                    "Nuevo contacto",
+                    "Cambio de etapa",
+                    "Pago recibido",
+                    "Cita agendada",
+                    "Formulario enviado",
+                    "Mensaje sin respuesta"
+                  ],
+                  "other": true
+                }
+              ]
+            },
+            {
+              "prompt": "¿Quién aprueba las automatizaciones nuevas?",
+              "fields": [
+                {
+                  "id": "aprobador",
+                  "type": "text",
+                  "label": "Responsable de aprobación",
+                  "placeholder": "Nombre y cargo"
+                }
+              ]
             }
           ]
         },
@@ -483,11 +1448,85 @@
             },
             {
               "id": "prohibidos",
-              "text": "Temas que la IA nunca debe responder"
+              "text": "Temas que la IA nunca debe hacer o responder"
+            }
+          ],
+          "config": [
+            {
+              "prompt": "¿Hasta qué monto puede la IA cerrar una venta sin pedir autorización?",
+              "fields": [
+                {
+                  "id": "tope",
+                  "type": "number",
+                  "label": "Monto máximo",
+                  "min": 0
+                },
+                {
+                  "id": "moneda",
+                  "type": "single",
+                  "label": "Moneda",
+                  "options": [
+                    "USD",
+                    "EUR",
+                    "Moneda local"
+                  ]
+                }
+              ]
+            },
+            {
+              "prompt": "¿Qué descuento máximo puede ofrecer la IA sin consultar?",
+              "fields": [
+                {
+                  "id": "descuento",
+                  "type": "number",
+                  "label": "Descuento máximo (%)",
+                  "min": 0,
+                  "max": 100
+                }
+              ]
+            },
+            {
+              "prompt": "¿Quién autoriza lo que la IA consulta y por qué canal le llega el aviso?",
+              "fields": [
+                {
+                  "id": "autoriza",
+                  "type": "text",
+                  "label": "Quién autoriza",
+                  "placeholder": "Nombre y cargo"
+                },
+                {
+                  "id": "canal",
+                  "type": "multi",
+                  "label": "Canal del aviso",
+                  "options": [
+                    "WhatsApp",
+                    "Correo",
+                    "Notificación en ZAK"
+                  ]
+                }
+              ]
             }
           ]
         }
       ]
     }
-  ]
+  ],
+  "configSection": {
+    "titleTemplate": "Configuración · {module}",
+    "intro": "Configuración técnica de {module}: lo que el equipo de implementación necesita para dejarlo funcionando."
+  },
+  "sections": {
+    "modules": {
+      "id": "sM",
+      "tag": "MÓDULOS",
+      "title": "Módulos de ZAK",
+      "intro": "Elige los módulos que vas a contratar. Con eso preparamos tu checklist."
+    },
+    "checklist": {
+      "id": "sC",
+      "tag": "PREPARACIÓN",
+      "title": "Checklist de preparación",
+      "intro": "Revisemos, módulo por módulo, qué tienes listo. Así sabemos qué tan preparada está tu empresa para arrancar."
+    }
+  }
 }

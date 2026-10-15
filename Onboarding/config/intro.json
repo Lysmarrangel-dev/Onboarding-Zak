@@ -16,8 +16,8 @@
   "scenes": [
     {
       "id": "hello",
-      "min": 3600,
-      "caption": "Hola, soy ZAK Assistant. Te acompaño en el onboarding de ZAK."
+      "min": 4600,
+      "caption": "Hola, soy Kira, la asistente que maneja ZAK hablando contigo. Te acompaño en este onboarding."
     },
     {
       "id": "zak",
@@ -43,8 +43,7 @@
     {
       "id": "go",
       "min": 4400,
-      "caption": "Toma unos 35 minutos y puedes editar cualquier respuesta. Empecemos.",
-      "say": "Toma unos treinta y cinco minutos, y puedes editar cualquier respuesta. Empecemos."
+      "caption": "Te leeré cada pregunta y solo te pediré lo de los módulos que contrates. Empecemos."
     }
   ]
 }

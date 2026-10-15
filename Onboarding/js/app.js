@@ -12,7 +12,9 @@ import { renderForm } from './inputs.js';
 import { freshState, loadState, saveState, clearState, getTheme, setTheme } from './store.js';
 import { submitOnboarding, isDemo } from './api.js';
 import { createIntro } from './intro.js';
-import { buildModuleSchema, computeReadiness, missingText } from './readiness.js';
+import { buildModuleSchema, buildAgentSchema, buildConfigSchema, computeReadiness, missingText } from './readiness.js';
+import { computeInfo, pendingText, consultTriggered, consultRequests } from './info.js';
+import * as kira from './kira.js';
 
 const root = document.getElementById('app');
 const clone = (x) => JSON.parse(JSON.stringify(x ?? {}));
@@ -24,7 +26,8 @@ const ASSET = {
   isoWhite: 'assets/brand/itech-isotipo-blanco.svg',
 };
 
-let engine, faq, mapping, schema, modulesCfg, introCfg;
+let engine, faq, mapping, schema, modulesCfg, introCfg, agentsCfg, scoringCfg, ndaCfg;
+let ndaHash = ''; // huella SHA-256 del texto del acuerdo que se muestra
 let state;
 let introCtl = null; // controlador de la presentación audiovisual
 // Estado de interfaz (no se guarda).
@@ -40,16 +43,24 @@ const ui = {
 async function boot() {
   setTheme(getTheme());
   try {
-    const [q, f, m, mods, intro] = await Promise.all(
-      ['config/questions.json', 'config/faq.json', 'config/form-mapping.json', 'config/modules.json', 'config/intro.json'].map((u) => fetch(u, { cache: 'no-cache' }).then((r) => r.json())),
+    const files = ['questions', 'faq', 'form-mapping', 'modules', 'intro', 'agents', 'scoring', 'nda'];
+    const [q, f, m, mods, intro, agents, scoring, nda] = await Promise.all(
+      files.map((n) => fetch(`config/${n}.json`, { cache: 'no-cache' }).then((r) => r.json())),
     );
-    schema = q; faq = f; mapping = m; modulesCfg = mods; introCfg = intro;
-    // Módulos + checklist (generados desde modules.json) van justo después de «Datos de la empresa».
+    schema = q; faq = f; mapping = m; modulesCfg = mods; introCfg = intro; agentsCfg = agents; scoringCfg = scoring; ndaCfg = nda;
+    ndaHash = await sha256(ndaText());
+    // Tras «Datos de la empresa» se insertan, en este orden: módulos, checklist y agentes de IA
+    // (generados desde modules.json y agents.json; el Apps Script aplica las mismas reglas).
     const gen = buildModuleSchema(modulesCfg);
-    const firstSec = schema.sections[0].id;
-    const afterIdx = schema.questions.findLastIndex((x) => x.section === firstSec) + 1;
-    schema.sections.splice(1, 0, ...gen.sections);
-    schema.questions.splice(afterIdx, 0, ...gen.questions);
+    const ag = buildAgentSchema(agentsCfg, modulesCfg);
+    // Orden: acuerdo de confidencialidad → datos de la empresa → módulos → checklist → agentes → cuestionario.
+    const afterIdx = schema.questions.findLastIndex((x) => x.section === 's0') + 1;
+    schema.sections.splice(schema.sections.findIndex((x) => x.id === 's0') + 1, 0, ...gen.sections, ...ag.sections);
+    schema.questions.splice(afterIdx, 0, ...gen.questions, ...ag.questions);
+    // Configuración técnica por módulo: antes del cierre (sección 13).
+    const cfgX = buildConfigSchema(modulesCfg);
+    schema.sections.splice(schema.sections.findIndex((x) => x.id === 's13'), 0, ...cfgX.sections);
+    schema.questions.splice(schema.questions.findIndex((x) => x.section === 's13'), 0, ...cfgX.questions);
   } catch (e) {
     root.replaceChildren(h('div', { class: 'summary' }, h('div', { class: 'status-card error' },
       h('strong', {}, 'No se pudo cargar el cuestionario.'),
@@ -69,6 +80,7 @@ function persist() { saveState(state); }
 function render() {
   closeOverlays(false);
   introCtl?.stop();
+  kira.stop();
   if (state.screen === 'chat') renderChat();
   else if (state.screen === 'summary') renderSummary();
   else if (state.screen === 'success') renderSuccess();
@@ -87,7 +99,7 @@ function go(screen) {
    ========================================================================== */
 function renderWelcome() {
   const started = Object.keys(state.done).length > 0;
-  const nSections = schema.sections.filter((s) => s.number > 0).length;
+  const nSections = schema.sections.filter((s) => s.number > 0).length; // máximo, con todos los módulos
   root.replaceChildren(
     h('main', { class: 'welcome brand-surface', id: 'main' },
       h('header', { class: 'welcome-top' },
@@ -98,9 +110,10 @@ function renderWelcome() {
         h('h1', { class: 'h1', id: 'w-title' }, 'Bienvenido al onboarding de ZAK'),
         h('p', { class: 'lead' }, 'Con estos datos configuramos ZAK según la operación de tu empresa. Te haré una pregunta a la vez.'),
         h('div', { class: 'meta' },
-          h('span', {}, icon('clock'), `Unos ${schema.meta.estimatedMinutes} minutos`),
-          h('span', {}, icon('layers'), `${nSections} secciones`),
-          h('span', {}, icon('shield'), 'Tu progreso se guarda en este dispositivo')),
+          h('span', {}, icon('clock'), `Entre 10 y ${schema.meta.estimatedMinutes} minutos, según tus módulos`),
+          h('span', {}, icon('layers'), 'Solo te preguntamos por los módulos que contrates'),
+          h('span', {}, icon('shield'), 'Protegido por un acuerdo de confidencialidad'),
+          h('span', {}, icon('save'), 'Tu progreso se guarda en este dispositivo')),
         h('div', { class: 'welcome-actions' },
           h('button', {
             class: 'btn btn-white', type: 'button', onclick: () => {
@@ -174,7 +187,7 @@ function refreshChat({ scroll = true, focus = true } = {}) {
       ui.typing = false;
       state.revealed[q.id] = true;
       persist();
-      if (state.screen === 'chat') refreshChat();
+      if (state.screen === 'chat') { refreshChat(); speakQuestion(q); }
     }, delay);
   }
   if (q && ui.draftFor !== q.id) { ui.draft = clone(state.answers[q.id]); ui.errors = {}; ui.draftFor = q.id; }
@@ -186,11 +199,11 @@ function refreshChat({ scroll = true, focus = true } = {}) {
 
 function renderHeader(q) {
   const sections = schema.sections;
-  const main = sections.filter((s) => s.number > 0);
+  const main = activeSections();
   const flow = engine.flow(state.answers);
   const prog = engine.progress(state);
-  const sec = q ? engine.sectionById[q.section] : main[main.length - 1];
-  const label = sec.number === 0 ? `${sec.tag || 'INICIO'} · ${prog.pct}%` : `SECCIÓN ${sec.number} DE ${main.length} · ${prog.pct}%`;
+  const sec = q ? engine.sectionById[q.section] : (main[main.length - 1] || sections[0]);
+  const label = sec.number === 0 ? `${sec.tag || 'INICIO'} · ${prog.pct}%` : `SECCIÓN ${sectionNumber(sec)} DE ${main.length} · ${prog.pct}%`;
   const segs = sections.map((s, i) => {
     const qs = flow.filter((x) => x.section === s.id);
     const fill = qs.length ? qs.filter((x) => state.done[x.id]).length / qs.length : 0;
@@ -206,7 +219,13 @@ function renderHeader(q) {
       h('img', { class: 'logo logo-negative', src: ASSET.logoNegative, alt: 'iTech' }),
       h('span', { class: 'header-spacer' }),
       h('div', { class: 'header-actions' },
-        h('button', { class: 'btn-text', type: 'button', onclick: openDrawer, 'aria-haspopup': 'dialog' }, icon('list'), h('span', {}, 'Mis respuestas')),
+        infoMeter(),
+        h('button', { class: 'btn-text', type: 'button', onclick: openDrawer, 'aria-haspopup': 'dialog' }, icon('list'), h('span', {}, 'Editar mis respuestas')),
+        h('button', {
+          class: `icon-btn kira-toggle ${kira.isOn() ? 'is-on' : ''}`, type: 'button', 'aria-pressed': String(kira.isOn()),
+          'aria-label': kira.isOn() ? 'Kira lee las preguntas en voz alta. Silenciar' : 'Activar la voz de Kira', title: 'Voz de Kira',
+          onclick: () => { kira.setOn(!kira.isOn()); renderHeader(currentQuestion()); if (kira.isOn()) speakQuestion(currentQuestion()); },
+        }, icon(kira.isOn() ? 'volume' : 'volumeOff')),
         h('button', {
           class: 'icon-btn', type: 'button', 'aria-label': theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro',
           onclick: toggleTheme,
@@ -282,14 +301,17 @@ function renderLog(current) {
     if (q.section !== lastSection) {
       lastSection = q.section;
       const s = engine.sectionById[q.section];
-      push(`sec-${s.id}`, s.title, () => h('div', { class: 'section-card brand-surface', role: 'heading', 'aria-level': 2 },
-        h('span', { class: 'num', 'aria-hidden': 'true' }, s.number === 0 ? '·' : String(s.number).padStart(2, '0')),
-        h('div', {}, h('div', { class: 'eyebrow' }, s.number === 0 ? (s.tag === undefined ? 'ANTES DE EMPEZAR' : s.tag) : `SECCIÓN ${s.number}`), h('div', { class: 'title' }, s.title))));
+      push(`sec-${s.id}`, `${s.title}|${sectionNumber(s)}`, () => h('div', { class: 'section-card brand-surface', role: 'heading', 'aria-level': 2 },
+        h('span', { class: 'num', 'aria-hidden': 'true' }, s.number === 0 ? '·' : String(sectionNumber(s)).padStart(2, '0')),
+        h('div', {}, h('div', { class: 'eyebrow' }, s.number === 0 ? (s.tag === undefined ? 'ANTES DE EMPEZAR' : s.tag) : `SECCIÓN ${sectionNumber(s)}`), h('div', { class: 'title' }, s.title))));
       if (s.intro) push(`intro-${s.id}`, s.intro, () => agentMsg(h('p', {}, s.intro)));
     }
     const editing = ui.editing === q.id;
     push(`q-${q.id}`, `${q.prompt}|${editing}`, () => {
-      const m = agentMsg([h('span', { class: 'q-label' }, `Pregunta ${q.id}`), h('p', {}, q.prompt), q.hint ? h('p', { class: 'hint' }, q.hint) : null]);
+      const m = agentMsg([h('span', { class: 'q-label' }, q.label || `Pregunta ${q.id}`), h('p', {}, q.prompt), q.hint ? h('p', { class: 'hint' }, q.hint) : null,
+        q.document === 'nda' ? ndaDocument() : null,
+        h('button', { class: 'listen-btn', type: 'button', onclick: () => kira.speak([q.prompt], { force: true }), 'aria-label': `Escuchar la pregunta ${q.label || q.id}` }, icon('volume'), 'Escuchar'),
+        q.links?.length ? h('p', { class: 'q-links' }, q.links.map((l) => h('a', { href: l.href, target: '_blank', rel: 'noopener noreferrer' }, l.label, ' ↗'))) : null]);
       m.id = `q-${q.id.replace('.', '-')}`;
       if (editing) m.classList.add('is-editing');
       return m;
@@ -360,6 +382,100 @@ function scrollChat(added) {
 
 /* ---------- Dock de respuesta ---------- */
 
+/* ---------- Acuerdo de confidencialidad ---------- */
+
+/** Texto canónico del acuerdo (lo que se muestra, se descarga y se firma con la huella). */
+function ndaText() {
+  const n = ndaCfg;
+  return [`${n.title} · Versión ${n.version}`, n.subtitle, '', n.parties, '', ...n.clauses.map((c) => `${c.title}\n${c.text}`)].join('\n');
+}
+
+async function sha256(text) {
+  try {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  } catch { return ''; } // crypto.subtle exige HTTPS o localhost
+}
+
+/** Registro de aceptación que llega al Form (ítem de control). */
+function ndaRecord() {
+  const a = state.answers['N.1'] || {};
+  if (!a.acepto) return null;
+  return [
+    `Acuerdo: ${ndaCfg.title} v${ndaCfg.version}`,
+    `Huella SHA-256: ${ndaHash || 'no disponible'}`,
+    `Aceptado: ${a.acepto}`,
+    `Facultad declarada: ${a.facultad || '—'}`,
+    `Por: ${a.firmante || ''} · C.I. ${a.cedula || ''} · ${a.cargo || ''}`,
+    `Empresa: ${state.answers['0.1']?.empresa || ''} · RIF ${state.answers['0.2']?.rif || ''}`,
+    `Sesión: ${state.sessionId}`,
+  ].join('\n');
+}
+
+/** El acuerdo dentro del chat: resumen en lenguaje claro y texto completo desplegable. */
+function ndaDocument() {
+  const n = ndaCfg;
+  return h('div', { class: 'nda' },
+    h('div', { class: 'nda-head' }, icon('shield'), h('div', {}, h('strong', {}, n.title), h('span', {}, `${n.subtitle} · Versión ${n.version}`))),
+    h('ul', { class: 'nda-summary' }, n.summary.map((x) => h('li', {}, x))),
+    h('details', { class: 'nda-full' },
+      h('summary', {}, 'Leer el acuerdo completo'),
+      h('div', { class: 'nda-body', tabindex: '0', 'aria-label': 'Texto completo del acuerdo' },
+        h('p', {}, n.parties),
+        n.clauses.map((c) => h('p', {}, h('strong', {}, c.title), ' ', c.text)))));
+}
+
+
+/**
+ * Secciones del cuestionario que le tocan a este cliente (según sus módulos) y su número visible.
+ * Si solo ve 5 secciones, se numeran 1 a 5, sin huecos.
+ */
+function activeSections() {
+  const flowSecs = new Set(engine.flow(state.answers).map((q) => q.section));
+  return schema.sections.filter((s) => s.number > 0 && flowSecs.has(s.id));
+}
+function sectionNumber(s) {
+  if (!s || s.number === 0) return null;
+  const i = activeSections().findIndex((x) => x.id === s.id);
+  return i >= 0 ? i + 1 : s.number;
+}
+
+function currentInfo() {
+  return computeInfo(scoringCfg, engine, state, computeReadiness(modulesCfg, state.answers));
+}
+
+/** Medidor compacto del encabezado: cuánta información hay para configurar ZAK. */
+function infoMeter() {
+  const info = currentInfo();
+  const pct = info.overall ?? 0;
+  return h('div', {
+    class: 'info-meter', role: 'meter', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': pct,
+    'aria-label': 'Información para configurar ZAK', 'aria-valuetext': info.overall === null ? 'Aún sin datos' : `${pct} %, ${info.level.label}`,
+    title: info.overall === null ? 'Responde algunas preguntas para calcularla' : `${info.level.label}: ${info.level.client}`,
+  },
+  h('span', { class: 'info-lbl' }, 'Información'),
+  h('span', { class: 'info-bar', 'aria-hidden': 'true' }, h('i', { style: { width: `${pct}%` } })),
+  h('span', { class: 'info-val' }, info.overall === null ? '—' : `${pct} %`));
+}
+
+/** Tarjeta del resumen: información disponible, desglose y consultoría recomendada. */
+function infoCard(info) {
+  return h('div', { class: 'ready-card info-card' },
+    h('div', { class: 'ready-head' },
+      h('div', { class: 'ready-ring', style: { '--p': info.overall }, role: 'img', 'aria-label': `Información disponible: ${info.overall} por ciento` },
+        h('span', { class: 'ready-pct' }, String(info.overall), h('small', {}, '%'))),
+      h('div', {},
+        h('span', { class: 'eyebrow' }, 'INFORMACIÓN PARA CONFIGURAR ZAK'),
+        h('h3', { class: 'ready-level' }, info.level.label),
+        h('p', {}, info.level.client))),
+    h('ul', { class: 'ready-mods' },
+      [['Respuestas del cuestionario', info.questionnaire], ['Checklist de módulos', info.checklist]].filter(([, v]) => v !== null).map(([k, v]) =>
+        h('li', {}, h('span', { class: 'ready-name' }, k), h('span', { class: 'ready-bar', 'aria-hidden': 'true' }, h('i', { style: { width: `${v}%` } })), h('span', { class: 'ready-val' }, `${v} %`)))),
+    info.pending.length ? h('details', { class: 'ready-missing' },
+      h('summary', {}, `Información por completar (${info.pending.length})`),
+      h('ul', { class: 'info-pending' }, info.pending.map((p) => h('li', {}, h('strong', {}, `${p.id} · `), p.reasons.join(' · '))))) : null);
+}
+
 /** Dock mientras se ve la presentación: saltar o empezar. */
 function renderIntroDock() {
   dockEl.replaceChildren(h('div', { class: 'dock-card' },
@@ -390,18 +506,45 @@ function readinessCard(r, { open = false } = {}) {
       h('summary', {}, `Lo que falta (${missingCount})`),
       r.modules.filter((m) => m.missing.length).map((m) => h('div', { class: 'ready-miss-mod' },
         h('strong', {}, m.name),
-        h('ul', {}, m.missing.map((x) => h('li', {}, x.text, h('span', { class: `ready-state st-${x.state === 'En proceso' ? 'proc' : 'no'}` }, x.state))))))) :
+        h('ul', {}, m.missing.map((x) => h('li', {}, x.text, h('span', { class: `ready-state st-${x.state === 'En proceso' ? 'proc' : 'no'}` }, x.state),
+          x.note ? h('span', { class: 'ready-note' }, `Falta: ${x.note}`) : null)))))) :
       h('p', { class: 'ready-ok' }, icon('check'), 'Cumples todos los requisitos de los módulos elegidos.'));
+}
+
+/** Respuesta rápida (se envía al tocar la opción): un solo campo de opción única, sin «Otro» y sin opciones que abran consultoría. */
+function quickQuestion(q) {
+  if (q.fields.length !== 1) return false;
+  const f = q.fields[0];
+  if (f.type !== 'single' || f.other) return false;
+  const triggers = new Set([...scoringCfg.unknownValues, ...(scoringCfg.consultValues || []), ...(scoringCfg.lacks[q.id]?.[f.id] || [])]);
+  return !f.options.some((o) => triggers.has(o));
+}
+
+function moduleName(id) {
+  for (const g of modulesCfg.groups) for (const m of g.modules) if (m.id === id) return m.name;
+  return null;
+}
+
+/** Kira lee la introducción de la sección (si es nueva) y la pregunta. */
+function speakQuestion(q) {
+  if (!q || state.screen !== 'chat' || introActive()) return;
+  const flow = engine.flow(state.answers);
+  const i = flow.findIndex((x) => x.id === q.id);
+  const newSection = i === 0 || flow[i - 1]?.section !== q.section;
+  const sec = engine.sectionById[q.section];
+  kira.speak([newSection ? sec.intro : null, q.prompt]);
 }
 
 function formCtx(q, rerender) {
   return {
     engine, answers: state.answers, draft: ui.draft, errors: ui.errors, uploads: ui.uploads, sessionId: state.sessionId,
-    rerender, submit: () => commit(q),
+    rerender, submit: () => commit(q), attachOpen: (ui.attachOpen ||= {}), msOpen: (ui.msOpen ||= {}),
+    consultCheck: (qq, draft, fields) => consultTriggered(scoringCfg, qq, draft, fields),
+    chosenModules: () => (state.answers['M.1']?.modulos || []).map((id) => moduleName(id)).filter(Boolean),
     clearError: (fid) => { if (ui.errors[fid]) { delete ui.errors[fid]; } },
     setError: (fid, msg) => { ui.errors[fid] = msg; rerender(); },
     // Respuesta rápida: pregunta de un solo campo de opción única sin «Otro».
-    isQuick: (f) => !ui.editing && q.fields.length === 1 && f.type === 'single' && !f.other && !ui.modal,
+    isQuick: (f) => quickQuestion(q) && !ui.editing && !ui.modal,
   };
 }
 
@@ -419,7 +562,7 @@ function renderDock(q, focus = true) {
   }
   if (ui.typing && !ui.editing) { dockEl.replaceChildren(); return; }
 
-  const rerender = (focusKey) => { renderDock(q); if (typeof focusKey === 'string') dockEl.querySelector(`[data-fk="${focusKey}"]`)?.focus(); };
+  const rerender = (focusKey) => { renderDock(q); if (typeof focusKey === 'string') dockEl.querySelector(`[data-fk="${CSS.escape(focusKey)}"]`)?.focus({ preventScroll: true }); };
   const uploading = Object.values(ui.uploads).some((l) => l.length);
   const prevId = prevQuestionId(q.id);
 
@@ -428,7 +571,7 @@ function renderDock(q, focus = true) {
     body = doubtForm(q);
   } else {
     const ctx = formCtx(q, rerender);
-    const hideSend = !ui.editing && q.fields.length === 1 && q.fields[0].type === 'single' && !q.fields[0].other;
+    const hideSend = !ui.editing && quickQuestion(q);
     body = [
       ui.editing ? h('div', { class: 'dock-banner' }, icon('edit'), `Editando la pregunta ${q.id}`) : null,
       ui.pending?.kind === 'question' ? h('div', { class: 'dock-actions' },
@@ -454,7 +597,12 @@ function renderDock(q, focus = true) {
           }, uploading ? 'Subiendo archivo…' : ui.editing ? 'Guardar' : ui.clarified[q.id] ? 'Enviar así' : 'Enviar', icon(ui.editing ? 'save' : 'arrowRight', 'icon btn-arrow')))),
     ];
   }
+  // Conservar la posición de lectura del panel al re-renderizar (evita el salto hacia arriba).
+  const prevScroll = dockEl.querySelector('.dock-card')?.scrollTop || 0;
+  const pageScroll = window.scrollY;
   dockEl.replaceChildren(h('div', { class: 'dock-card' }, body));
+  if (ui.dockFor === q.id) { dockEl.querySelector('.dock-card').scrollTop = prevScroll; window.scrollTo(0, pageScroll); }
+  ui.dockFor = q.id;
 
   // Restaurar el foco tras re-renderizar (o llevarlo al primer campo en una pregunta nueva).
   const target = (prevKey && hadFocusInDock && dockEl.querySelector(`[data-fk="${CSS.escape(prevKey)}"]`)) ||
@@ -612,14 +760,14 @@ function openDrawer() {
   const close = () => { closeOverlays(); trigger?.focus?.(); };
   const panel = h('aside', { class: 'drawer', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'drawer-title' },
     h('div', { class: 'drawer-head' },
-      h('h2', { class: 'h2', id: 'drawer-title', style: { fontSize: '1.3rem' } }, 'Mis respuestas'),
+      h('h2', { class: 'h2', id: 'drawer-title', style: { fontSize: '1.3rem' } }, 'Editar mis respuestas'),
       h('button', { class: 'icon-btn', type: 'button', 'aria-label': 'Cerrar', onclick: close }, icon('close'))),
     h('div', { class: 'drawer-body' },
       schema.sections.map((s) => {
         const qs = flow.filter((x) => x.section === s.id);
         if (!qs.length) return null;
         return h('div', { class: 'drawer-section' },
-          h('h3', {}, s.number === 0 ? s.title : `${s.number}. ${s.title}`),
+          h('h3', {}, s.number === 0 ? s.title : `${sectionNumber(s)}. ${s.title}`),
           qs.map((x) => h('button', {
             class: 'drawer-item', type: 'button', disabled: !state.done[x.id],
             onclick: () => { closeOverlays(); startEdit(x.id); },
@@ -668,14 +816,14 @@ function renderSummary() {
   const flow = engine.flow(state.answers);
   const pending = pendingQuestions();
   const theme = document.documentElement.getAttribute('data-theme');
-  const main = schema.sections.filter((s) => s.number > 0);
+  const main = activeSections();
 
   const cards = schema.sections.map((s, idx) => {
     const qs = flow.filter((x) => x.section === s.id);
     if (!qs.length) return null;
     return h('section', { class: 's-card', style: { animationDelay: `${Math.min(idx * 30, 300)}ms` }, 'aria-labelledby': `sum-${s.id}` },
       h('div', { class: 's-card-head' },
-        h('span', { class: 'num', 'aria-hidden': 'true' }, s.number === 0 ? '·' : String(s.number)),
+        h('span', { class: 'num', 'aria-hidden': 'true' }, s.number === 0 ? '·' : String(sectionNumber(s))),
         h('h2', { id: `sum-${s.id}` }, s.title)),
       qs.map((q) => {
         const done = state.done[q.id];
@@ -710,6 +858,7 @@ function renderSummary() {
         h('img', { class: 'logo logo-negative', src: ASSET.logoNegative, alt: 'iTech' }),
         h('span', { class: 'header-spacer' }),
         h('div', { class: 'header-actions' },
+        infoMeter(),
           h('button', { class: 'icon-btn', type: 'button', 'aria-label': theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro', onclick: toggleTheme }, icon(theme === 'dark' ? 'sun' : 'moon')))),
       h('div', { class: 'progress-wrap' },
         h('div', { class: 'progress-meta' }, h('span', { class: 'eyebrow' }, `RESUMEN · ${main.length} SECCIONES · ${engine.progress(state).pct}%`)),
@@ -726,7 +875,11 @@ function renderSummary() {
         h('p', {}, 'Confirma que todo está correcto. Puedes editar cualquier respuesta antes de enviarla al equipo de iTech.')),
       (() => {
         const r = computeReadiness(modulesCfg, state.answers);
-        return r.complete ? h('section', { class: 's-card s-ready', 'aria-label': 'Preparación de tu empresa' }, readinessCard(r, { open: true })) : null;
+        const info = currentInfo();
+        return [
+          info.overall !== null ? h('section', { class: 's-card s-ready', 'aria-label': 'Información para configurar ZAK' }, infoCard(info)) : null,
+          r.complete ? h('section', { class: 's-card s-ready', 'aria-label': 'Preparación de tu empresa' }, readinessCard(r, { open: true })) : null,
+        ];
       })(),
       pending.length ? h('div', { class: 'status-card error', role: 'alert', style: { marginBottom: '16px' } },
         h('strong', {}, pending.length === 1 ? 'Falta 1 respuesta.' : `Faltan ${pending.length} respuestas.`),
@@ -756,6 +909,7 @@ function openModal(qid) {
 }
 
 function renderModal() {
+  const prevModalScroll = document.querySelector('.modal')?.scrollTop || 0;
   document.querySelectorAll('.scrim, .modal').forEach((n) => n.remove());
   const q = engine.byId[ui.modal];
   if (!q) return;
@@ -766,7 +920,7 @@ function renderModal() {
   const uploading = Object.values(ui.uploads).some((l) => l.length);
   const modal = h('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'modal-title' },
     h('div', { style: { display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start' } },
-      h('div', {}, h('span', { class: 'q-label eyebrow', style: { color: 'var(--text-muted)' } }, `PREGUNTA ${q.id}`),
+      h('div', {}, h('span', { class: 'q-label eyebrow', style: { color: 'var(--text-muted)' } }, (q.label || `Pregunta ${q.id}`).toUpperCase()),
         h('h2', { class: 'q-title', id: 'modal-title' }, q.prompt),
         q.hint ? h('p', { class: 'field-hint', style: { marginTop: '6px' } }, q.hint) : null),
       h('button', { class: 'icon-btn', type: 'button', 'aria-label': 'Cerrar', onclick: close }, icon('close'))),
@@ -776,9 +930,10 @@ function renderModal() {
       h('div', { class: 'left' }, h('button', { class: 'btn-text', type: 'button', onclick: close }, 'Cancelar')),
       h('div', { class: 'right' }, h('button', { class: 'btn btn-primary', type: 'button', disabled: uploading, 'data-fk': 'save', onclick: () => commit(q, { fromModal: true }) }, uploading ? 'Subiendo archivo…' : 'Guardar', icon('save', 'icon')))));
   document.body.append(h('div', { class: 'scrim', onclick: close }), modal);
+  modal.scrollTop = prevModalScroll;
   trapFocus(modal, close);
   const target = (prevKey && modal.querySelector(`[data-fk="${CSS.escape(prevKey)}"]`)) || modal.querySelector('[aria-invalid="true"]') || modal.querySelector('input:not([type=file]), textarea, select, .chip');
-  target?.focus();
+  target?.focus({ preventScroll: true });
 }
 
 /* ---------- Envío ---------- */
@@ -791,6 +946,8 @@ function buildPayload() {
     clientSubmittedAt: new Date().toISOString(),
     website: honeypot, // trampa anti-spam
     company: state.answers['0.1']?.empresa || '',
+    legalName: state.answers['0.2']?.razonSocial || '',
+    taxId: state.answers['0.2']?.rif || '',
     contactName: state.answers['0.3']?.contacto || '',
     contactEmail: state.answers['0.4']?.correo || '',
     answers: flow.map((q) => ({
@@ -803,6 +960,22 @@ function buildPayload() {
     })),
     doubts: state.doubts.map((d) => `[${d.qid}] ${d.text}`).join('\n'),
     readiness: readinessPayload(),
+    info: infoPayload(),
+    nda: ndaRecord(),
+    consulting: consultRequests(engine, state, computeReadiness(modulesCfg, state.answers)).join('\n'),
+    attachments: engine.attachmentsText(state.answers),
+  };
+}
+
+/** Nivel de información y consultoría recomendada, para el Form y el correo. */
+function infoPayload() {
+  const info = currentInfo();
+  if (info.overall === null) return null;
+  return {
+    overall: info.overall,
+    consulting: info.level.label,
+    detail: `Cuestionario: ${info.questionnaire ?? '—'} % · Checklist: ${info.checklist ?? '—'} %`,
+    pending: pendingText(info) || 'Ninguna',
   };
 }
 
@@ -883,13 +1056,14 @@ function downloadCopy() {
   for (const s of schema.sections) {
     const qs = flow.filter((x) => x.section === s.id);
     if (!qs.length) continue;
-    lines.push(`== ${s.number === 0 ? '' : `${s.number}. `}${s.title} ==`, '');
+    lines.push(`== ${s.number === 0 ? '' : `${sectionNumber(s)}. `}${s.title} ==`, '');
     for (const q of qs) {
       lines.push(`${q.id} ${q.formTitle}`);
       for (const p of engine.formatAnswer(q, state.answers)) lines.push(`   ${p.label}: ${p.value}`);
       lines.push('');
     }
   }
+  if (ndaRecord()) lines.push('== Acuerdo de confidencialidad ==', '', ndaText(), '', 'REGISTRO DE ACEPTACIÓN', ndaRecord(), '');
   const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
   const a = h('a', { href: URL.createObjectURL(blob), download: `onboarding-zak-${state.reference || 'copia'}.txt` });
   document.body.appendChild(a); a.click(); a.remove();
