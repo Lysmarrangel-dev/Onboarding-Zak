@@ -15,6 +15,7 @@ import { createIntro } from './intro.js';
 import { buildModuleSchema, buildAgentSchema, buildConfigSchema, computeReadiness, missingText } from './readiness.js';
 import { computeInfo, pendingText, consultTriggered, consultRequests } from './info.js';
 import * as kira from './kira.js';
+import { askKira, setKnowledge } from './kiraChat.js';
 
 const root = document.getElementById('app');
 const clone = (x) => JSON.parse(JSON.stringify(x ?? {}));
@@ -24,7 +25,11 @@ const ASSET = {
   logoNegative: 'assets/brand/itech-logo-negativo.svg',
   isoGradient: 'assets/brand/itech-isotipo-degradado.svg',
   isoWhite: 'assets/brand/itech-isotipo-blanco.svg',
+  kira: 'assets/brand/kira.png',
 };
+
+/** Avatar de Kira (el mismo pulpo del brochure) en sus mensajes del chat. */
+const kiraAvatar = () => h('span', { class: 'avatar avatar-kira', 'aria-hidden': 'true' }, h('img', { src: ASSET.kira, alt: '' }));
 
 let engine, faq, mapping, schema, modulesCfg, introCfg, agentsCfg, scoringCfg, ndaCfg;
 let ndaHash = ''; // huella SHA-256 del texto del acuerdo que se muestra
@@ -49,6 +54,7 @@ async function boot() {
     );
     schema = q; faq = f; mapping = m; modulesCfg = mods; introCfg = intro; agentsCfg = agents; scoringCfg = scoring; ndaCfg = nda;
     ndaHash = await sha256(ndaText());
+    setKnowledge({ faq, modulesCfg });
     // Tras «Datos de la empresa» se insertan, en este orden: módulos, checklist y agentes de IA
     // (generados desde modules.json y agents.json; el Apps Script aplica las mismas reglas).
     const gen = buildModuleSchema(modulesCfg);
@@ -79,6 +85,8 @@ function persist() { saveState(state); }
    ========================================================================== */
 function render() {
   closeOverlays(false);
+  ui.summaryShown = false;
+  ui.confirmReset = false;
   introCtl?.stop();
   kira.stop();
   if (state.screen === 'chat') renderChat();
@@ -122,17 +130,26 @@ function renderWelcome() {
               go(state.submittedAt ? 'success' : Object.keys(state.done).length && !engine.nextPending(state) ? 'summary' : 'chat');
             },
           }, started ? 'Continuar onboarding' : 'Comenzar onboarding', icon('arrowRight', 'icon btn-arrow')),
-          started ? h('button', {
-            class: 'btn btn-ghost-white', type: 'button', onclick: () => {
-              if (confirm('¿Seguro que quieres empezar de nuevo? Se borrarán las respuestas guardadas en este dispositivo.')) {
-                clearState(); state = freshState(); render();
-              }
-            },
-          }, 'Empezar de nuevo') : null)),
+          started && !ui.confirmReset ? h('button', {
+            class: 'btn btn-ghost-white', type: 'button', 'data-fk': 'reset', onclick: () => { ui.confirmReset = true; renderWelcome(); document.querySelector('[data-fk="reset-no"]')?.focus(); },
+          }, 'Empezar de nuevo') : null),
+        started && ui.confirmReset ? resetConfirm('Se borrarán las respuestas guardadas en este dispositivo. ¿Empezar de nuevo?', renderWelcome) : null),
       h('footer', { class: 'welcome-foot' },
         h('span', { class: 'brand-text' }, 'Inteligencia que construye.'),
         h('span', {}, `© ${new Date().getFullYear()} iTech`))),
   );
+}
+
+/** Confirmación en la propia página (sin el cuadro del navegador, que bloquea la pantalla). */
+function resetConfirm(text, rerender) {
+  return h('div', { class: 'reset-confirm', role: 'alert' },
+    h('p', {}, text),
+    h('div', { class: 'welcome-actions' },
+      h('button', { class: 'btn btn-white btn-sm', type: 'button', onclick: () => { clearState(); state = freshState(); render(); } }, 'Sí, borrar y empezar'),
+      h('button', {
+        class: 'btn btn-ghost-white btn-sm', type: 'button', 'data-fk': 'reset-no',
+        onclick: () => { ui.confirmReset = false; rerender(); document.querySelector('[data-fk="reset"]')?.focus(); },
+      }, 'Cancelar')));
 }
 
 /* ==========================================================================
@@ -251,7 +268,7 @@ function toggleTheme() {
 
 function agentMsg(content, { withAvatar = true } = {}) {
   return h('div', { class: 'msg msg-agent' },
-    withAvatar ? h('span', { class: 'avatar', 'aria-hidden': 'true' }, h('img', { src: ASSET.isoGradient, alt: '' })) : h('span', { class: 'avatar-spacer' }),
+    withAvatar ? kiraAvatar() : h('span', { class: 'avatar-spacer' }),
     h('div', { class: 'bubble' }, h('span', { class: 'sr-only' }, `${CONFIG.agentName}: `), content));
 }
 
@@ -279,7 +296,7 @@ function renderLog(current) {
       introCtl = createIntro({ config: CONFIG.intro, script: introCfg, autoplay: Boolean(ui.autoplayIntro) && !state.introDone, ended: state.introDone, onEnd: finishIntro });
       ui.autoplayIntro = false;
       return h('div', { class: 'msg msg-agent msg-media' },
-        h('span', { class: 'avatar', 'aria-hidden': 'true' }, h('img', { src: ASSET.isoGradient, alt: '' })),
+        kiraAvatar(),
         h('div', { class: 'bubble bubble-media' }, introCtl.el));
     });
   } else {
@@ -338,7 +355,7 @@ function renderLog(current) {
   }
   if (ui.typing) {
     push('typing', 't', () => h('div', { class: 'msg msg-agent' },
-      h('span', { class: 'avatar', 'aria-hidden': 'true' }, h('img', { src: ASSET.isoGradient, alt: '' })),
+      kiraAvatar(),
       h('div', { class: 'bubble typing', role: 'status', 'aria-label': `${CONFIG.agentName} está escribiendo` },
         h('span', { class: 'node' }), h('span', { class: 'node' }), h('span', { class: 'node' }))));
   }
@@ -375,6 +392,10 @@ function scrollChat(added) {
   const behavior = prefersReducedMotion() ? 'auto' : 'smooth';
   if (ui.editing) {
     document.getElementById(`q-${ui.editing.replace('.', '-')}`)?.scrollIntoView({ block: 'center', behavior });
+  } else if (added.length && dockEl.classList.contains('is-inline')) {
+    // Formulario largo: se muestra la pregunta y el inicio del formulario, no su final.
+    const last = [...logEl.querySelectorAll('.msg-agent')].pop();
+    requestAnimationFrame(() => last?.scrollIntoView({ block: 'start', behavior }));
   } else if (added.length) {
     requestAnimationFrame(() => window.scrollTo({ top: document.body.scrollHeight, behavior }));
   }
@@ -560,7 +581,7 @@ function renderDock(q, focus = true) {
     if (focus) dockEl.querySelector('[data-fk="summary"]')?.focus({ preventScroll: true });
     return;
   }
-  if (ui.typing && !ui.editing) { dockEl.replaceChildren(); return; }
+  if (ui.typing && !ui.editing) { dockEl.replaceChildren(); dockEl.classList.remove('is-inline'); return; }
 
   const rerender = (focusKey) => { renderDock(q); if (typeof focusKey === 'string') dockEl.querySelector(`[data-fk="${CSS.escape(focusKey)}"]`)?.focus({ preventScroll: true }); };
   const uploading = Object.values(ui.uploads).some((l) => l.length);
@@ -575,7 +596,7 @@ function renderDock(q, focus = true) {
     body = [
       ui.editing ? h('div', { class: 'dock-banner' }, icon('edit'), `Editando la pregunta ${q.id}`) : null,
       ui.pending?.kind === 'question' ? h('div', { class: 'dock-actions' },
-        h('span', { class: 'field-hint' }, '¿Es una duda sobre ZAK o es tu respuesta?'),
+        h('span', { class: 'field-hint' }, `¿Es una duda para ${CONFIG.agentName} o es tu respuesta?`),
         h('div', { class: 'right' },
           h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: () => { const t = ui.pending.text; ui.pending = null; clearTextOf(q); answerDoubt(q, t); } }, 'Es una duda'),
           h('button', { class: 'btn btn-primary btn-sm', type: 'button', 'data-fk': 'is-answer', onclick: () => { ui.pending = null; commit(q, { force: true }); } }, 'Es mi respuesta'))) : null,
@@ -588,7 +609,7 @@ function renderDock(q, focus = true) {
           ui.editing
             ? h('button', { class: 'btn-text', type: 'button', onclick: cancelEdit }, icon('close'), 'Cancelar')
             : prevId ? h('button', { class: 'btn-text', type: 'button', onclick: () => startEdit(prevId) }, icon('arrowLeft'), 'Anterior') : null,
-          h('button', { class: 'btn-text', type: 'button', onclick: () => { ui.doubtMode = true; renderDock(q); dockEl.querySelector('[data-fk="doubt"]')?.focus(); } }, icon('help'), h('span', {}, '¿Dudas', h('span', { class: 'lbl-long' }, ' sobre ZAK'), '?'))),
+          h('button', { class: 'btn-text', type: 'button', onclick: () => { ui.doubtMode = true; renderDock(q); dockEl.querySelector('[data-fk="doubt"]')?.focus(); } }, h('img', { class: 'kira-mini', src: ASSET.kira, alt: '' }), h('span', {}, 'Pregúntale a Kira'))),
         h('div', { class: 'right' },
           h('span', { class: 'kbd-hint' }, q.fields.some((f) => f.type === 'textarea') ? 'Ctrl + Enter para enviar' : ''),
           hideSend ? null : h('button', {
@@ -601,6 +622,9 @@ function renderDock(q, focus = true) {
   const prevScroll = dockEl.querySelector('.dock-card')?.scrollTop || 0;
   const pageScroll = window.scrollY;
   dockEl.replaceChildren(h('div', { class: 'dock-card' }, body));
+  // Formularios largos (tablas, KPIs, usuarios…): el panel deja de flotar sobre la conversación
+  // y pasa a ser parte de la página, que se desplaza con normalidad. Los cortos siguen fijos abajo.
+  dockEl.classList.toggle('is-inline', dockEl.firstChild.scrollHeight > window.innerHeight * 0.45);
   if (ui.dockFor === q.id) { dockEl.querySelector('.dock-card').scrollTop = prevScroll; window.scrollTo(0, pageScroll); }
   ui.dockFor = q.id;
 
@@ -662,7 +686,7 @@ function commit(q, { force = false, fromModal = false } = {}) {
   if (Object.keys(errors).length) {
     ui.errors = errors;
     if (fromModal) renderModal(); else renderDock(q, true);
-    const first = (fromModal ? document.querySelector('.modal') : dockEl).querySelector('[aria-invalid="true"], .field-error');
+    const first = (fromModal ? document.getElementById('s-edit') : dockEl)?.querySelector('[aria-invalid="true"], .field-error');
     first?.scrollIntoView({ block: 'nearest' });
     announce(Object.values(errors)[0]);
     return;
@@ -720,11 +744,11 @@ function doubtForm(q) {
     answerDoubt(q, text.trim());
   };
   return [
-    h('div', { class: 'dock-banner' }, icon('help'), 'Tu duda sobre ZAK'),
+    h('div', { class: 'dock-banner' }, h('img', { class: 'kira-mini', src: ASSET.kira, alt: '' }), `Pregúntale a ${CONFIG.agentName}`),
     h('div', { class: 'field' },
-      h('label', { class: 'sr-only', for: 'doubt-input' }, 'Escribe tu duda sobre ZAK'),
+      h('label', { class: 'sr-only', for: 'doubt-input' }, `Escribe tu duda para ${CONFIG.agentName}`),
       h('input', {
-        id: 'doubt-input', class: 'input', 'data-fk': 'doubt', placeholder: 'Escribe tu pregunta', maxlength: 500,
+        id: 'doubt-input', class: 'input', 'data-fk': 'doubt', placeholder: 'Tu duda sobre esta pregunta o sobre ZAK', maxlength: 500,
         oninput: (e) => { text = e.target.value; },
         onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } if (e.key === 'Escape') { ui.doubtMode = false; renderDock(q); } },
       })),
@@ -739,16 +763,30 @@ function faqAnswer(text) {
   return hit ? `${hit.answer} Sigamos con la pregunta ${currentQuestion()?.id || ''}.`.trim() : faq.fallback;
 }
 
-function answerDoubt(q, text) {
+/** Contexto de la conversación para Kira: empresa, módulos elegidos y la pregunta en pantalla. */
+function kiraContext(q) {
+  return {
+    question: q,
+    section: q ? engine.sectionById[q.section]?.title : null,
+    company: state.answers['0.1']?.empresa || '',
+    modules: (state.answers['M.1']?.modulos || []).map((id) => moduleName(id)).filter(Boolean),
+  };
+}
+
+/** Kira responde con IA (y con su voz si está activa); sin conexión, con las respuestas de faq.json. */
+async function answerDoubt(q, text) {
   state.doubts.push({ qid: q.id, text, at: new Date().toISOString() });
   addExtra(q.id, 'user', text);
   ui.typing = true;
   refreshChat();
-  setTimeout(() => {
-    ui.typing = false;
-    addExtra(q.id, 'agent', faqAnswer(text));
-    refreshChat();
-  }, prefersReducedMotion() ? 0 : CONFIG.typingDelayMs);
+  const minWait = new Promise((r) => setTimeout(r, prefersReducedMotion() ? 0 : CONFIG.typingDelayMs));
+  const [ai] = await Promise.all([askKira(text, kiraContext(q)), minWait]);
+  const answer = ai || faqAnswer(text);
+  ui.typing = false;
+  addExtra(q.id, 'agent', answer);
+  if (state.screen !== 'chat') return;
+  refreshChat();
+  kira.speak([answer]);
 }
 
 /* ---------- Panel «Mis respuestas» ---------- */
@@ -818,16 +856,19 @@ function renderSummary() {
   const theme = document.documentElement.getAttribute('data-theme');
   const main = activeSections();
 
+  const animate = !ui.summaryShown; // la entrada animada de las tarjetas, solo la primera vez
+  ui.summaryShown = true;
   const cards = schema.sections.map((s, idx) => {
     const qs = flow.filter((x) => x.section === s.id);
     if (!qs.length) return null;
-    return h('section', { class: 's-card', style: { animationDelay: `${Math.min(idx * 30, 300)}ms` }, 'aria-labelledby': `sum-${s.id}` },
+    return h('section', { class: 's-card', style: animate ? { animationDelay: `${Math.min(idx * 30, 300)}ms` } : { animation: 'none' }, 'aria-labelledby': `sum-${s.id}` },
       h('div', { class: 's-card-head' },
         h('span', { class: 'num', 'aria-hidden': 'true' }, s.number === 0 ? '·' : String(sectionNumber(s))),
         h('h2', { id: `sum-${s.id}` }, s.title)),
       qs.map((q) => {
         const done = state.done[q.id];
         const parts = done ? engine.formatAnswer(q, state.answers) : [];
+        if (ui.modal === q.id) return h('div', { class: 's-item s-editing', id: 's-edit' });
         return h('div', { class: `s-item ${done ? '' : 'pending'}` },
           h('div', { class: 'q' }, `${q.id} · ${q.prompt}`),
           h('div', { class: 'a' }, done
@@ -897,43 +938,52 @@ function renderSummary() {
           h('button', { class: 'btn btn-primary', type: 'button', disabled: ui.sending || pending.length > 0, onclick: submit },
             ui.sending ? 'Enviando…' : 'Confirmar y enviar', icon('arrowRight', 'icon btn-arrow'))))),
   );
-  if (ui.modal) renderModal();
+  if (ui.modal) renderModal({ reveal: true });
 }
 
+/** Editar desde el resumen: el formulario se abre dentro de la tarjeta, sin ventana encima. */
 function openModal(qid) {
   ui.modal = qid;
   ui.draftFor = null;
   ui.draft = clone(state.answers[qid]);
   ui.errors = {};
-  renderModal();
+  renderSummary();
 }
 
-function renderModal() {
-  const prevModalScroll = document.querySelector('.modal')?.scrollTop || 0;
-  document.querySelectorAll('.scrim, .modal').forEach((n) => n.remove());
+function closeInlineEdit() {
+  const qid = ui.modal;
+  ui.modal = null; ui.errors = {};
+  renderSummary();
+  document.querySelector(`[aria-label$="pregunta ${CSS.escape(qid)}"]`)?.focus({ preventScroll: true });
+}
+
+function renderModal({ reveal = false } = {}) {
+  const box = document.getElementById('s-edit');
   const q = engine.byId[ui.modal];
-  if (!q) return;
-  const prevKey = document.activeElement?.dataset?.fk;
-  const close = () => { ui.modal = null; closeOverlays(); };
-  const rerender = () => renderModal();
-  const ctx = formCtx(q, rerender);
+  if (!box || !q) return;
+  const prevKey = box.contains(document.activeElement) ? document.activeElement?.dataset?.fk : null;
+  const pageScroll = window.scrollY;
+  const ctx = formCtx(q, () => renderModal());
   const uploading = Object.values(ui.uploads).some((l) => l.length);
-  const modal = h('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'modal-title' },
-    h('div', { style: { display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start' } },
-      h('div', {}, h('span', { class: 'q-label eyebrow', style: { color: 'var(--text-muted)' } }, (q.label || `Pregunta ${q.id}`).toUpperCase()),
-        h('h2', { class: 'q-title', id: 'modal-title' }, q.prompt),
-        q.hint ? h('p', { class: 'field-hint', style: { marginTop: '6px' } }, q.hint) : null),
-      h('button', { class: 'icon-btn', type: 'button', 'aria-label': 'Cerrar', onclick: close }, icon('close'))),
-    h('form', { novalidate: true, onsubmit: (e) => { e.preventDefault(); commit(q, { fromModal: true }); } },
-      renderForm(q, { ...ctx, submit: () => commit(q, { fromModal: true }), alwaysLabel: false })),
+  box.replaceChildren(
+    h('div', { class: 'q' }, `${q.id} · ${q.prompt}`),
+    ...(q.hint ? [h('p', { class: 'field-hint' }, q.hint)] : []),
+    h('form', {
+      novalidate: true, 'aria-label': `Editar la pregunta ${q.id}`,
+      onsubmit: (e) => { e.preventDefault(); commit(q, { fromModal: true }); },
+      onkeydown: (e) => { if (e.key === 'Escape') { e.preventDefault(); closeInlineEdit(); } },
+    }, renderForm(q, { ...ctx, submit: () => commit(q, { fromModal: true }), alwaysLabel: false })),
     h('div', { class: 'dock-actions' },
-      h('div', { class: 'left' }, h('button', { class: 'btn-text', type: 'button', onclick: close }, 'Cancelar')),
-      h('div', { class: 'right' }, h('button', { class: 'btn btn-primary', type: 'button', disabled: uploading, 'data-fk': 'save', onclick: () => commit(q, { fromModal: true }) }, uploading ? 'Subiendo archivo…' : 'Guardar', icon('save', 'icon')))));
-  document.body.append(h('div', { class: 'scrim', onclick: close }), modal);
-  modal.scrollTop = prevModalScroll;
-  trapFocus(modal, close);
-  const target = (prevKey && modal.querySelector(`[data-fk="${CSS.escape(prevKey)}"]`)) || modal.querySelector('[aria-invalid="true"]') || modal.querySelector('input:not([type=file]), textarea, select, .chip');
-  target?.focus({ preventScroll: true });
+      h('div', { class: 'left' }, h('button', { class: 'btn-text', type: 'button', onclick: closeInlineEdit }, icon('close'), 'Cancelar')),
+      h('div', { class: 'right' }, h('button', { class: 'btn btn-primary btn-sm', type: 'button', disabled: uploading, 'data-fk': 'save', onclick: () => commit(q, { fromModal: true }) }, uploading ? 'Subiendo archivo…' : 'Guardar', icon('save', 'icon')))));
+  if (reveal) {
+    box.scrollIntoView({ block: 'nearest', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+    const first = box.querySelector('[aria-invalid="true"]') || (window.matchMedia('(pointer: coarse)').matches ? null : box.querySelector('input:not([type=file]), textarea, select, .chip'));
+    first?.focus({ preventScroll: true });
+    return;
+  }
+  window.scrollTo(0, pageScroll);
+  if (prevKey) box.querySelector(`[data-fk="${CSS.escape(prevKey)}"]`)?.focus({ preventScroll: true });
 }
 
 /* ---------- Envío ---------- */
@@ -1042,11 +1092,10 @@ function renderSuccess() {
             h('li', {}, 'Ten a mano los accesos que mencionaste en el onboarding. Los usaremos durante la configuración.'))),
         h('div', { class: 'welcome-actions', style: { justifyContent: 'center' } },
           h('button', { class: 'btn btn-white', type: 'button', onclick: downloadCopy }, icon('download'), 'Descargar una copia'),
-          h('button', {
-            class: 'btn btn-ghost-white', type: 'button', onclick: () => {
-              if (confirm('¿Empezar un onboarding nuevo? La copia local de este se borrará de este dispositivo.')) { clearState(); state = freshState(); render(); }
-            },
-          }, 'Nuevo onboarding'))),
+          ui.confirmReset ? null : h('button', {
+            class: 'btn btn-ghost-white', type: 'button', 'data-fk': 'reset', onclick: () => { ui.confirmReset = true; renderSuccess(); document.querySelector('[data-fk="reset-no"]')?.focus(); },
+          }, 'Nuevo onboarding')),
+        ui.confirmReset ? resetConfirm('La copia local de este onboarding se borrará de este dispositivo. ¿Empezar uno nuevo?', renderSuccess) : null),
       h('footer', { class: 'welcome-foot' }, h('span', { class: 'brand-text' }, 'Inteligencia que construye.'), h('span', {}, `© ${new Date().getFullYear()} iTech`))),
   );
   document.getElementById('s-title')?.focus?.();

@@ -85,7 +85,7 @@ Se generan desde `config/agents.json` y solo aparecen si el cliente elige el mó
 | Lectura y scroll | Al elegir opciones, el panel conserva la posición de lectura y el foco no desplaza la vista. |
 | Navegación | El botón superior dice «Editar mis respuestas». |
 | Checklist | Menú desplegable por requisito: «Sí, lo tengo» (detalle), «Lo estoy preparando» (¿para cuándo?), «No lo tengo» (¿qué te falta? + consultoría) y «No sé / necesito orientación» (consultoría). |
-| Audio y archivos | «Adjuntar archivo o responder con audio» en las preguntas sin archivo propio. Una nota de voz sustituye las respuestas escritas. |
+| Archivos | «Adjuntar archivo» (documentos o imágenes) en las preguntas sin archivo propio. El onboarding no recibe audios: el de la voz clonada (4.4) se envía a zak@itech.com.ve. |
 | Consultoría | Con «No sé», con un «No» que indica una carencia (p. ej. sin tarjeta en Meta), con un texto «no»/«no sé» o con «No lo tengo definido», aparece «¿Quieres que un consultor de iTech te ayude con esto?». Todo llega al Form en «Consultoría solicitada por el cliente». |
 | Agentes de IA | Nombre y Rol separados. «¿Qué puede hacer el agente por sí solo?» y «¿Qué debe consultar antes de actuar?» separados. |
 | Horarios | Una sola pregunta de horario (4.6 si hay Call Center; si no, la de Agentes IA), con opción 24/7 que oculta días y horas, y «¿Qué debe indicar el agente autorizado fuera del horario de atención?». |
@@ -282,7 +282,7 @@ Total: **47 preguntas**.
 | 4.1 | ¿Cuántos agentes de voz necesitan y qué rol tendrá cada uno? Por ejemplo: prospección en frío, soporte técnico, confirmación de citas o cobranza. | número, casillas, texto largo | Párrafo | Sí | Sí | — | ✅ |
 | 4.2 | ¿Las llamadas serán entrantes, salientes o ambas? ¿Qué volumen diario estiman? | chips (única), número | Párrafo | Sí | Sí | — | ✅ |
 | 4.3 | ¿Qué tono debe usar el agente (formal, cercano o corporativo)? ¿Qué saludo, modismos regionales o expresiones deben usarse o evitarse? | chips (única), texto largo | Párrafo | Sí | Sí | — | ✅ |
-| 4.4 | ¿Quieren clonar la voz de alguien del equipo? Si es así, ¿pueden enviar un audio limpio de 1 a 2 minutos, con la autorización de esa persona? ¿O prefieren una voz de catálogo? | chips (única), archivo | Párrafo | Sí | Sí | — | ✅ |
+| 4.4 | ¿Quieren clonar la voz de alguien del equipo? Si es así, ¿pueden enviar un audio limpio de 1 a 2 minutos, con la autorización de esa persona? ¿O prefieren una voz de catálogo? | chips (única), aviso | Párrafo | Sí | Sí | — | ✅ |
 | 4.5 | ¿Qué debe pasar al final de cada llamada? Por ejemplo: crear un contacto, agendar una cita, mover un trato o transferir a un humano. | casillas | Casillas | Sí | Sí | — | ✅ |
 | 4.6 | ¿En qué horario deben operar los agentes? ¿Qué hacen fuera de ese horario? | casillas, hora, texto largo | Párrafo | Sí | Sí | — | ✅ |
 | 5.1 | ¿Tienen documentado el catálogo, la lista de precios, los enlaces de pago y las políticas de garantía o devolución (PDF, Word o Excel) | casillas | Párrafo | Sí | Sí | — | ✅ |
@@ -349,4 +349,4 @@ La marca de tiempo la añade Google Forms automáticamente en la primera columna
 |---|---|
 | 2.2 | 2.1 = "Activo en WhatsApp" o "Activo en WhatsApp Business" |
 | 6.2, 6.3, 6.4 | 6.1 ≠ "No usamos ERP" (la sección dice "si aplica") |
-| Campos internos | Formato y registros (1.5) si hay base; audio y autorización (4.4) si se clona la voz; monto (5.3) si se elige ese caso; lista de usuarios o archivo (7.1) según el modo; roles por usuario o texto libre (7.2) según 7.1; % de descuento y archivo (8.2); planes (8.3); datos del avatar (10.3); URL (11.1); detalle (7.5, 12.3, 13.1, 13.3) |
+| Campos internos | Formato y registros (1.5) si hay base; aviso del audio por correo y autorización (4.4) si se clona la voz; monto (5.3) si se elige ese caso; lista de usuarios o archivo (7.1) según el modo; roles por usuario o texto libre (7.2) según 7.1; % de descuento y archivo (8.2); planes (8.3); datos del avatar (10.3); URL (11.1); detalle (7.5, 12.3, 13.1, 13.3) |

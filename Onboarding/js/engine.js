@@ -8,11 +8,8 @@
 /** Adjuntos opcionales que acepta cualquier pregunta (documento o imagen de respaldo). */
 export const ATTACH = {
   id: '__adjuntos', type: 'file', label: 'Adjuntos', multiple: true, required: false, maxMB: 10,
-  accept: '.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.ppt,.pptx,image/*,audio/*',
+  accept: '.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.ppt,.pptx,image/*',
 };
-
-/** ¿La respuesta incluye una nota de voz? (sustituye a las respuestas escritas). */
-export const hasAudio = (draft) => [].concat(draft?.[ATTACH.id] || []).some((f) => /\.(webm|ogg|m4a|mp3|wav|aac)$/i.test(f.name || '') || /^audio\//.test(f.type || ''));
 
 const isEmpty = (v) =>
   v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0);
@@ -220,10 +217,7 @@ export function createEngine(schema) {
   function validate(q, draft, answers) {
     const errors = {};
     const fields = visibleFields(q, answers, draft);
-    const audio = hasAudio(draft);
     for (const f of fields) {
-      // Una nota de voz adjunta sustituye a las respuestas escritas.
-      if (audio && ['text', 'textarea'].includes(f.type)) continue;
       const msg = validateField(f, draft[f.id], draft);
       if (msg) errors[f.id] = msg;
     }
@@ -238,7 +232,7 @@ export function createEngine(schema) {
       if (g) errors[f.id] = `Elige la frecuencia y el canal de «${g.title}».`;
     }
     // «Responde al menos uno de estos campos» (p. ej. organigrama: archivo o descripción).
-    if (q.requireOneOf && !audio && q.requireOneOf.every((id) => isEmpty(draft[id]))) {
+    if (q.requireOneOf && q.requireOneOf.every((id) => isEmpty(draft[id]))) {
       errors[q.requireOneOf[0]] = q.requireOneOfMsg || (q.fields.some((f) => f.type === 'file') ? 'Adjunta un archivo o escribe una descripción.' : 'Elige al menos una opción.');
     }
     for (const f of fields.filter((x) => x.type === 'userRoles')) {

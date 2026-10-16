@@ -21,7 +21,7 @@ export function renderForm(q, ctx) {
   for (const f of fields) wrap.appendChild(renderField(f, q, ctx, showLabels));
   // «No» / «No sé» → ofrecemos consultoría de iTech.
   if (ctx.consultCheck?.(q, ctx.draft, fields)) wrap.appendChild(renderConsultCta(q, ctx));
-  // Adjuntos o nota de voz en todas las preguntas, salvo las que ya piden su propio archivo.
+  // Adjuntos (documento o imagen) en todas las preguntas, salvo las que ya piden su propio archivo.
   if (!ctx.noAttach && !q.noAttach && !q.fields.some((f) => f.type === 'file')) wrap.appendChild(renderAttach(q, ctx));
   return wrap;
 }
@@ -52,13 +52,11 @@ function renderAttach(q, ctx) {
       h('button', {
         type: 'button', class: 'btn-text btn-xs', 'data-fk': 'attach-open',
         onclick: () => { (ctx.attachOpen ||= {})[q.id] = true; ctx.rerender(); setTimeout(() => document.querySelector('.attach-box .dropzone input')?.focus(), 0); },
-      }, icon('clip'), 'Adjuntar archivo o responder con audio'));
+      }, icon('clip'), 'Adjuntar archivo'));
   }
   const id = nextId(`f-${q.id}-attach`).replace(/\./g, '_');
   return h('div', { class: 'field attach-box' },
-    h('span', { class: 'field-label', id: `${id}-label` }, icon('clip'), ' Archivos o nota de voz', h('span', { class: 'opt' }, ' (opcional)')),
-    h('div', { class: 'field-hint' }, 'Si prefieres, responde con una nota de voz: reemplaza las respuestas escritas de esta pregunta.'),
-    audioRecorder(q, ctx),
+    h('span', { class: 'field-label', id: `${id}-label` }, icon('clip'), ' Documentos o imágenes', h('span', { class: 'opt' }, ' (opcional)')),
     fileControl(ATTACH, q, ctx, { id, describedBy: null, labelId: `${id}-label` }),
     ctx.errors[ATTACH.id] ? h('div', { class: 'field-error', role: 'alert' }, icon('alert', 'icon'), ctx.errors[ATTACH.id]) : null);
 }
@@ -517,41 +515,6 @@ function rowsControl(f, q, ctx) {
       return cellInput(f, ctx, row, c.id, i, col, { type, placeholder: c.placeholder || c.label, 'aria-label': aria, autocomplete: 'off', inputmode: c.type === 'number' ? 'decimal' : null });
     }),
   });
-}
-
-/** Nota de voz: graba con el micrófono y la adjunta como archivo de audio. */
-let recorder = null;
-function audioRecorder(q, ctx) {
-  if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') return null;
-  const recording = recorder?.qid === q.id;
-  return h('div', { class: 'recorder' },
-    h('button', {
-      type: 'button', class: `btn btn-sm ${recording ? 'btn-primary' : 'btn-ghost'}`, 'data-fk': 'rec',
-      'aria-pressed': String(recording),
-      onclick: async () => {
-        if (recording) { recorder.mr.stop(); return; }
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          const mr = new MediaRecorder(stream);
-          const chunks = [];
-          mr.ondataavailable = (e) => chunks.push(e.data);
-          mr.onstop = () => {
-            stream.getTracks().forEach((t) => t.stop());
-            recorder = null;
-            const type = mr.mimeType || 'audio/webm';
-            const ext = type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm';
-            const file = new File(chunks, `nota-de-voz-${q.id}-${Date.now()}.${ext}`, { type });
-            handleFiles([file], ATTACH, q, ctx);
-          };
-          recorder = { qid: q.id, mr };
-          mr.start();
-          ctx.rerender('rec');
-        } catch {
-          ctx.setError(ATTACH.id, 'No pudimos usar el micrófono. Revisa el permiso del navegador.');
-        }
-      },
-    }, icon(recording ? 'pause' : 'mic'), recording ? 'Detener y adjuntar' : 'Grabar nota de voz'),
-    recording ? h('span', { class: 'rec-dot', role: 'status' }, 'Grabando…') : null);
 }
 
 /** KPIs por módulo: casillas con descripción y, por cada grupo con KPIs marcados, frecuencia y canal. */

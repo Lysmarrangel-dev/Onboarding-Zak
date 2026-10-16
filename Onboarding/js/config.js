@@ -14,6 +14,10 @@ export const CONFIG = {
   // Ruta del mismo dominio: vercel.json la reenvía al backend en Railway (igual que el CRM y el brochure), sin CORS.
   kiraTtsUrl: '/api/kira/tts',
 
+  // Kira responde las dudas del cliente con IA (mismo motor que el CRM y el brochure), por el mismo
+  // rewrite de vercel.json. Vacía = las dudas se responden solo con config/faq.json.
+  kiraChatUrl: '/api/kira/generate',
+
   // Reintentos automáticos del envío (esperas en ms entre intentos).
   retryDelays: [1000, 3000, 6000],
   requestTimeoutMs: 30000,

@@ -104,6 +104,9 @@ button { cursor: pointer; }
 .welcome-main .meta { display: flex; flex-wrap: wrap; gap: 10px 22px; margin: 18px 0 36px; color: rgba(255, 255, 255, .85); font-size: .95rem; }
 .welcome-main .meta span { display: inline-flex; align-items: center; gap: 8px; }
 .welcome-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.reset-confirm { display: grid; gap: 10px; margin-top: 16px; padding: 14px 16px; border-radius: 14px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.3); max-width: 520px; }
+.reset-confirm p { margin: 0; }
+.success-main .reset-confirm .welcome-actions { justify-content: center; }
 .welcome-foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; color: rgba(255, 255, 255, .75); font-size: .9rem; }
 .welcome-foot .brand-text { color: var(--itech-white); font-size: 1.05rem; }
 
@@ -153,6 +156,11 @@ button { cursor: pointer; }
 }
 .avatar img { width: 24px; height: auto; } /* isotipo ≥ 24 px */
 .avatar-spacer { width: 40px; flex: none; }
+/* Kira (el pulpo del brochure) como avatar de los mensajes del agente */
+.avatar.avatar-kira { overflow: hidden; background: var(--surface-soft); }
+.avatar.avatar-kira img { width: 100%; height: 100%; object-fit: cover; }
+.kira-mini { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; flex: none; }
+.chat-log .msg { scroll-margin-top: 150px; }
 .bubble {
   padding: 12px 16px; border-radius: var(--radius-bubble); max-width: 100%;
   overflow-wrap: anywhere;
@@ -210,6 +218,10 @@ button { cursor: pointer; }
   background: linear-gradient(to top, var(--bg) 70%, transparent);
   padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
 }
+/* Formularios largos: el panel deja de flotar y pasa a ser parte de la página (no tapa la conversación). */
+.dock.is-inline { position: static; background: none; }
+.dock.is-inline .dock-card { max-height: none; overflow: visible; }
+.dock.is-inline .dock-card > .dock-actions:last-child { bottom: 0; border-radius: 0 0 var(--radius-card) var(--radius-card); }
 .dock-card {
   max-width: 760px; margin: 0 auto; background: var(--surface);
   border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow);
@@ -357,6 +369,9 @@ button { cursor: pointer; }
 .s-item .edit-link { grid-column: 2; grid-row: 1 / 3; align-self: start; }
 .s-item .a .k { color: var(--text-muted); }
 .s-item.pending .a { color: var(--danger); }
+/* Edición dentro del resumen (sin ventana encima) */
+.s-item.s-editing { grid-template-columns: 1fr; gap: 12px; background: var(--surface-soft); border-radius: 14px; padding: 14px; margin: 6px -14px; border-top: 0; outline: 1.5px solid var(--chip-border); }
+.s-item.s-editing .field-hint { margin: 0; }
 .summary-bar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 15;
   background: var(--header-bg); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
@@ -624,7 +639,7 @@ button { cursor: pointer; }
 .consent-text { font-size: .92rem; line-height: 1.4; }
 
 /* ==========================================================================
-   13. Mejoras iTech: consultoría, avisos, listas desplegables, audio y Kira
+   13. Mejoras iTech: consultoría, avisos, listas desplegables y Kira
    ========================================================================== */
 .consult-cta { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; background: var(--surface-soft); border: 1.5px solid var(--chip-border); }
 .consult-ico .icon { width: 30px; height: 30px; padding: 6px; border-radius: 10px; background: var(--itech-gradient); color: #fff; }
@@ -662,9 +677,6 @@ button { cursor: pointer; }
 .grid-table.is-select .grid-row { display: grid; gap: 8px; }
 .grid-table.is-select .select { min-height: 44px; }
 
-.recorder { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.rec-dot { display: inline-flex; align-items: center; gap: 6px; font-size: .85rem; font-weight: 600; color: var(--danger); }
-.rec-dot::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--danger); animation: node-pulse 1.2s infinite; }
 
 .listen-btn { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; padding: 4px 8px 4px 0; color: var(--accent-text); font-weight: 600; font-size: .8rem; cursor: pointer; border-radius: 8px; }
 .listen-btn .icon { width: 16px; height: 16px; }

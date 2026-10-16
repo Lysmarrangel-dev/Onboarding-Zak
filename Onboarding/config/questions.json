@@ -8,7 +8,7 @@
       "q": "M.1",
       "f": "modulos"
     },
-    "notes": "Sección 0 añadida con aprobación de iTech (identificación y RIF para la verificación en Meta). Después de la sección 0, la app inserta «Módulos de ZAK» y «Checklist de preparación» (config/modules.json) y «Agentes de IA por departamento» (config/agents.json). Todas las preguntas aceptan adjuntos opcionales. Secciones 1–13 = documento original, en el mismo orden. Cada pregunta del documento = 1 ítem del Google Form. Revisión 2026-10-14 (lista de mejoras de iTech): Kira lee las preguntas, checklist con opciones explicativas, CTA de consultoría, audio, usuarios con tipo y módulos, SLA, etc."
+    "notes": "Sección 0 añadida con aprobación de iTech (identificación y RIF para la verificación en Meta). Después de la sección 0, la app inserta «Módulos de ZAK» y «Checklist de preparación» (config/modules.json) y «Agentes de IA por departamento» (config/agents.json). Todas las preguntas aceptan adjuntos opcionales (documentos o imágenes; sin audio). Secciones 1–13 = documento original, en el mismo orden. Cada pregunta del documento = 1 ítem del Google Form. Revisión 2026-10-14 (lista de mejoras de iTech): Kira lee las preguntas, checklist con opciones explicativas, CTA de consultoría, usuarios con tipo y módulos, SLA, etc."
   },
 
   "sections": [
@@ -216,7 +216,7 @@
       "fields": [
         {"id": "voz", "type": "single", "label": "Voz", "options": ["Clonar la voz de alguien del equipo", "Usar una voz de catálogo"]},
         {"id": "genero", "type": "single", "label": "Género de la voz", "options": ["Femenino", "Masculino"]},
-        {"id": "audio", "type": "file", "label": "Audio limpio de 1 a 2 minutos", "accept": "audio/*", "maxMB": 10, "required": false, "hint": "Si aún no lo tienes, puedes enviarlo después.", "showIf": {"f": "voz", "op": "eq", "value": "Clonar la voz de alguien del equipo"}},
+        {"id": "audioAviso", "type": "notice", "icon": "doc", "text": "Para clonar la voz necesitamos un audio limpio de 1 a 2 minutos y la autorización de esa persona. No lo subas aquí: envíalo a zak@itech.com.ve y lo sumamos a tu implementación.", "link": {"label": "Escribir a zak@itech.com.ve", "href": "mailto:zak@itech.com.ve?subject=Audio%20para%20clonar%20la%20voz%20(ZAK)"}, "showIf": {"f": "voz", "op": "eq", "value": "Clonar la voz de alguien del equipo"}},
         {"id": "autorizacion", "type": "single", "label": "¿Cuentan con la autorización de esa persona?", "options": ["Sí", "No", "En trámite"], "showIf": {"f": "voz", "op": "eq", "value": "Clonar la voz de alguien del equipo"}}
       ]
     },

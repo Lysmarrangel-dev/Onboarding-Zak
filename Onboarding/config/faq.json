@@ -654,7 +654,7 @@
         "clonacion",
         "audio"
       ],
-      "answer": "Para clonar una voz necesitamos un audio limpio de 1 a 2 minutos y la autorización de la persona. Si no, pueden elegir una voz de catálogo."
+      "answer": "Para clonar una voz necesitamos un audio limpio de 1 a 2 minutos y la autorización de la persona. No lo subas en el onboarding: envíalo a zak@itech.com.ve. Si no, pueden elegir una voz de catálogo."
     },
     {
       "id": "privacidad",
@@ -670,7 +670,7 @@
         "acuerdo de confidencialidad",
         "confidencialidad"
       ],
-      "answer": "Tus respuestas llegan solo al equipo de iTech, que las usa para configurar ZAK. Están protegidas por el Acuerdo de Confidencialidad y Protección de Datos que aceptaste al inicio: no las compartimos con terceros y puedes pedir que se eliminen al terminar la relación."
+      "answer": "En cada pregunta puedes adjuntar documentos o imágenes desde «Adjuntar archivo». Se aceptan PDF, Word, Excel, PowerPoint, texto e imágenes, de hasta 10 MB cada uno. La base de contactos y los audios no se suben aquí: envíalos a zak@itech.com.ve."
     },
     {
       "id": "guardar-progreso",
@@ -854,19 +854,6 @@
         "acompanamiento"
       ],
       "answer": "Si algo no lo tienes o no lo sabes, no pasa nada. Cuando respondas «No» o «No sé», te preguntaremos si quieres consultoría de iTech para eso. Lo anotamos y tu consultor lo trabaja contigo en la implementación."
-    },
-    {
-      "id": "nota-de-voz",
-      "source": "onboarding",
-      "keywords": [
-        "audio",
-        "nota de voz",
-        "grabar",
-        "responder hablando",
-        "responder con audio",
-        "microfono"
-      ],
-      "answer": "Sí. En «Adjuntar archivo o responder con audio» pulsa «Grabar nota de voz», habla y pulsa «Detener y adjuntar». La nota de voz reemplaza las respuestas escritas de esa pregunta."
     },
     {
       "id": "plantillas",

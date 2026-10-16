@@ -13,7 +13,7 @@ Asistente conversacional que guía a cada cliente nuevo en el onboarding de ZAK.
 - **Agentes de IA:** `config/agents.json`. Por cada departamento elegido, el cliente describe su agente y sube los documentos que puede leer.
 - **Nivel de información:** `config/scoring.json`. Barra en el encabezado que indica cuánta información hay para configurar ZAK y qué consultoría se recomienda.
 - **Adjuntos:** cualquier pregunta acepta documentos o imágenes de respaldo. La 0.2 pide el RIF **en PDF** (obligatorio; se valida que el archivo sea un PDF real) para verificar la empresa en WhatsApp Business. Al enviar, el Apps Script guarda una copia en la carpeta de Drive **«RIF de clientes»** como `RIF · J-12345678-9 · Razón social · ZAK-2026-XXXXXX.pdf`, y su enlace queda en la columna «RIF en PDF (enlace para revisión)» de la hoja y en el correo de aviso.
-- **Dudas sobre ZAK:** `config/faq.json` (56 respuestas basadas en el cuestionario y en el brochure de ZAK). Para añadir una, agrega una entrada con `keywords` y `answer`.
+- **Pregúntale a Kira:** Kira (el mismo pulpo y el mismo motor de IA del CRM y del brochure) responde las dudas del cliente sobre la pregunta en pantalla o sobre ZAK, y las lee con su voz si está activa. Usa `/api/kira/generate` del backend del CRM (rewrite en `vercel.json`, `kiraChatUrl` en `js/config.js`) y toma como fuente `config/faq.json` y `config/modules.json`. Si el backend no responde, contesta con `config/faq.json` (respuestas con `keywords` y `answer`).
 - **Marca:** `css/tokens.css` (paleta, degradado a 125°, Iquost + Inter) y `assets/brand/` (vectores del Manual de Marca v1.0).
 - **Backend:** Google Apps Script (`apps-script/Code.gs`), publicado como aplicación web.
 
