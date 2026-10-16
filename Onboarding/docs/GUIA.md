@@ -33,8 +33,8 @@ Kira suena igual en el onboarding, en el CRM ZAK y en el brochure: es la voz Gem
 
 - Para cambiar una frase, edita `caption` o `say` en `config/intro.json` y ejecuta `python3 tools/generar_voz.py --force`, o `--only <escena>` para una sola. `--kira` solo genera los textos nuevos o cambiados: ejecútalo cada vez que edites preguntas.
 - Si falta algún audio, la app pide la voz de Kira en vivo al backend (`kiraTtsUrl` en `js/config.js`), así que no cambia de voz. La llamada va a `/api/kira/tts` del mismo dominio y `vercel.json` la reenvía al backend en Railway (igual que el CRM y el brochure), así que no hace falta configurar CORS. Solo si el backend no responde se usa la voz del navegador.
-- «Pregúntale a Kira» (en el panel de respuesta) usa la IA del mismo backend: `/api/kira/generate`, también reenviado por `vercel.json` (`kiraChatUrl` en `js/config.js`). Sin backend, Kira responde con `config/faq.json`.
-- El botón del micrófono abre una conversación por voz con Kira (Gemini Live) por el relay WebSocket del backend en Railway (`kiraLiveUrl` en `js/config.js`; Vercel no reenvía WebSockets). `vercel.json` permite el micrófono solo a este sitio (`microphone=(self)`).
+- El botón flotante de Kira (`js/kiraWidget.js`) abre su panel de conversación; las respuestas escritas usan la IA del mismo backend: `/api/kira/generate`, también reenviado por `vercel.json` (`kiraChatUrl` en `js/config.js`). Sin backend, Kira responde con `config/faq.json`.
+- El micrófono del panel de Kira abre una conversación por voz con Kira (Gemini Live) por el relay WebSocket del backend en Railway (`kiraLiveUrl` en `js/config.js`; Vercel no reenvía WebSockets). `vercel.json` permite el micrófono solo a este sitio (`microphone=(self)`).
 - Todo esto usa la clave de Gemini del backend del CRM: si el crédito de Google AI Studio se agota, la voz en vivo, las respuestas con IA y la voz de Kira dejan de funcionar en el CRM, el brochure y el onboarding (el onboarding sigue con `faq.json` y la voz del navegador).
 
 ## Actualizar un onboarding ya en marcha
@@ -154,6 +154,7 @@ Onboarding/
 │   ├── kira.js                Kira lee las preguntas (voz de Kira del CRM)
 │   ├── kiraVoice.js           Voz de Kira en vivo desde el backend del CRM
 │   ├── kiraChat.js            Pregúntale a Kira: respuestas con IA del backend del CRM
+│   ├── kiraWidget.js          Kira flotante: botón y panel de conversación
 │   ├── kiraLive.js            Conversación por voz con Kira (Gemini Live)
 │   ├── kira-pcm-worklet.js    Captura del micrófono a 16 kHz para la voz en vivo
 │   ├── inputs.js              Componentes por tipo de respuesta

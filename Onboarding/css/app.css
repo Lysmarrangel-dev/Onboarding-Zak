@@ -159,7 +159,6 @@ button { cursor: pointer; }
 /* Kira (el pulpo del brochure) como avatar de los mensajes del agente */
 .avatar.avatar-kira { overflow: hidden; background: var(--surface-soft); }
 .avatar.avatar-kira img { width: 100%; height: 100%; object-fit: cover; }
-.kira-mini { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; flex: none; }
 .chat-log .msg { scroll-margin-top: 150px; }
 .bubble {
   padding: 12px 16px; border-radius: var(--radius-bubble); max-width: 100%;
@@ -676,19 +675,46 @@ button { cursor: pointer; }
 .listen-btn .icon { width: 16px; height: 16px; }
 .listen-btn:hover { text-decoration: underline; }
 .kira-toggle.is-on { background: var(--itech-gradient); color: #fff; border-color: transparent; }
-.kira-call.is-on { background: var(--itech-gradient); color: #fff; border-color: transparent; }
-
-/* Conversación por voz: franja bajo la barra de progreso (no tapa el chat) */
-.kira-live { display: flex; gap: 10px; align-items: center; max-width: 760px; margin: 10px auto 0; padding: 8px 10px 8px 8px; border-radius: 14px; background: var(--surface-soft); border: 1px solid var(--chip-border); --lvl: 0; }
-.kira-live.is-notice { color: var(--danger); font-size: .88rem; padding: 8px 12px; }
-.kira-live-avatar { width: 38px; height: 38px; flex: none; border-radius: 50%; overflow: hidden; background: var(--surface); box-shadow: 0 0 0 calc(2px + var(--lvl) * 9px) rgba(167, 45, 188, .28); transition: box-shadow 90ms linear; }
-.kira-live-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.kira-live.st-connecting .kira-live-avatar, .kira-live.st-thinking .kira-live-avatar { animation: node-pulse 1.2s infinite; }
-.kira-live-text { flex: 1; min-width: 0; display: grid; gap: 1px; }
-.kira-live-text strong { font-size: .86rem; color: var(--accent-text); }
-.kira-live-caption { font-size: .82rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kira-live-caption:empty { display: none; }
-@media (prefers-reduced-motion: reduce) { .kira-live-avatar { transition: none; animation: none !important; } }
+/* Kira flotante: botón y panel de conversación (como en el brochure y el CRM). No bloquea la página. */
+.kira-dock { position: fixed; right: 20px; bottom: var(--kira-bottom, 20px); z-index: 30; display: grid; justify-items: end; gap: 12px; --level: 0; transition: bottom var(--dur-fast); }
+.kira-dock[hidden] { display: none; }
+.kira-fab { display: inline-flex; align-items: center; gap: 10px; padding: 6px 18px 6px 6px; border-radius: var(--radius-pill); border: 1px solid var(--chip-border); background: var(--surface); color: var(--text); font-weight: 700; cursor: pointer; box-shadow: var(--shadow); }
+.kira-fab:hover { border-color: var(--itech-purple); }
+.kira-orb { position: relative; display: inline-grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: 50%; overflow: hidden;
+  background: radial-gradient(circle at 50% 38%, #fff 0, #f3e8ff 38%, #d8b4fe 72%, #a855f7 100%);
+  box-shadow: 0 0 calc(var(--level) * 22px) rgba(167, 45, 188, calc(.25 + var(--level) * .5)); transform: scale(calc(1 + var(--level) * .08)); transition: transform 80ms linear, box-shadow 80ms linear; }
+.kira-orb img { width: 96%; height: 96%; object-fit: contain; margin-top: 8%; }
+.kira-orb.sm { width: 34px; height: 34px; }
+.kira-dock[data-kira="connecting"] .kira-orb, .kira-dock[data-kira="thinking"] .kira-orb { animation: node-pulse 1.2s infinite; }
+.kira-panel { width: min(380px, calc(100vw - 32px)); height: min(540px, calc(100dvh - var(--kira-bottom, 20px) - 96px)); display: flex; flex-direction: column; border-radius: 22px; border: 1px solid var(--chip-border); background: var(--surface); color: var(--text); box-shadow: var(--shadow); overflow: hidden; animation: msg-in var(--dur-med) var(--ease-out) both; }
+.kira-panel[hidden] { display: none; }
+.kira-panel-head { display: flex; align-items: center; gap: 10px; padding: 12px 12px 12px 14px; border-bottom: 1px solid var(--border); }
+.kira-panel-head > div { display: grid; line-height: 1.2; margin-right: auto; }
+.kira-panel-state { font-size: .78rem; color: var(--text-muted); }
+.kira-dock[data-kira="listening"] .kira-panel-state, .kira-dock[data-kira="speaking"] .kira-panel-state { color: var(--accent-text); font-weight: 600; }
+.kira-msgs { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; overscroll-behavior: contain; }
+.kira-msg { max-width: 88%; padding: 9px 13px; border-radius: 16px; font-size: .92rem; line-height: 1.45; white-space: pre-wrap; }
+.kira-msg.kira { align-self: flex-start; background: var(--surface-soft); border-bottom-left-radius: 6px; }
+.kira-msg.user { align-self: flex-end; background: var(--itech-gradient); color: #fff; border-bottom-right-radius: 6px; }
+.kira-msg.note { align-self: center; max-width: 100%; text-align: center; font-size: .82rem; color: var(--danger); background: var(--danger-bg); }
+.kira-msg.typing { display: flex; gap: 4px; }
+.kira-suggest { display: flex; gap: 6px; padding: 0 12px 10px; overflow-x: auto; scrollbar-width: none; }
+.kira-suggest button { flex: none; padding: 6px 11px; border-radius: var(--radius-pill); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font-size: .8rem; cursor: pointer; white-space: nowrap; }
+.kira-suggest button:hover { border-color: var(--itech-purple); color: var(--accent-text); }
+.kira-composer { display: flex; gap: 8px; padding: 10px 12px 12px; border-top: 1px solid var(--border); }
+.kira-input { flex: 1; min-width: 0; height: 42px; padding: 0 12px; border-radius: 12px; border: 1.5px solid var(--border-strong); background: var(--surface); color: var(--text); font: inherit; font-size: .92rem; }
+.kira-input:focus { outline: none; border-color: var(--focus); }
+.kira-send { background: var(--itech-gradient); color: #fff; border-color: transparent; }
+.kira-mic.on { background: #ec4899; color: #fff; border-color: transparent; animation: node-pulse 1.4s infinite; }
+@media (max-width: 520px) {
+  .kira-dock { right: 12px; left: 12px; }
+  .kira-panel { width: 100%; }
+  .kira-dock.is-open .kira-fab { display: none; }
+  .kira-fab > span:not(.kira-orb) { display: none; }
+  .kira-fab .kira-orb { width: 46px; height: 46px; }
+  .kira-fab { padding: 5px; }
+}
+@media (prefers-reduced-motion: reduce) { .kira-orb, .kira-panel, .kira-mic.on { transition: none; animation: none !important; } }
 .grid-row:not(.is-missing) .missing-q { color: var(--accent-text); }
 .grid-table.is-select .grid-row .select { width: 100%; }
 

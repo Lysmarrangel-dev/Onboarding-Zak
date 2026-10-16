@@ -15,8 +15,8 @@ import { createIntro } from './intro.js';
 import { buildModuleSchema, buildAgentSchema, buildConfigSchema, computeReadiness, missingText } from './readiness.js';
 import { computeInfo, pendingText, consultTriggered, consultRequests } from './info.js';
 import * as kira from './kira.js';
-import { askKira, setKnowledge, describeQuestion, voiceInstruction, VOICE_TOOLS } from './kiraChat.js';
-import { KiraLive, voiceSupported } from './kiraLive.js';
+import { setKnowledge } from './kiraChat.js';
+import { createKiraWidget } from './kiraWidget.js';
 
 const root = document.getElementById('app');
 const clone = (x) => JSON.parse(JSON.stringify(x ?? {}));
@@ -39,7 +39,7 @@ let introCtl = null; // controlador de la presentación audiovisual
 // Estado de interfaz (no se guarda).
 const ui = {
   editing: null, returnTo: null, draft: {}, errors: {}, uploads: {},
-  typing: false, pending: null, clarified: {}, doubtMode: false,
+  typing: false, pending: null, clarified: {},
   drawer: false, modal: null, sending: false, sendAttempt: 0, sendError: null,
 };
 
@@ -90,7 +90,7 @@ function render() {
   ui.confirmReset = false;
   introCtl?.stop();
   kira.stop();
-  if (state.screen !== 'chat') live?.stop(); // la conversación por voz vive en el chat
+  kiraW.show(['chat', 'summary'].includes(state.screen)); // Kira flotante: en el chat y en el resumen
   if (state.screen === 'chat') renderChat();
   else if (state.screen === 'summary') renderSummary();
   else if (state.screen === 'success') renderSuccess();
@@ -240,11 +240,6 @@ function renderHeader(q) {
       h('div', { class: 'header-actions' },
         infoMeter(),
         h('button', { class: 'btn-text', type: 'button', onclick: openDrawer, 'aria-haspopup': 'dialog' }, icon('list'), h('span', {}, 'Editar mis respuestas')),
-        voiceSupported() ? h('button', {
-          class: `icon-btn kira-call ${ui.voice !== 'idle' ? 'is-on' : ''}`, type: 'button', 'aria-pressed': String(ui.voice !== 'idle'),
-          'aria-label': ui.voice !== 'idle' ? 'Terminar la conversación por voz con Kira' : 'Hablar con Kira por voz', title: 'Hablar con Kira',
-          onclick: toggleVoice,
-        }, icon('mic')) : null,
         h('button', {
           class: `icon-btn kira-toggle ${kira.isOn() ? 'is-on' : ''}`, type: 'button', 'aria-pressed': String(kira.isOn()),
           'aria-label': kira.isOn() ? 'Kira lee las preguntas en voz alta. Silenciar' : 'Activar la voz de Kira', title: 'Voz de Kira',
@@ -262,80 +257,7 @@ function renderHeader(q) {
         class: 'progress-track', role: 'progressbar', 'aria-label': 'Avance del onboarding',
         'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': prog.pct, 'aria-valuetext': `${label}, ${sec.title}`,
       }, segs)),
-    voiceBar(),
   );
-}
-
-/* ---------- Conversación por voz con Kira (Gemini Live) ---------- */
-
-let live = null;
-ui.voice = 'idle';
-ui.voiceCaption = '';
-ui.voiceNotice = '';
-const VOICE_LABEL = { connecting: 'Conectando con Kira…', listening: 'Kira te escucha', thinking: 'Kira está pensando…', speaking: 'Kira está hablando' };
-
-/** Franja de la llamada bajo la barra de progreso: estado, subtítulo en vivo y «Terminar». No tapa el chat. */
-function voiceBar() {
-  if (ui.voice === 'idle') {
-    return ui.voiceNotice ? h('div', { class: 'kira-live is-notice', role: 'status' }, icon('alert'), h('span', {}, ui.voiceNotice)) : null;
-  }
-  return h('div', { class: `kira-live st-${ui.voice}`, role: 'status' },
-    h('span', { class: 'kira-live-avatar', 'aria-hidden': 'true' }, h('img', { src: ASSET.kira, alt: '' })),
-    h('div', { class: 'kira-live-text' },
-      h('strong', {}, VOICE_LABEL[ui.voice] || ''),
-      h('span', { class: 'kira-live-caption' }, ui.voiceCaption)),
-    h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: () => live?.stop() }, icon('close'), 'Terminar'));
-}
-
-function refreshVoiceUi() {
-  if (state.screen === 'chat' && headerEl?.isConnected) renderHeader(introActive() ? engine.flow(state.answers)[0] : currentQuestion());
-}
-
-function getLive() {
-  live ||= new KiraLive({
-    systemInstruction: voiceInstruction(),
-    functionDeclarations: VOICE_TOOLS,
-    tools: { get_current_question: () => ({ pregunta: describeQuestion(kiraContext(currentQuestion())) }) },
-    onState: (s) => {
-      ui.voice = s;
-      if (s === 'idle') ui.voiceCaption = '';
-      refreshVoiceUi();
-    },
-    onUserText: (text, final) => { setCaption(`Tú: ${text}`); if (final) logVoice('user', text); },
-    onKiraText: (text, final) => { setCaption(text); if (final) logVoice('agent', text); },
-    onLevel: (l) => document.querySelector('.kira-live')?.style.setProperty('--lvl', l.toFixed(2)),
-    onNotice: (m) => {
-      ui.voiceNotice = m;
-      announce(m);
-      refreshVoiceUi();
-      setTimeout(() => { if (ui.voiceNotice === m) { ui.voiceNotice = ''; refreshVoiceUi(); } }, 7000);
-    },
-  });
-  return live;
-}
-
-function setCaption(text) {
-  ui.voiceCaption = text;
-  const el = document.querySelector('.kira-live-caption');
-  if (el) el.textContent = text;
-}
-
-/** Lo dicho en la llamada queda en el chat (y las dudas del cliente llegan al equipo, como las escritas). */
-function logVoice(role, text) {
-  const clean = String(text || '').trim();
-  const q = currentQuestion() || engine.byId[prevQuestionId(null)];
-  if (!clean || !q) return;
-  if (role === 'user') state.doubts.push({ qid: q.id, text: `(voz) ${clean}`, at: new Date().toISOString() });
-  addExtra(q.id, role, clean);
-  if (state.screen === 'chat') refreshChat({ focus: false });
-}
-
-async function toggleVoice() {
-  const k = getLive();
-  if (ui.voice !== 'idle') { k.stop(); return; }
-  kira.stop(); // la narración de las preguntas se calla mientras hablan
-  ui.voiceNotice = '';
-  await k.start('El cliente acaba de activar tu voz en el onboarding. Llama a get_current_question y salúdalo en una sola frase corta: ofrécele ayuda con esa pregunta o con cualquier duda sobre ZAK.');
 }
 
 function toggleTheme() {
@@ -579,6 +501,7 @@ function infoCard(info) {
 
 /** Dock mientras se ve la presentación: saltar o empezar. */
 function renderIntroDock() {
+  requestAnimationFrame(placeKira);
   dockEl.replaceChildren(h('div', { class: 'dock-card' },
     h('div', { class: 'dock-actions' },
       h('span', { class: 'field-hint' }, 'Mira la presentación o empieza cuando quieras.'),
@@ -628,7 +551,7 @@ function moduleName(id) {
 
 /** Kira lee la introducción de la sección (si es nueva) y la pregunta. */
 function speakQuestion(q) {
-  if (!q || state.screen !== 'chat' || introActive() || ui.voice !== 'idle') return;
+  if (!q || state.screen !== 'chat' || introActive() || kiraW.voiceActive()) return;
   const flow = engine.flow(state.answers);
   const i = flow.findIndex((x) => x.id === q.id);
   const newSection = i === 0 || flow[i - 1]?.section !== q.section;
@@ -650,6 +573,7 @@ function formCtx(q, rerender) {
 }
 
 function renderDock(q, focus = true) {
+  requestAnimationFrame(placeKira);
   const prevKey = document.activeElement?.dataset?.fk;
   const hadFocusInDock = dockEl.contains(document.activeElement);
 
@@ -668,9 +592,7 @@ function renderDock(q, focus = true) {
   const prevId = prevQuestionId(q.id);
 
   let body;
-  if (ui.doubtMode) {
-    body = doubtForm(q);
-  } else {
+  {
     const ctx = formCtx(q, rerender);
     const hideSend = !ui.editing && quickQuestion(q);
     body = [
@@ -678,7 +600,7 @@ function renderDock(q, focus = true) {
       ui.pending?.kind === 'question' ? h('div', { class: 'dock-actions' },
         h('span', { class: 'field-hint' }, `¿Es una duda para ${CONFIG.agentName} o es tu respuesta?`),
         h('div', { class: 'right' },
-          h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: () => { const t = ui.pending.text; ui.pending = null; clearTextOf(q); answerDoubt(q, t); } }, 'Es una duda'),
+          h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: () => { const t = ui.pending.text; ui.pending = null; clearTextOf(q); renderDock(q); kiraW.ask(t); } }, 'Es una duda'),
           h('button', { class: 'btn btn-primary btn-sm', type: 'button', 'data-fk': 'is-answer', onclick: () => { ui.pending = null; commit(q, { force: true }); } }, 'Es mi respuesta'))) : null,
       h('form', {
         novalidate: true, 'aria-label': `Respuesta a la pregunta ${q.id}`,
@@ -688,8 +610,7 @@ function renderDock(q, focus = true) {
         h('div', { class: 'left' },
           ui.editing
             ? h('button', { class: 'btn-text', type: 'button', onclick: cancelEdit }, icon('close'), 'Cancelar')
-            : prevId ? h('button', { class: 'btn-text', type: 'button', onclick: () => startEdit(prevId) }, icon('arrowLeft'), 'Anterior') : null,
-          h('button', { class: 'btn-text', type: 'button', onclick: () => { ui.doubtMode = true; renderDock(q); dockEl.querySelector('[data-fk="doubt"]')?.focus(); } }, h('img', { class: 'kira-mini', src: ASSET.kira, alt: '' }), h('span', {}, 'Pregúntale a Kira'))),
+            : prevId ? h('button', { class: 'btn-text', type: 'button', onclick: () => startEdit(prevId) }, icon('arrowLeft'), 'Anterior') : null),
         h('div', { class: 'right' },
           h('span', { class: 'kbd-hint' }, q.fields.some((f) => f.type === 'textarea') ? 'Ctrl + Enter para enviar' : ''),
           hideSend ? null : h('button', {
@@ -737,7 +658,7 @@ function prevQuestionId(currentId) {
 
 function startEdit(id) {
   if (!id) return;
-  ui.editing = id; ui.draftFor = null; ui.pending = null; ui.doubtMode = false;
+  ui.editing = id; ui.draftFor = null; ui.pending = null;
   refreshChat({ scroll: true });
 }
 
@@ -814,29 +735,7 @@ function announce(text) {
   setTimeout(() => { liveEl.textContent = text; }, 30);
 }
 
-/* ---------- Dudas sobre ZAK ---------- */
-
-function doubtForm(q) {
-  let text = '';
-  const send = () => {
-    if (!text.trim()) return;
-    ui.doubtMode = false;
-    answerDoubt(q, text.trim());
-  };
-  return [
-    h('div', { class: 'dock-banner' }, h('img', { class: 'kira-mini', src: ASSET.kira, alt: '' }), `Pregúntale a ${CONFIG.agentName}`),
-    h('div', { class: 'field' },
-      h('label', { class: 'sr-only', for: 'doubt-input' }, `Escribe tu duda para ${CONFIG.agentName}`),
-      h('input', {
-        id: 'doubt-input', class: 'input', 'data-fk': 'doubt', placeholder: 'Tu duda sobre esta pregunta o sobre ZAK', maxlength: 500,
-        oninput: (e) => { text = e.target.value; },
-        onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } if (e.key === 'Escape') { ui.doubtMode = false; renderDock(q); } },
-      })),
-    h('div', { class: 'dock-actions' },
-      h('div', { class: 'left' }, h('button', { class: 'btn-text', type: 'button', onclick: () => { ui.doubtMode = false; renderDock(q); } }, icon('arrowLeft'), 'Volver a la pregunta')),
-      h('div', { class: 'right' }, h('button', { class: 'btn btn-primary', type: 'button', onclick: send }, 'Preguntar', icon('arrowRight', 'icon btn-arrow')))),
-  ];
-}
+/* ---------- Kira flotante (dudas sobre la pregunta o sobre ZAK) ---------- */
 
 function faqAnswer(text) {
   const hit = matchFaq(faq, text);
@@ -853,23 +752,35 @@ function kiraContext(q) {
   };
 }
 
-/** Kira responde con IA (y con su voz si está activa); sin conexión, con las respuestas de faq.json. */
-async function answerDoubt(q, text) {
-  state.doubts.push({ qid: q.id, text, at: new Date().toISOString() });
-  addExtra(q.id, 'user', text);
-  // En plena llamada, la duda escrita va a la misma conversación y Kira la contesta con voz.
-  if (ui.voice !== 'idle' && live?.live) { live.sendText(text); refreshChat({ focus: false }); return; }
-  ui.typing = true;
-  refreshChat();
-  const minWait = new Promise((r) => setTimeout(r, prefersReducedMotion() ? 0 : CONFIG.typingDelayMs));
-  const [ai] = await Promise.all([askKira(text, kiraContext(q)), minWait]);
-  const answer = ai || faqAnswer(text);
-  ui.typing = false;
-  addExtra(q.id, 'agent', answer);
-  if (state.screen !== 'chat') return;
-  refreshChat();
-  if (ui.voice === 'idle') kira.speak([answer]);
+const kiraW = createKiraWidget({
+  avatar: ASSET.kira,
+  getContext: () => kiraContext(state?.screen === 'chat' ? currentQuestion() : null),
+  fallback: (text) => faqAnswer(text),
+  // Las dudas (escritas o dichas) llegan al equipo con el envío, como antes.
+  onDoubt: (text) => {
+    if (!state || !text) return;
+    state.doubts.push({ qid: (state.screen === 'chat' && currentQuestion()?.id) || 'resumen', text, at: new Date().toISOString() });
+    persist();
+  },
+  onVoice: (on) => { if (on) kira.stop(); }, // la narración de las preguntas se calla durante la llamada
+  speak: (text) => { if (!kiraW.voiceActive()) kira.speak([text]); },
+});
+
+/** El botón de Kira se apoya sobre el panel de respuesta o la barra del resumen, sin taparlos. */
+function placeKira() {
+  if (window.innerWidth >= 1180) { kiraW.setBottom(20); return; } // en pantallas anchas no se cruzan
+  let h0 = 0;
+  if (state.screen === 'chat' && dockEl?.isConnected) {
+    h0 = dockEl.classList.contains('is-inline')
+      ? dockEl.querySelector('.dock-card > .dock-actions:last-child')?.offsetHeight || 0
+      : dockEl.offsetHeight;
+  } else if (state.screen === 'summary') {
+    h0 = document.querySelector('.summary-bar')?.offsetHeight || 0;
+  }
+  kiraW.setBottom(h0 + 12);
 }
+window.addEventListener('resize', () => placeKira());
+
 
 /* ---------- Panel «Mis respuestas» ---------- */
 
@@ -932,6 +843,7 @@ function pendingQuestions() {
 
 let honeypot = '';
 function renderSummary() {
+  requestAnimationFrame(placeKira);
   document.querySelectorAll('.scrim, .modal').forEach((n) => n.remove());
   const flow = engine.flow(state.answers);
   const pending = pendingQuestions();
