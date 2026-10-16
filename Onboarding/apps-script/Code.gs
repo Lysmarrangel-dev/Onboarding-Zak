@@ -8,7 +8,7 @@
  *                  la carpeta ni las respuestas. Es lo que hay que ejecutar en cada actualización.
  * 2) doPost(e)     Aplicación web que recibe las respuestas de la app y las envía al Form con
  *                  form.createResponse() → withItemResponse() → submit().
- *                  También recibe archivos (action: "upload") y los guarda en Drive.
+ *                  También recibe el PDF del RIF (action: "upload"), el único archivo del onboarding.
  * 3) doGet()       Comprobación de estado.
  *
  * Propiedades del script (Configuración del proyecto → Propiedades del script):
@@ -18,8 +18,8 @@
  */
 
 var MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB por archivo
-var RIF_QUESTION_ID = '0.2';              // su PDF se archiva aparte en «RIF de clientes» (RIF_FOLDER_ID)
-var ALLOWED_MIME = /^(audio\/|image\/|application\/pdf|application\/msword|application\/vnd\.openxmlformats-officedocument\.|application\/vnd\.ms-excel|application\/vnd\.ms-powerpoint|text\/csv|text\/plain|application\/octet-stream)/;
+var RIF_QUESTION_ID = '0.2';              // su PDF se archiva en «RIF de clientes/<fecha>» (RIF_FOLDER_ID)
+var RIF_TIMEZONE = 'America/Caracas';     // zona horaria de las carpetas por día del RIF
 
 /* ============================================================
    1. Creación del Form (ejecutar una sola vez desde el editor)
@@ -437,13 +437,11 @@ function handleUpload_(body) {
   if (!body.data || !body.name) return fatal_('Archivo vacío');
   var bytes = Utilities.base64Decode(body.data);
   if (bytes.length > MAX_UPLOAD_BYTES) return fatal_('El archivo supera los 10 MB');
-  var mime = String(body.mimeType || 'application/octet-stream');
-  if (!ALLOWED_MIME.test(mime)) return fatal_('Formato de archivo no admitido');
-  // El RIF (pregunta 0.2) solo se acepta en PDF: se comprueba la firma «%PDF-» del contenido.
-  if (body.questionId === RIF_QUESTION_ID) {
-    if (!isPdf_(bytes)) return fatal_('El RIF debe subirse en PDF');
-    mime = 'application/pdf';
-  }
+  // El único archivo del onboarding es el RIF (pregunta 0.2), y solo en PDF: se comprueba la firma
+  // «%PDF-» del contenido. Los demás documentos se piden por correo a zak@itech.com.ve.
+  if (body.questionId !== RIF_QUESTION_ID) return fatal_('Solo se recibe el RIF en PDF');
+  if (!isPdf_(bytes)) return fatal_('El RIF debe subirse en PDF');
+  var mime = 'application/pdf';
 
   var root = DriveApp.getFolderById(prop_('UPLOAD_FOLDER_ID'));
   var sub = root.getFoldersByName(body.sessionId);
@@ -462,8 +460,10 @@ function isPdf_(bytes) {
 }
 
 /**
- * Archiva una copia del PDF del RIF en «RIF de clientes» (dentro de la carpeta de archivos),
- * con un nombre fácil de revisar: «RIF · J-12345678-9 · Razón social · ZAK-2026-XXXXXX.pdf».
+ * Archiva una copia del PDF del RIF en «RIF de clientes» (dentro de la carpeta de archivos), en una
+ * subcarpeta por día («2026-10-16»). La carpeta del día se crea solo cuando llega el primer RIF de
+ * ese día; los días sin onboardings no crean nada.
+ * Nombre fácil de revisar: «RIF · J-12345678-9 · Razón social · ZAK-2026-XXXXXX.pdf».
  * El original se queda en la carpeta de la sesión. Devuelve el enlace de la copia ('' si no hay RIF).
  * Solo se aceptan archivos que este mismo onboarding subió a la carpeta de su sesión.
  */
@@ -491,6 +491,10 @@ function archiveRif_(body, reference) {
       folder = root.createFolder('RIF de clientes');
       props.setProperty('RIF_FOLDER_ID', folder.getId());
     }
+    // Carpeta del día (dentro del bloqueo de handleSubmit_, así dos envíos simultáneos no la duplican).
+    var day = Utilities.formatDate(new Date(), RIF_TIMEZONE, 'yyyy-MM-dd');
+    var days = folder.getFoldersByName(day);
+    folder = days.hasNext() ? days.next() : folder.createFolder(day);
     var clean = function (s) { return String(s || '').replace(/[\\/:*?"<>|]/g, '_').trim().slice(0, 80); };
     var name = ['RIF', clean(body.taxId) || 'sin RIF', clean(body.legalName || body.company) || 'sin razón social', reference].join(' · ') + '.pdf';
     var copy = file.makeCopy(name, folder);

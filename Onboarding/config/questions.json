@@ -8,7 +8,7 @@
       "q": "M.1",
       "f": "modulos"
     },
-    "notes": "Sección 0 añadida con aprobación de iTech (identificación y RIF para la verificación en Meta). Después de la sección 0, la app inserta «Módulos de ZAK» y «Checklist de preparación» (config/modules.json) y «Agentes de IA por departamento» (config/agents.json). Todas las preguntas aceptan adjuntos opcionales (documentos o imágenes; sin audio). Secciones 1–13 = documento original, en el mismo orden. Cada pregunta del documento = 1 ítem del Google Form. Revisión 2026-10-14 (lista de mejoras de iTech): Kira lee las preguntas, checklist con opciones explicativas, CTA de consultoría, usuarios con tipo y módulos, SLA, etc."
+    "notes": "Sección 0 añadida con aprobación de iTech (identificación y RIF para la verificación en Meta). Después de la sección 0, la app inserta «Módulos de ZAK» y «Checklist de preparación» (config/modules.json) y «Agentes de IA por departamento» (config/agents.json). El único archivo del onboarding es el PDF del RIF (0.2); los demás documentos se piden por correo a zak@itech.com.ve. Secciones 1–13 = documento original, en el mismo orden. Cada pregunta del documento = 1 ítem del Google Form. Revisión 2026-10-14 (lista de mejoras de iTech): Kira lee las preguntas, checklist con opciones explicativas, CTA de consultoría, usuarios con tipo y módulos, SLA, etc."
   },
 
   "sections": [
@@ -31,7 +31,7 @@
 
   "questions": [
     {
-      "id": "N.1", "label": "Acuerdo de confidencialidad", "section": "sN", "formType": "PARAGRAPH_TEXT", "required": true, "document": "nda", "noAttach": true, "formTitle": "Aceptación del Acuerdo de Confidencialidad y Protección de Datos", "prompt": "Lee el acuerdo y, si estás de acuerdo, acéptalo con tus datos.",
+      "id": "N.1", "label": "Acuerdo de confidencialidad", "section": "sN", "formType": "PARAGRAPH_TEXT", "required": true, "document": "nda", "formTitle": "Aceptación del Acuerdo de Confidencialidad y Protección de Datos", "prompt": "Lee el acuerdo y, si estás de acuerdo, acéptalo con tus datos.",
       "fields": [
         {"id": "firmante", "type": "text", "label": "Nombre y apellido de quien acepta", "placeholder": "Ej.: María Pérez"},
         {"id": "cedula", "type": "idcard", "label": "Cédula de identidad", "placeholder": "V-12345678"},
@@ -100,7 +100,7 @@
       ]
     },
     {
-      "id": "1.5", "modules": ["contactos", "pipelines", "inbox", "ventas", "email-marketing"], "section": "s1", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Tienen una base de contactos o clientes para migrar? ¿En qué formato está (Excel, CSV u otro CRM) y cuántos registros tiene aproximadamente?", "prompt": "¿Tienen una base de contactos o clientes para migrar a ZAK?", "noAttach": true,
+      "id": "1.5", "modules": ["contactos", "pipelines", "inbox", "ventas", "email-marketing"], "section": "s1", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Tienen una base de contactos o clientes para migrar? ¿En qué formato está (Excel, CSV u otro CRM) y cuántos registros tiene aproximadamente?", "prompt": "¿Tienen una base de contactos o clientes para migrar a ZAK?",
       "fields": [
         {"id": "tiene", "type": "single", "label": "¿Tienen una base para migrar?", "options": ["Sí", "No"]},
         {"id": "formato", "type": "single", "label": "¿En qué formato está?", "options": ["Excel", "CSV", "Otro CRM"], "showIf": {"f": "tiene", "op": "eq", "value": "Sí"}},
@@ -236,12 +236,12 @@
       ]
     },
     {
-      "id": "5.1", "section": "s5", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Tienen documentado el catálogo, la lista de precios, los enlaces de pago y las políticas de garantía o devolución (PDF, Word o Excel)?", "prompt": "¿Tienen documentado el catálogo, la lista de precios, los enlaces de pago y las políticas de garantía o devolución?", "hint": "Son la base de lo que responde el agente. Adjúntalos aquí o indica cuáles enviarás después.",
+      "id": "5.1", "section": "s5", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Tienen documentado el catálogo, la lista de precios, los enlaces de pago y las políticas de garantía o devolución (PDF, Word o Excel)?", "prompt": "¿Tienen documentado el catálogo, la lista de precios, los enlaces de pago y las políticas de garantía o devolución?", "hint": "Son la base de lo que responde el agente. Envíalos a zak@itech.com.ve o indica cuáles enviarás después.",
       "fields": [
         {"id": "docs", "type": "multi", "label": "Lo que tienen documentado", "options": ["Catálogo", "Lista de precios", "Enlaces de pago", "Políticas de garantía o devolución", "Aún no tenemos nada documentado"], "exclusive": ["Aún no tenemos nada documentado"]},
         {"id": "formato", "type": "multi", "label": "¿En qué formato?", "options": ["PDF", "Word", "Excel"], "other": true, "showIf": {"f": "docs", "op": "hasAnyExcept", "value": ["Aún no tenemos nada documentado"]}},
         {"id": "claves", "type": "notice", "icon": "doc", "text": "Documentos clave: catálogo con precios, lista de precios vigente, enlaces de pago, políticas de garantía y devolución, preguntas frecuentes de tus clientes, horarios y ubicaciones."},
-        {"id": "archivos", "type": "file", "label": "Adjunta los documentos clave", "accept": ".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.ppt,.pptx,image/*", "maxMB": 10, "multiple": true, "required": false},
+        {"id": "envio", "type": "notice", "icon": "doc", "text": "Envía los documentos clave a zak@itech.com.ve. No se suben en este onboarding.", "link": {"label": "Escribir a zak@itech.com.ve", "href": "mailto:zak@itech.com.ve?subject=Documentos%20clave%20(ZAK)"}},
         {"id": "pendientes", "type": "textarea", "label": "Documentos que enviarás después", "required": false, "placeholder": "Opcional. Ej.: políticas de devolución (las estamos actualizando)"}
       ]
     },
@@ -304,10 +304,10 @@
     {
       "id": "7.1", "section": "s7", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Pueden enviarnos la lista de usuarios con nombre, apellido y correo?", "prompt": "Registra a los usuarios que tendrán acceso a ZAK, con su tipo y los módulos que podrán usar.",
       "fields": [
-        {"id": "modo", "type": "single", "label": "¿Cómo prefieres enviarla?", "options": ["La escribo aquí", "Subo la plantilla (Excel)"]},
+        {"id": "modo", "type": "single", "label": "¿Cómo prefieres enviarla?", "options": ["La escribo aquí", "Envío la plantilla (Excel) por correo"]},
         {"id": "usuarios", "type": "rows", "label": "Usuarios", "rowLabel": "Usuario", "addLabel": "Agregar usuario", "minLabel": "un usuario", "showIf": {"f": "modo", "op": "eq", "value": "La escribo aquí"}, "columns": [{"id": "nombre", "label": "Nombre", "type": "text"}, {"id": "apellido", "label": "Apellido", "type": "text"}, {"id": "correo", "label": "Correo", "type": "email"}, {"id": "telefono", "label": "Teléfono", "type": "phone"}, {"id": "tipo", "label": "Tipo de usuario", "type": "select", "options": ["Colaborador", "Administrador"]}, {"id": "modulos", "label": "Módulos autorizados", "type": "multiselect", "optionsFrom": "modules", "requiredIf": {"col": "tipo", "eq": "Colaborador"}, "showIf": {"col": "tipo", "eq": "Colaborador"}}]},
-        {"id": "plantilla", "type": "notice", "icon": "download", "text": "Descarga la plantilla, complétala con Nombre, Apellido, Correo y Teléfono de cada usuario, y súbela aquí.", "link": {"label": "Descargar plantilla de usuarios (Excel)", "href": "assets/plantillas/plantilla-usuarios-zak.xlsx", "download": "plantilla-usuarios-zak.xlsx"}, "showIf": {"f": "modo", "op": "eq", "value": "Subo la plantilla (Excel)"}},
-        {"id": "archivo", "type": "file", "label": "Plantilla completada", "accept": ".xlsx,.xls,.csv", "maxMB": 10, "showIf": {"f": "modo", "op": "eq", "value": "Subo la plantilla (Excel)"}}
+        {"id": "plantilla", "type": "notice", "icon": "download", "text": "Descarga la plantilla, complétala con Nombre, Apellido, Correo y Teléfono de cada usuario, y envíala a zak@itech.com.ve.", "link": {"label": "Descargar plantilla de usuarios (Excel)", "href": "assets/plantillas/plantilla-usuarios-zak.xlsx", "download": "plantilla-usuarios-zak.xlsx"}, "showIf": {"f": "modo", "op": "eq", "value": "Envío la plantilla (Excel) por correo"}},
+        {"id": "envio", "type": "notice", "icon": "doc", "text": "Cuando la tengas lista, envíala a zak@itech.com.ve.", "link": {"label": "Escribir a zak@itech.com.ve", "href": "mailto:zak@itech.com.ve?subject=Plantilla%20de%20usuarios%20(ZAK)"}, "showIf": {"f": "modo", "op": "eq", "value": "Envío la plantilla (Excel) por correo"}}
       ]
     },
     {
@@ -349,7 +349,7 @@
         {"id": "descuento", "type": "single", "label": "¿Hay descuento máximo por vendedor?", "options": ["Sí", "No"]},
         {"id": "descuentoPct", "type": "number", "label": "Descuento máximo (%)", "min": 0, "max": 100, "showIf": {"f": "descuento", "op": "eq", "value": "Sí"}},
         {"id": "formato", "type": "single", "label": "¿Tienen formato o logo de cotización?", "options": ["Sí", "No"]},
-        {"id": "formatoArchivo", "type": "file", "label": "Formato o logo", "accept": ".pdf,.doc,.docx,.xls,.xlsx,image/*", "maxMB": 10, "required": false, "hint": "Opcional. También puedes enviarlo después.", "showIf": {"f": "formato", "op": "eq", "value": "Sí"}}
+        {"id": "envio", "type": "notice", "icon": "doc", "text": "Envía tu formato o logo de cotización a zak@itech.com.ve.", "link": {"label": "Escribir a zak@itech.com.ve", "href": "mailto:zak@itech.com.ve?subject=Formato%20de%20cotización%20(ZAK)"}, "showIf": {"f": "formato", "op": "eq", "value": "Sí"}}
       ]
     },
     {
@@ -362,7 +362,7 @@
     {
       "id": "8.4", "section": "s8", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "Contratos: ¿Pueden compartir sus plantillas o un contrato de ejemplo? ¿Quién firma por la empresa? ¿Aceptan la firma electrónica?", "prompt": "Sobre contratos: ¿pueden compartir sus plantillas o un contrato de ejemplo? ¿Quién firma por la empresa y aceptan la firma electrónica?",
       "fields": [
-        {"id": "plantillas", "type": "file", "label": "Plantillas o contrato de ejemplo", "accept": ".pdf,.doc,.docx", "maxMB": 10, "multiple": true, "required": false, "hint": "Opcional. También puedes enviarlas después."},
+        {"id": "envio", "type": "notice", "icon": "doc", "text": "Si tienen plantillas o un contrato de ejemplo, envíalos a zak@itech.com.ve.", "link": {"label": "Escribir a zak@itech.com.ve", "href": "mailto:zak@itech.com.ve?subject=Plantillas%20de%20contrato%20(ZAK)"}},
         {"id": "firmante", "type": "text", "label": "¿Quién firma por la empresa?", "placeholder": "Nombre y cargo"},
         {"id": "firmaElectronica", "type": "single", "label": "¿Aceptan la firma electrónica?", "options": ["Sí", "No", "No sé"]}
       ]
@@ -382,8 +382,8 @@
     {
       "id": "9.2", "section": "s9", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Tienen manual de marca (logo, colores, tipografías) para las plantillas?", "prompt": "¿Tienen manual de marca (logo, colores, tipografías) para las plantillas?",
       "fields": [
-        {"id": "manual", "type": "single", "label": "Manual de marca", "options": ["Sí, lo adjunto", "No, quiero crearlo con iTech", "No lo necesito"], "consultOptions": ["No, quiero crearlo con iTech"]},
-        {"id": "archivo", "type": "file", "label": "Manual de marca", "accept": ".pdf,.ppt,.pptx,image/*", "maxMB": 10, "multiple": true, "showIf": {"f": "manual", "op": "eq", "value": "Sí, lo adjunto"}}
+        {"id": "manual", "type": "single", "label": "Manual de marca", "options": ["Sí, lo tengo", "No, quiero crearlo con iTech", "No lo necesito"], "consultOptions": ["No, quiero crearlo con iTech"]},
+        {"id": "envio", "type": "notice", "icon": "doc", "text": "Envía tu manual de marca a zak@itech.com.ve.", "link": {"label": "Escribir a zak@itech.com.ve", "href": "mailto:zak@itech.com.ve?subject=Manual%20de%20marca%20(ZAK)"}, "showIf": {"f": "manual", "op": "eq", "value": "Sí, lo tengo"}}
       ]
     },
     {
@@ -485,7 +485,7 @@
       "fields": [
         {"id": "hay", "type": "single", "label": "¿Existen políticas?", "options": ["Sí", "No", "No sé"]},
         {"id": "detalle", "type": "textarea", "label": "Resumen de las políticas", "showIf": {"f": "hay", "op": "eq", "value": "Sí"}},
-        {"id": "archivo", "type": "file", "label": "Documento de políticas", "accept": ".pdf,.doc,.docx", "maxMB": 10, "required": false, "hint": "Opcional.", "showIf": {"f": "hay", "op": "eq", "value": "Sí"}}
+        {"id": "envio", "type": "notice", "icon": "doc", "text": "Si tienes el documento de políticas, envíalo a zak@itech.com.ve.", "link": {"label": "Escribir a zak@itech.com.ve", "href": "mailto:zak@itech.com.ve?subject=Políticas%20de%20datos%20(ZAK)"}, "showIf": {"f": "hay", "op": "eq", "value": "Sí"}}
       ]
     },
     {

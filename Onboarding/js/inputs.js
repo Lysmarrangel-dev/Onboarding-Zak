@@ -5,7 +5,6 @@
  */
 import { h, icon } from './dom.js';
 import { uploadFile } from './api.js';
-import { ATTACH } from './engine.js';
 
 const INPUT_TYPES = { text: 'text', email: 'email', phone: 'tel', url: 'url', taxid: 'text', idcard: 'text', number: 'text', date: 'date', time: 'time' };
 const AUTOCOMPLETE = { email: 'email', phone: 'tel', url: 'url' };
@@ -21,8 +20,6 @@ export function renderForm(q, ctx) {
   for (const f of fields) wrap.appendChild(renderField(f, q, ctx, showLabels));
   // «No» / «No sé» → ofrecemos consultoría de iTech.
   if (ctx.consultCheck?.(q, ctx.draft, fields)) wrap.appendChild(renderConsultCta(q, ctx));
-  // Adjuntos (documento o imagen) en todas las preguntas, salvo las que ya piden su propio archivo.
-  if (!ctx.noAttach && !q.noAttach && !q.fields.some((f) => f.type === 'file')) wrap.appendChild(renderAttach(q, ctx));
   return wrap;
 }
 
@@ -41,24 +38,6 @@ function renderConsultCta(q, ctx) {
           type: 'button', class: 'chip', 'aria-pressed': String(v === o), 'data-fk': `${CONSULT_KEY}:${o}`,
           onclick: () => { ctx.draft[CONSULT_KEY] = v === o ? '' : o; ctx.rerender(); },
         }, o)))));
-}
-
-/** «Adjuntar documento o imagen»: disponible en todas las preguntas, plegado hasta que se usa. */
-function renderAttach(q, ctx) {
-  const files = [].concat(ctx.draft[ATTACH.id] || []);
-  const open = files.length > 0 || (ctx.uploads[ATTACH.id] || []).length > 0 || ctx.attachOpen?.[q.id];
-  if (!open) {
-    return h('div', { class: 'attach-toggle' },
-      h('button', {
-        type: 'button', class: 'btn-text btn-xs', 'data-fk': 'attach-open',
-        onclick: () => { (ctx.attachOpen ||= {})[q.id] = true; ctx.rerender(); setTimeout(() => document.querySelector('.attach-box .dropzone input')?.focus(), 0); },
-      }, icon('clip'), 'Adjuntar archivo'));
-  }
-  const id = nextId(`f-${q.id}-attach`).replace(/\./g, '_');
-  return h('div', { class: 'field attach-box' },
-    h('span', { class: 'field-label', id: `${id}-label` }, icon('clip'), ' Documentos o imágenes', h('span', { class: 'opt' }, ' (opcional)')),
-    fileControl(ATTACH, q, ctx, { id, describedBy: null, labelId: `${id}-label` }),
-    ctx.errors[ATTACH.id] ? h('div', { class: 'field-error', role: 'alert' }, icon('alert', 'icon'), ctx.errors[ATTACH.id]) : null);
 }
 
 function renderField(f, q, ctx, showLabel) {

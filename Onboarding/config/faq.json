@@ -670,7 +670,7 @@
         "acuerdo de confidencialidad",
         "confidencialidad"
       ],
-      "answer": "En cada pregunta puedes adjuntar documentos o imágenes desde «Adjuntar archivo». Se aceptan PDF, Word, Excel, PowerPoint, texto e imágenes, de hasta 10 MB cada uno. La base de contactos y los audios no se suben aquí: envíalos a zak@itech.com.ve."
+      "answer": "En este onboarding solo se sube un archivo: el RIF de la empresa en PDF (pregunta 0.2). Los demás documentos (catálogo, precios, manual de marca, plantillas, guiones, políticas, organigrama, la base de contactos o audios) envíalos a zak@itech.com.ve; cada pregunta trae el enlace para escribir."
     },
     {
       "id": "guardar-progreso",
@@ -809,7 +809,7 @@
         "documento de respaldo",
         "que archivos"
       ],
-      "answer": "En cada pregunta puedes adjuntar documentos o imágenes, o responder con una nota de voz desde «Adjuntar archivo o responder con audio». Se aceptan PDF, Word, Excel, PowerPoint, texto, imágenes y audio, de hasta 10 MB cada uno. La base de contactos no se sube aquí: envíala a zak@itech.com.ve."
+      "answer": "En este onboarding solo se sube un archivo: el RIF de la empresa en PDF (pregunta 0.2). Los demás documentos (catálogo, precios, manual de marca, plantillas, guiones, políticas, organigrama, la base de contactos o audios) envíalos a zak@itech.com.ve; cada pregunta trae el enlace para escribir."
     },
     {
       "id": "nivel-informacion",
@@ -866,7 +866,7 @@
         "excel de number master",
         "formato de usuarios"
       ],
-      "answer": "Hay dos plantillas de Excel: la de usuarios (pregunta 7.1, con Nombre, Apellido, Correo y Teléfono) y la de Number Master (en la configuración de ese módulo). Descárgalas desde el enlace de cada pregunta, complétalas y súbelas ahí mismo."
+      "answer": "Hay dos plantillas de Excel: la de usuarios (pregunta 7.1, con Nombre, Apellido, Correo y Teléfono) y la de Number Master (en la configuración de ese módulo). Descárgalas desde el enlace de cada pregunta, complétalas y envíalas a zak@itech.com.ve."
     }
   ]
 }

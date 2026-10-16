@@ -73,7 +73,7 @@ Se generan desde `config/agents.json` y solo aparecen si el cliente elige el mó
 
 ## Funciones transversales
 
-- **Adjuntos en todas las preguntas:** botón «Adjuntar documento o imagen» (PDF, Word, Excel, PowerPoint, texto o imágenes de hasta 10 MB). No aparece en las preguntas que ya piden su propio archivo. Los enlaces van en el ítem de la pregunta, si es de párrafo, y siempre en «Adjuntos por pregunta».
+- **Un solo archivo:** el RIF en PDF (0.2). Las demás preguntas que antes pedían archivos muestran un aviso con enlace para enviarlos a zak@itech.com.ve. «Adjuntos por pregunta» queda vacío en los envíos nuevos.
 - **«No lo tengo» → «¿Qué te falta?»:** en el checklist, cada requisito marcado «No lo tengo» abre un campo de texto. La nota va a «Requisitos pendientes».
 - **Nivel de información:** barra en el encabezado y tarjeta en el resumen. Reglas en `config/scoring.json`: «No sé» = 0, respuestas parciales = 0,5, carencias clave (p. ej. sin tarjeta en Meta) = 0, comprobante del RIF sin adjuntar = 0,5. Global = 50 % cuestionario + 50 % checklist. Recomendación: ≥ 80 % consultoría básica, 50–79 % estándar, < 50 % intensiva.
 
@@ -85,14 +85,14 @@ Se generan desde `config/agents.json` y solo aparecen si el cliente elige el mó
 | Lectura y scroll | Al elegir opciones, el panel conserva la posición de lectura y el foco no desplaza la vista. |
 | Navegación | El botón superior dice «Editar mis respuestas». |
 | Checklist | Menú desplegable por requisito: «Sí, lo tengo» (detalle), «Lo estoy preparando» (¿para cuándo?), «No lo tengo» (¿qué te falta? + consultoría) y «No sé / necesito orientación» (consultoría). |
-| Archivos | «Adjuntar archivo» (documentos o imágenes) en las preguntas sin archivo propio. El onboarding no recibe audios: el de la voz clonada (4.4) se envía a zak@itech.com.ve. |
+| Archivos | Solo el RIF en PDF (0.2). Documentos, plantillas y audios se envían a zak@itech.com.ve (aviso con enlace en cada pregunta). |
 | Consultoría | Con «No sé», con un «No» que indica una carencia (p. ej. sin tarjeta en Meta), con un texto «no»/«no sé» o con «No lo tengo definido», aparece «¿Quieres que un consultor de iTech te ayude con esto?». Todo llega al Form en «Consultoría solicitada por el cliente». |
 | Agentes de IA | Nombre y Rol separados. «¿Qué puede hacer el agente por sí solo?» y «¿Qué debe consultar antes de actuar?» separados. |
 | Horarios | Una sola pregunta de horario (4.6 si hay Call Center; si no, la de Agentes IA), con opción 24/7 que oculta días y horas, y «¿Qué debe indicar el agente autorizado fuera del horario de atención?». |
 | Agentes de voz | Roles: Prospección, Ventas, Soporte técnico, Confirmación de citas, Cobranza y Otro. Género de la voz. «Objetivos de la llamada» con 11 opciones. |
-| Inbox | 5.1 pide adjuntar o listar los documentos clave. 5.5: «Temas que la IA nunca debe hacer o responder». |
+| Inbox | 5.1 pide enviar por correo o listar los documentos clave. 5.5: «Temas que la IA nunca debe hacer o responder». |
 | Redes y Meta | 10.1: un campo por cada red elegida. 3.2: vinculación Instagram–Facebook y quién administra la página. |
-| Marca y guiones | Manual de marca (9.2 y AdStudio): adjuntarlo o crearlo con iTech. Guiones de llamada: adjuntarlos o pedir consultoría. |
+| Marca y guiones | Manual de marca (9.2 y AdStudio): enviarlo por correo o crearlo con iTech. Guiones de llamada: enviarlos por correo o pedir consultoría. |
 | KPIs y tableros | Vista principal del Dashboard en lista desplegable. 1.3 «Otro» abre el catálogo de 14 KPIs con descripción. Workforce: tiempo de ejecución, tiempo vencido y tiempo total de la tarea. Resúmenes del equipo con listas de KPIs de Pipeline y Ventas y frecuencia. Objetivos cuantitativos y cualitativos. Público objetivo con opciones + «Otro». Género del avatar. |
 | Equipo y usuarios | 1.6 admite varios responsables. Organigrama: «Muéstrame tu organigrama en el Workforce». Plantilla de usuarios en Excel (Nombre, Apellido, Correo, Teléfono). La tabla de usuarios incluye tipo (Colaborador/Administrador) y módulos autorizados, por lo que 7.2 y 7.3 solo se preguntan si se sube la plantilla. Externos con datos y módulos. |
 | Operación y finanzas | SLA en tabla por canal (con «No lo tengo definido» → consultoría). Base de contactos y listas de llamadas: no se suben; se envían a zak@itech.com.ve. Nota de iTech en la sincronización con el ERP, más la descripción departamental. Delegación de escaladas sin respuesta. Excel de Number Master obligatorio o consultoría. Cuentas bancarias nacionales e internacionales. |

@@ -5,12 +5,6 @@
 
 /* ---------- Condiciones ---------- */
 
-/** Adjuntos opcionales que acepta cualquier pregunta (documento o imagen de respaldo). */
-export const ATTACH = {
-  id: '__adjuntos', type: 'file', label: 'Adjuntos', multiple: true, required: false, maxMB: 10,
-  accept: '.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.ppt,.pptx,image/*',
-};
-
 const isEmpty = (v) =>
   v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0);
 
@@ -343,19 +337,9 @@ export function createEngine(schema) {
   /** Lista [{label, value}] con los campos visibles respondidos. */
   function formatAnswer(q, answers) {
     const draft = answers[q.id] || {};
-    const fields = [...visibleFields(q, answers, draft), ATTACH];
-    return fields
+    return visibleFields(q, answers, draft)
       .map((f) => ({ label: f.label, value: formatField(f, draft, answers), field: f }))
       .filter((x) => x.value);
-  }
-
-  /** «ID · archivo (enlace)» de todas las preguntas con adjuntos, para el ítem de control del Form. */
-  function attachmentsText(answers) {
-    return flow(answers)
-      .map((q) => ({ q, files: [].concat(answers[q.id]?.[ATTACH.id] || []) }))
-      .filter((x) => x.files.length)
-      .map(({ q, files }) => `${q.id} · ${files.map((f) => `${f.name}${f.url ? ` (${f.url})` : ''}`).join(', ')}`)
-      .join('\n');
   }
 
   /* ---------- Serialización para Google Forms ---------- */
@@ -380,8 +364,8 @@ export function createEngine(schema) {
       return f.rows.map((r) => draft[f.id]?.[r] || '');
     }
     const parts = formatAnswer(q, answers);
-    if (q.formType === 'TEXT') return parts.filter((p) => p.field !== ATTACH).map((p) => p.value).join(' ');
-    // PARAGRAPH_TEXT: una línea por parte; los archivos incluyen su enlace de Drive.
+    if (q.formType === 'TEXT') return parts.map((p) => p.value).join(' ');
+    // PARAGRAPH_TEXT: una línea por parte; el archivo (el PDF del RIF) incluye su enlace de Drive.
     return parts
       .map(({ label, value, field }) => {
         if (field.type === 'file') {
@@ -396,6 +380,6 @@ export function createEngine(schema) {
   return {
     sections, questions, byId, sectionById,
     isVisible, visibleFields, flow, nextPending, progress, isAnswered, modulesOf,
-    validate, softCheck, formatAnswer, serialize, isEmpty, attachmentsText, kpiGroupsFor,
+    validate, softCheck, formatAnswer, serialize, isEmpty, kpiGroupsFor,
   };
 }

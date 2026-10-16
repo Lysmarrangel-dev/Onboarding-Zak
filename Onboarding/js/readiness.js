@@ -106,8 +106,8 @@ export function buildAgentSchema(cfg, mod) {
         { id: 'solo', type: 'textarea', label: '¿Qué puede hacer el agente por sí solo?', placeholder: 'Ej.: agendar citas, enviar el catálogo y el enlace de pago' },
         { id: 'consulta', type: 'textarea', label: '¿Qué debe consultar antes de actuar?', placeholder: 'Ej.: descuentos, devoluciones y ventas sobre USD 1.000' },
         { id: 'canales', type: 'multi', label: 'Canales donde atiende', options: cfg.agent.channels, other: true },
-        { id: 'documentos', type: 'file', label: 'Documentos que puede leer (catálogo, precios, políticas, guiones…)', multiple: true, required: false, maxMB: 10,
-          accept: '.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.ppt,.pptx,image/*', hint: 'Opcional. Puedes subir varios archivos o enviarlos después.' },
+        { id: 'documentos', type: 'notice', icon: 'doc', text: 'Los documentos que puede leer el agente (catálogo, precios, políticas, guiones…) envíalos a zak@itech.com.ve. No se suben aquí.',
+          link: { label: 'Escribir a zak@itech.com.ve', href: 'mailto:zak@itech.com.ve?subject=Documentos%20para%20los%20agentes%20de%20IA%20(ZAK)' } },
       ].filter(Boolean),
     })),
   ];
@@ -131,7 +131,7 @@ export function buildConfigSchema(mod) {
     id: `X.${m.id}.${k + 1}`, label: `${m.name} · ${k + 1}`, section: `sX-${m.id}`,
     formType: 'PARAGRAPH_TEXT', required: true,
     formTitle: c.prompt, prompt: c.prompt, hint: c.hint, fields: c.fields,
-    showIf: c.showIf, requireOneOf: c.requireOneOf, noAttach: c.noAttach,
+    showIf: c.showIf, requireOneOf: c.requireOneOf,
   })));
   return { sections, questions };
 }

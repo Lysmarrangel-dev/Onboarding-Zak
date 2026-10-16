@@ -18,6 +18,10 @@ export const CONFIG = {
   // rewrite de vercel.json. Vacía = las dudas se responden solo con config/faq.json.
   kiraChatUrl: '/api/kira/generate',
 
+  // Conversación por voz con Kira (botón del micrófono): relay WebSocket del backend del CRM.
+  // Vercel no reenvía WebSockets, por eso va directo a Railway. Vacía = sin botón de voz.
+  kiraLiveUrl: 'wss://itech-crm-production.up.railway.app/api/kira/live',
+
   // Reintentos automáticos del envío (esperas en ms entre intentos).
   retryDelays: [1000, 3000, 6000],
   requestTimeoutMs: 30000,

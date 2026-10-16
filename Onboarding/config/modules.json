@@ -237,7 +237,7 @@
                   "type": "single",
                   "label": "Manual de marca",
                   "options": [
-                    "Sí, lo adjunto",
+                    "Sí, lo tengo",
                     "No, quiero crearlo con iTech",
                     "No lo necesito"
                   ],
@@ -246,18 +246,18 @@
                   ]
                 },
                 {
-                  "id": "material",
-                  "type": "file",
-                  "label": "Manual de marca y fotos o videos de productos",
-                  "accept": ".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,image/*,video/*",
-                  "maxMB": 10,
-                  "multiple": true,
-                  "required": false,
-                  "hint": "Puedes enviarlos después.",
+                  "id": "envio",
+                  "type": "notice",
+                  "icon": "doc",
+                  "text": "Envía el manual de marca y las fotos o videos de tus productos a zak@itech.com.ve. No se suben aquí.",
+                  "link": {
+                    "label": "Escribir a zak@itech.com.ve",
+                    "href": "mailto:zak@itech.com.ve?subject=Manual%20de%20marca%20y%20material%20(ZAK)"
+                  },
                   "showIf": {
                     "f": "manual",
                     "op": "eq",
-                    "value": "Sí, lo adjunto"
+                    "value": "Sí, lo tengo"
                   }
                 }
               ]
@@ -510,16 +510,17 @@
                   "type": "textarea",
                   "label": "Respuestas rápidas",
                   "required": false,
-                  "placeholder": "Opcional. Escríbelas o súbelas en un archivo."
+                  "placeholder": "Opcional. Escríbelas aquí."
                 },
                 {
-                  "id": "archivo",
-                  "type": "file",
-                  "label": "Archivo con respuestas rápidas",
-                  "accept": ".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,image/*",
-                  "maxMB": 10,
-                  "multiple": true,
-                  "required": false
+                  "id": "envio",
+                  "type": "notice",
+                  "icon": "doc",
+                  "text": "Si las tienes en un archivo, envíalo a zak@itech.com.ve.",
+                  "link": {
+                    "label": "Escribir a zak@itech.com.ve",
+                    "href": "mailto:zak@itech.com.ve?subject=Respuestas%20rápidas%20(ZAK)"
+                  }
                 }
               ]
             }
@@ -583,14 +584,13 @@
             },
             {
               "prompt": "¿Tienes guiones para las llamadas?",
-              "noAttach": true,
               "fields": [
                 {
                   "id": "guiones",
                   "type": "single",
                   "label": "Guiones",
                   "options": [
-                    "Sí, los adjunto",
+                    "Sí, los tengo",
                     "Necesito consultoría de iTech para elaborarlos",
                     "Aún no los necesito"
                   ],
@@ -599,16 +599,18 @@
                   ]
                 },
                 {
-                  "id": "archivos",
-                  "type": "file",
-                  "label": "Guiones de llamada",
-                  "accept": ".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,image/*",
-                  "maxMB": 10,
-                  "multiple": true,
+                  "id": "envio",
+                  "type": "notice",
+                  "icon": "doc",
+                  "text": "Envía tus guiones de llamada a zak@itech.com.ve. No se suben aquí.",
+                  "link": {
+                    "label": "Escribir a zak@itech.com.ve",
+                    "href": "mailto:zak@itech.com.ve?subject=Guiones%20de%20llamada%20(ZAK)"
+                  },
                   "showIf": {
                     "f": "guiones",
                     "op": "eq",
-                    "value": "Sí, los adjunto"
+                    "value": "Sí, los tengo"
                   }
                 },
                 {
@@ -752,17 +754,31 @@
           ],
           "config": [
             {
-              "prompt": "Sube tu catálogo o lista de precios para cargarlo en ZAK.",
+              "prompt": "¿Tienes tu catálogo o lista de precios para cargarlo en ZAK?",
               "fields": [
                 {
                   "id": "catalogo",
-                  "type": "file",
-                  "label": "Catálogo o lista de precios",
-                  "accept": ".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,image/*",
-                  "maxMB": 10,
-                  "multiple": true,
-                  "required": false,
-                  "hint": "Opcional, pero acelera la configuración de cotizaciones."
+                  "type": "single",
+                  "label": "¿Lo tienes?",
+                  "options": [
+                    "Sí, lo envío por correo",
+                    "Aún no lo tengo"
+                  ]
+                },
+                {
+                  "id": "envio",
+                  "type": "notice",
+                  "icon": "doc",
+                  "text": "Envía tu catálogo o lista de precios a zak@itech.com.ve. Acelera la configuración de cotizaciones.",
+                  "link": {
+                    "label": "Escribir a zak@itech.com.ve",
+                    "href": "mailto:zak@itech.com.ve?subject=Catálogo%20o%20lista%20de%20precios%20(ZAK)"
+                  },
+                  "showIf": {
+                    "f": "catalogo",
+                    "op": "eq",
+                    "value": "Sí, lo envío por correo"
+                  }
                 }
               ]
             },
@@ -980,27 +996,23 @@
           "config": [
             {
               "prompt": "Muéstrame tu organigrama en el Workforce.",
-              "hint": "Adjunta una imagen o PDF, o descríbelo con tus palabras.",
-              "requireOneOf": [
-                "archivo",
-                "descripcion"
-              ],
+              "hint": "Descríbelo con tus palabras. Si lo tienes en imagen o PDF, envíalo por correo.",
               "fields": [
-                {
-                  "id": "archivo",
-                  "type": "file",
-                  "label": "Organigrama (imagen o PDF)",
-                  "accept": ".pdf,.png,.jpg,.jpeg,.webp,.xlsx,.ppt,.pptx",
-                  "maxMB": 10,
-                  "multiple": true,
-                  "required": false
-                },
                 {
                   "id": "descripcion",
                   "type": "textarea",
-                  "label": "O descríbelo",
-                  "required": false,
+                  "label": "Descríbelo",
                   "placeholder": "Ej.: Gerencia general → Ventas (Ana, 4 personas), Cobranza (Luis, 2 personas)"
+                },
+                {
+                  "id": "envio",
+                  "type": "notice",
+                  "icon": "doc",
+                  "text": "Si tienes el organigrama en imagen o PDF, envíalo a zak@itech.com.ve.",
+                  "link": {
+                    "label": "Escribir a zak@itech.com.ve",
+                    "href": "mailto:zak@itech.com.ve?subject=Organigrama%20(ZAK)"
+                  }
                 }
               ]
             },
@@ -1130,17 +1142,31 @@
               ]
             },
             {
-              "prompt": "Sube la lista de empleados con su cargo y área.",
+              "prompt": "¿Tienes la lista de empleados con su cargo y área?",
               "fields": [
                 {
                   "id": "lista",
-                  "type": "file",
-                  "label": "Lista de empleados",
-                  "accept": ".xlsx,.xls,.csv,.pdf",
-                  "maxMB": 10,
-                  "multiple": true,
-                  "required": false,
-                  "hint": "Opcional. Puedes enviarla después."
+                  "type": "single",
+                  "label": "¿Lo tienes?",
+                  "options": [
+                    "Sí, la envío por correo",
+                    "Aún no la tengo"
+                  ]
+                },
+                {
+                  "id": "envio",
+                  "type": "notice",
+                  "icon": "doc",
+                  "text": "Envía la lista de empleados con su cargo y área a zak@itech.com.ve.",
+                  "link": {
+                    "label": "Escribir a zak@itech.com.ve",
+                    "href": "mailto:zak@itech.com.ve?subject=Lista%20de%20empleados%20(ZAK)"
+                  },
+                  "showIf": {
+                    "f": "lista",
+                    "op": "eq",
+                    "value": "Sí, la envío por correo"
+                  }
                 }
               ]
             },
@@ -1245,14 +1271,13 @@
           "config": [
             {
               "prompt": "Completa el Excel de Number Master: indicador, peso, meta y responsable por área.",
-              "noAttach": true,
               "hint": "Es obligatorio para configurar Number Master. Si prefieres, lo completamos contigo en una consultoría.",
               "fields": [
                 {
                   "id": "plantilla",
                   "type": "notice",
                   "icon": "download",
-                  "text": "Descarga la plantilla, complétala y súbela aquí.",
+                  "text": "Descarga la plantilla, complétala y envíala a zak@itech.com.ve.",
                   "link": {
                     "label": "Descargar Excel de Number Master",
                     "href": "assets/plantillas/plantilla-number-master-zak.xlsx",
@@ -1264,7 +1289,7 @@
                   "type": "single",
                   "label": "¿Cómo lo prefieres?",
                   "options": [
-                    "Lo completo y lo subo",
+                    "Lo completo y lo envío por correo",
                     "Prefiero completarlo con consultoría de iTech"
                   ],
                   "consultOptions": [
@@ -1272,16 +1297,18 @@
                   ]
                 },
                 {
-                  "id": "excel",
-                  "type": "file",
-                  "label": "Excel de Number Master completado",
-                  "accept": ".xlsx,.xls,.csv",
-                  "maxMB": 10,
-                  "multiple": false,
+                  "id": "envio",
+                  "type": "notice",
+                  "icon": "doc",
+                  "text": "Envía el Excel completado a zak@itech.com.ve.",
+                  "link": {
+                    "label": "Escribir a zak@itech.com.ve",
+                    "href": "mailto:zak@itech.com.ve?subject=Excel%20de%20Number%20Master%20(ZAK)"
+                  },
                   "showIf": {
                     "f": "modo",
                     "op": "eq",
-                    "value": "Lo completo y lo subo"
+                    "value": "Lo completo y lo envío por correo"
                   }
                 }
               ]
@@ -1348,17 +1375,31 @@
               ]
             },
             {
-              "prompt": "Sube tu plan de cuentas o catálogo contable.",
+              "prompt": "¿Tienes tu plan de cuentas o catálogo contable?",
               "fields": [
                 {
                   "id": "plan",
-                  "type": "file",
-                  "label": "Plan de cuentas",
-                  "accept": ".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,image/*",
-                  "maxMB": 10,
-                  "multiple": true,
-                  "required": false,
-                  "hint": "Opcional. Puedes enviarlo después."
+                  "type": "single",
+                  "label": "¿Lo tienes?",
+                  "options": [
+                    "Sí, lo envío por correo",
+                    "Aún no lo tengo"
+                  ]
+                },
+                {
+                  "id": "envio",
+                  "type": "notice",
+                  "icon": "doc",
+                  "text": "Envía tu plan de cuentas a zak@itech.com.ve.",
+                  "link": {
+                    "label": "Escribir a zak@itech.com.ve",
+                    "href": "mailto:zak@itech.com.ve?subject=Plan%20de%20cuentas%20(ZAK)"
+                  },
+                  "showIf": {
+                    "f": "plan",
+                    "op": "eq",
+                    "value": "Sí, lo envío por correo"
+                  }
                 }
               ]
             }
