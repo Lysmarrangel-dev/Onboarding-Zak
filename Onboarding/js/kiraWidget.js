@@ -30,7 +30,10 @@ export function createKiraWidget(opts) {
   let kiraBubble = null;
   let busy = false;
 
-  const orb = (cls = '') => h('span', { class: `kira-orb ${cls}`, 'aria-hidden': 'true' }, h('img', { src: opts.avatar, alt: '' }));
+  // La bolita de Kira del brochure y el CRM: núcleo claro con el pulpo y dos anillos que laten.
+  const orb = (cls = '') => h('span', { class: `kira-orb ${cls}`, 'aria-hidden': 'true' },
+    h('span', { class: 'kira-orb-core' }, h('img', { src: opts.avatar, alt: '', draggable: 'false' })),
+    h('span', { class: 'kira-orb-ring' }), h('span', { class: 'kira-orb-ring r2' }));
   const stateEl = h('span', { class: 'kira-panel-state' }, STATE_LABEL.idle);
   const msgs = h('div', { class: 'kira-msgs', 'aria-live': 'polite' },
     h('div', { class: 'kira-msg kira' }, `Hola, soy ${CONFIG.agentName}. Pregúntame lo que necesites sobre la pregunta en pantalla o sobre ZAK${voiceSupported() ? ', por escrito o por voz con el micrófono' : ''}.`));
@@ -49,9 +52,13 @@ export function createKiraWidget(opts) {
       class: 'kira-composer', autocomplete: 'off',
       onsubmit: (e) => { e.preventDefault(); const t = input.value.trim(); if (!t) return; input.value = ''; ask(t); },
     }, micBtn, input, h('button', { type: 'submit', class: 'icon-btn kira-send', 'aria-label': 'Enviar' }, icon('arrowRight'))));
-  const fab = h('button', { type: 'button', class: 'kira-fab', 'aria-expanded': 'false', onclick: () => setOpen(panel.hidden) },
-    orb(), h('span', {}, CONFIG.agentName));
-  const root = h('aside', { class: 'kira-dock', 'aria-label': CONFIG.agentName, hidden: true }, panel, fab);
+  const fab = h('button', {
+    type: 'button', class: 'kira-fab', 'aria-expanded': 'false', 'aria-label': `Hablar con ${CONFIG.agentName}`, title: `Pregúntale a ${CONFIG.agentName}`,
+    onclick: () => setOpen(panel.hidden),
+  }, orb('lg'));
+  // Etiqueta junto a la bolita mientras dura la voz («Kira escuchando…»), como en el CRM.
+  const pill = h('span', { class: 'kira-pill', role: 'status' });
+  const root = h('aside', { class: 'kira-dock', 'aria-label': CONFIG.agentName, hidden: true }, panel, h('div', { class: 'kira-fab-row' }, pill, fab));
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) { setOpen(false); fab.focus(); } });
   document.body.appendChild(root);
 
@@ -78,6 +85,7 @@ export function createKiraWidget(opts) {
     micBtn?.setAttribute('aria-pressed', String(Boolean(voiceOn)));
     micBtn?.setAttribute('aria-label', voiceOn ? 'Terminar la conversación por voz' : 'Hablar con Kira por voz');
     if (s === 'idle' || s === 'thinking') root.style.setProperty('--level', '0');
+    pill.textContent = voiceOn ? ({ connecting: 'Conectando con Kira…', listening: 'Kira escuchando…', speaking: 'Kira hablando…', thinking: 'Kira pensando…' }[s] || '') : '';
     opts.onVoice?.(Boolean(voiceOn));
   }
 
