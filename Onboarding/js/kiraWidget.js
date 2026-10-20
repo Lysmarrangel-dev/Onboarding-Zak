@@ -3,16 +3,21 @@
  * - Texto: /api/kira/generate (js/kiraChat.js); sin backend, responde con config/faq.json.
  * - Voz: botón del micrófono del panel → Gemini Live por el relay del backend (js/kiraLive.js).
  *   Lo que el cliente escribe en plena llamada va a la misma conversación y Kira lo contesta con voz.
- * - Kira sabe en qué pregunta está el cliente (getContext) y no llena el formulario por él.
+ * - Por escrito, Kira responde dudas y no llena el formulario. Por voz, lleva el onboarding
+ *   conversando: lee la pregunta en pantalla, llena los campos con lo que dice el cliente, envía la
+ *   respuesta y lee el acuerdo de confidencialidad completo (opts.voiceForm, en app.js).
+ * - Decir «Kira» la llama (js/kiraWakeWord.js): el micrófono escucha esa palabra mientras el panel
+ *   está disponible, y se pausa durante la llamada y mientras suena la narración.
  * El panel no bloquea la página: no hay fondo oscuro y el cliente puede seguir respondiendo.
  */
 import { h, icon } from './dom.js';
 import { CONFIG } from './config.js';
 import { askKira, describeQuestion, voiceInstruction, VOICE_TOOLS } from './kiraChat.js';
 import { KiraLive, voiceSupported } from './kiraLive.js';
+import { KiraWakeWord, readWakePref, saveWakePref, wakeWordSupported, whenUserActive } from './kiraWakeWord.js';
 
 const STATE_LABEL = { idle: 'Lista para ayudarte', connecting: 'Conectando…', listening: 'Te escucho', thinking: 'Pensando…', speaking: 'Hablando' };
-const GREETING = 'El cliente acaba de activar tu voz en el onboarding. Llama a get_current_question y salúdalo en una sola frase corta: ofrécele ayuda con esa pregunta o con cualquier duda sobre ZAK.';
+const GREETING = 'El cliente acaba de activar tu voz en el onboarding. Llama a get_current_question. Salúdalo en una frase corta y dile que pueden llenar el onboarding conversando. Si la pregunta en pantalla es el acuerdo de confidencialidad, empieza a leérselo con read_nda; si no, hazle esa pregunta.';
 const SUGGESTIONS = [
   ['Explícame esta pregunta', 'Explícame la pregunta que tengo en pantalla y dame un ejemplo de respuesta.'],
   ['¿Qué es ZAK?', '¿Qué es ZAK en pocas palabras?'],
@@ -22,7 +27,8 @@ const SUGGESTIONS = [
 
 /**
  * opts: { avatar, getContext() → { question, section, company, modules }, fallback(texto) → respuesta,
- *         onDoubt(texto) (la duda llega al equipo), onVoice(activa), speak(texto) (voz de Kira para las respuestas escritas) }
+ *         voiceForm: { question(), fill({ field, value, values }), submit(), readNda({ parte }) },
+ *         onDoubt(texto) (la duda escrita llega al equipo), onVoice(activa), speak(texto) (voz de Kira para las respuestas escritas) }
  */
 export function createKiraWidget(opts) {
   let state = 'idle';
@@ -38,6 +44,9 @@ export function createKiraWidget(opts) {
   const msgs = h('div', { class: 'kira-msgs', 'aria-live': 'polite' },
     h('div', { class: 'kira-msg kira' }, `Hola, soy ${CONFIG.agentName}. Pregúntame lo que necesites sobre la pregunta en pantalla o sobre ZAK${voiceSupported() ? ', por escrito o por voz con el micrófono' : ''}.`));
   const input = h('input', { class: 'kira-input', type: 'text', placeholder: `Escríbele a ${CONFIG.agentName}…`, 'aria-label': `Mensaje para ${CONFIG.agentName}`, maxlength: 500 });
+  const wakeBtn = voiceSupported() && wakeWordSupported()
+    ? h('button', { type: 'button', class: 'icon-btn kira-wake', 'aria-pressed': 'false', onclick: () => setWake(!wakeOn) }, icon('ear'))
+    : null;
   const micBtn = voiceSupported()
     ? h('button', { type: 'button', class: 'icon-btn kira-mic', 'aria-label': 'Hablar con Kira por voz', 'aria-pressed': 'false', onclick: () => toggleVoice() }, icon('mic'))
     : null;
@@ -45,6 +54,7 @@ export function createKiraWidget(opts) {
     h('div', { class: 'kira-panel-head' },
       orb('sm'),
       h('div', {}, h('strong', {}, CONFIG.agentName), stateEl),
+      wakeBtn,
       h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Cerrar', onclick: () => setOpen(false) }, icon('close'))),
     msgs,
     h('div', { class: 'kira-suggest' }, SUGGESTIONS.map(([label, text]) => h('button', { type: 'button', onclick: () => ask(text) }, label))),
@@ -87,6 +97,8 @@ export function createKiraWidget(opts) {
     if (s === 'idle' || s === 'thinking') root.style.setProperty('--level', '0');
     pill.textContent = voiceOn ? ({ connecting: 'Conectando con Kira…', listening: 'Kira escuchando…', speaking: 'Kira hablando…', thinking: 'Kira pensando…' }[s] || '') : '';
     opts.onVoice?.(Boolean(voiceOn));
+    // Durante la llamada, la escucha de «Kira» suelta el micrófono.
+    if (voiceOn) wake.hold('llamada'); else wake.release('llamada');
   }
 
   let pendingLevel = null;
@@ -102,11 +114,18 @@ export function createKiraWidget(opts) {
     live ||= new KiraLive({
       systemInstruction: voiceInstruction(),
       functionDeclarations: VOICE_TOOLS,
-      tools: { get_current_question: () => ({ pregunta: describeQuestion(opts.getContext()) }) },
+      tools: opts.voiceForm
+        ? {
+          get_current_question: () => opts.voiceForm.question(),
+          fill_field: (args) => opts.voiceForm.fill(args),
+          submit_answer: () => opts.voiceForm.submit(),
+          read_nda: (args) => opts.voiceForm.readNda(args),
+        }
+        : { get_current_question: () => ({ pregunta: describeQuestion(opts.getContext()) }) },
       onState: setState,
       onUserText: (text, final) => {
         if (!userBubble) userBubble = bubble('user', text); else userBubble.textContent = text;
-        if (final) { opts.onDoubt?.(`(voz) ${text.trim()}`); userBubble = null; }
+        if (final) userBubble = null;
         kiraBubble = null;
       },
       onKiraText: (text, final) => {
@@ -127,6 +146,44 @@ export function createKiraWidget(opts) {
     setOpen(true);
     await k.start(GREETING);
   }
+
+  // «Kira» como palabra de activación: sola abre la llamada; «Kira, <pedido>» la abre con ese pedido.
+  const wake = new KiraWakeWord();
+  let wakeOn = Boolean(wakeBtn) && readWakePref();
+  let stopWaitingGesture = () => {};
+  wake.hold('oculta'); // hasta que el widget se muestre (chat o resumen)
+
+  function updateWake() {
+    wakeBtn?.classList.toggle('on', wakeOn);
+    wakeBtn?.setAttribute('aria-pressed', String(wakeOn));
+    const title = wakeOn ? 'Di «Kira» para llamarla. Toca para dejar de escuchar.' : 'Activar: llamar a Kira diciendo «Kira»';
+    wakeBtn?.setAttribute('title', title);
+    wakeBtn?.setAttribute('aria-label', title);
+    root.classList.toggle('is-wake', wake.listening);
+  }
+
+  function setWake(on) {
+    wakeOn = on;
+    saveWakePref(on);
+    stopWaitingGesture();
+    if (on) stopWaitingGesture = whenUserActive(() => wake.enable());
+    else wake.disable();
+    updateWake();
+  }
+
+  wake.setHandlers({
+    onWake: (command) => {
+      const k = getLive();
+      setOpen(true);
+      if (k.live) { if (command) ask(command); return; }
+      if (state === 'connecting') return;
+      if (command) bubble('user', command);
+      void k.start(command || GREETING);
+    },
+    onListening: () => updateWake(),
+    onBlocked: () => { wakeOn = false; updateWake(); },
+  });
+  if (wakeOn) setWake(true); else updateWake();
 
   /** Pregunta escrita (o desde una sugerencia). */
   async function ask(text) {
@@ -154,7 +211,7 @@ export function createKiraWidget(opts) {
   return {
     show(visible) {
       root.hidden = !visible;
-      if (!visible) { setOpen(false); live?.stop(); }
+      if (!visible) { setOpen(false); live?.stop(); wake.hold('oculta'); } else wake.release('oculta');
     },
     open: () => setOpen(true),
     ask,

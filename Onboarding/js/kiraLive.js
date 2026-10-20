@@ -6,8 +6,8 @@
  *   «Aoede» y la clave de Gemini nunca llega al navegador.
  * - El micrófono se captura a 16 kHz con js/kira-pcm-worklet.js (copia del brochure) y la voz de
  *   Kira llega en PCM 24 kHz.
- * - Herramientas: solo de lectura (qué pregunta tiene el cliente en pantalla) y end_conversation.
- *   Kira no llena el formulario: el cliente escribe sus respuestas.
+ * - Herramientas (js/kiraWidget.js → app.js): leer la pregunta en pantalla, llenar sus campos con lo
+ *   que dice el cliente, enviar la respuesta, leer el acuerdo de confidencialidad y end_conversation.
  *
  * Es una versión en JS de brochure/src/kira.ts (repo itech-crm); si allá cambia el modelo Live o
  * el formato de audio, cambiarlo también acá.

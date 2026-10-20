@@ -75,7 +75,7 @@
     {
       "id": "1.1", "section": "s1", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Cuál es la actividad principal de la empresa y en qué países o ciudades opera?", "prompt": "Empecemos por lo básico. ¿Cuál es la actividad principal de tu empresa y en qué países o ciudades opera?",
       "fields": [
-        {"id": "actividad", "type": "textarea", "label": "Actividad principal", "placeholder": "Ej.: distribución de repuestos automotrices"},
+        {"id": "actividad", "type": "textarea", "label": "Actividad principal", "placeholder": "Ej.: venta y distribución de productos al mayor y al detal"},
         {"id": "ubicacion", "type": "text", "label": "Países o ciudades", "placeholder": "Ej.: Caracas, Valencia y Bogotá"}
       ]
     },

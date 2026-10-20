@@ -723,6 +723,13 @@ button { cursor: pointer; }
 .kira-input:focus { outline: none; border-color: var(--focus); }
 .kira-send { background: var(--itech-gradient); color: #fff; border-color: transparent; }
 .kira-mic.on { background: #ec4899; color: #fff; border-color: transparent; animation: node-pulse 1.4s infinite; }
+/* Escucha de «Kira»: botón del panel y punto verde en la bolita mientras escucha. */
+.kira-wake { color: var(--text-muted); }
+.kira-wake.on { color: #10b981; border-color: rgba(16, 185, 129, .45); }
+.kira-dock.is-wake .kira-fab::after {
+  content: ''; position: absolute; top: 4px; right: 4px; width: 12px; height: 12px; border-radius: 50%;
+  background: #10b981; border: 2px solid #fff; z-index: 2;
+}
 @media (max-width: 520px) {
   .kira-dock { right: 14px; left: 14px; }
   .kira-panel { width: 100%; }

@@ -752,11 +752,206 @@ function kiraContext(q) {
   };
 }
 
+/* ---------- Kira por voz: llena la pregunta en pantalla y lee el acuerdo ---------- */
+
+// Campos que Kira puede llenar con lo que dice el cliente. Archivos, tablas, planes, usuarios y
+// KPIs se llenan en pantalla.
+const VOICE_TYPES = new Set(['text', 'textarea', 'email', 'phone', 'url', 'taxid', 'idcard', 'number', 'date', 'time',
+  'single', 'select', 'multi', 'multiselect', 'modules', 'consent', 'grid']);
+const CONSULT_FIELD = '__consultoria';
+const CONSULT_OPTIONS = ['Sí, quiero consultoría', 'No, por ahora'];
+const fold = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9@.+-]+/g, ' ').replace(/[\s.]+$/, '').trim();
+
+/** La opción que dijo el cliente: exacta primero; si no, la parecida más larga («No sé» antes que «No»). */
+function matchOption(options, said) {
+  const n = fold(said);
+  if (!n) return null;
+  const longest = [...options].sort((a, b) => fold(b).length - fold(a).length);
+  return options.find((o) => fold(o) === n)
+    || longest.find((o) => fold(o).startsWith(n) || n.startsWith(fold(o)))
+    || longest.find((o) => fold(o).includes(n)) || null;
+}
+
+const allModules = () => modulesCfg.groups.flatMap((g) => g.modules);
+const optionLabel = (o) => (typeof o === 'string' ? o : o.label);
+
+function voiceOptions(f) {
+  if (f.type === 'single' || f.type === 'multi') return f.other ? [...f.options, 'Otro'] : f.options;
+  if (f.type === 'select') return f.options;
+  if (f.type === 'multiselect') return f.optionsFrom === 'modules' ? kiraContext(null).modules : f.options.map(optionLabel);
+  if (f.type === 'modules') return allModules().map((m) => m.name);
+  if (f.type === 'grid') return f.states ? f.states.map((s) => s.label) : f.columns;
+  return null;
+}
+
+/** Valor actual del borrador, en texto (para que Kira no pise lo que el cliente ya escribió). */
+function draftText(f) {
+  const v = ui.draft[f.id];
+  if (f.type === 'modules') return (v || []).map((id) => moduleName(id)).filter(Boolean).join(', ');
+  if (f.type === 'consent') return v ? 'marcada' : '';
+  if (f.type === 'grid') return Object.entries(v || {}).map(([r, c]) => `${r}: ${c}`).join(' · ');
+  if (Array.isArray(v)) return v.map((x) => (typeof x === 'object' ? JSON.stringify(x) : x)).join(', ');
+  const other = ui.draft[`${f.id}__other`];
+  return [v, other && (v === 'Otro' || (Array.isArray(v) && v.includes('Otro'))) ? `(${other})` : ''].filter(Boolean).join(' ');
+}
+
+/** La pregunta en pantalla para Kira: campos visibles, opciones, lo que ya hay y qué se llena por voz. */
+function voiceQuestion() {
+  if (state.screen === 'summary') return { estado: 'El cliente ya respondió el cuestionario y está en el resumen: puede revisarlo y tocar «Enviar onboarding».' };
+  if (state.screen !== 'chat') return { estado: 'El cliente todavía no está en el cuestionario.' };
+  // Hablar con Kira es empezar: si la presentación sigue, se salta.
+  if (introActive()) { introCtl?.skip(); finishIntro(); }
+  const q = currentQuestion();
+  if (!q) return { estado: 'Ya respondió todas las preguntas: que toque «Ver resumen» para revisar y enviar.' };
+  const draft = normalizeDraft(q, ui.draft);
+  const campos = engine.visibleFields(q, state.answers, ui.draft).filter((f) => f.type !== 'notice').map((f) => ({
+    id: f.id,
+    tipo: f.type,
+    etiqueta: f.label,
+    obligatorio: f.required !== false,
+    opciones: voiceOptions(f) || undefined,
+    filas: f.type === 'grid' ? f.rows : undefined,
+    valorActual: draftText(f) || '',
+    porVoz: VOICE_TYPES.has(f.type) ? 'sí' : 'no: se completa en pantalla',
+  }));
+  if (consultTriggered(scoringCfg, q, draft, engine.visibleFields(q, state.answers, ui.draft)))
+    campos.push({ id: CONSULT_FIELD, tipo: 'single', etiqueta: '¿Quiere que un consultor de iTech lo ayude con esto?', obligatorio: false, opciones: CONSULT_OPTIONS, valorActual: ui.draft[CONSULT_FIELD] || '', porVoz: 'sí' });
+  return {
+    pregunta: q.id,
+    seccion: engine.sectionById[q.section]?.title || '',
+    enunciado: q.prompt,
+    aclaracion: q.hint || undefined,
+    esAcuerdo: q.document === 'nda' || undefined,
+    campos,
+  };
+}
+
+/** Pone en el campo lo que dijo el cliente, con el formato que pide el formulario. */
+function voiceFill({ field, value, values } = {}) {
+  const q = state.screen === 'chat' ? currentQuestion() : null;
+  if (!q) return { ok: false, error: 'No hay una pregunta abierta en pantalla.' };
+  const d = ui.draft;
+  const list = (Array.isArray(values) && values.length ? values : String(value ?? '').split(/\s*[,;]\s*/)).map((s) => String(s).trim()).filter(Boolean);
+  const raw = String(value ?? list.join(', ')).trim();
+
+  if (field === CONSULT_FIELD) {
+    const m = matchOption(CONSULT_OPTIONS, raw);
+    if (!m) return { ok: false, error: `Opciones: ${CONSULT_OPTIONS.join(' / ')}` };
+    d[CONSULT_FIELD] = m;
+    renderDock(q, false);
+    return { ok: true, campo: 'Consultoría', valor: m };
+  }
+
+  const fields = engine.visibleFields(q, state.answers, d).filter((f) => f.type !== 'notice');
+  const f = fields.find((x) => x.id === field);
+  if (!f) return { ok: false, error: `La pregunta ${q.id} no tiene el campo «${field}». Sus campos son: ${fields.map((x) => x.id).join(', ')}.` };
+  if (!VOICE_TYPES.has(f.type)) return { ok: false, error: 'Este campo se completa en pantalla: pídele al cliente que lo llene y te avise.' };
+  const opts = voiceOptions(f);
+
+  switch (f.type) {
+    case 'single':
+    case 'select': {
+      const m = matchOption(opts, raw);
+      if (m) d[f.id] = m;
+      else if (f.other && raw) { d[f.id] = 'Otro'; d[`${f.id}__other`] = raw; }
+      else return { ok: false, error: `«${raw}» no es una de las opciones: ${opts.join(' / ')}.` };
+      break;
+    }
+    case 'multi':
+    case 'multiselect':
+    case 'modules': {
+      const picked = [];
+      const extra = [];
+      for (const s of list) { const m = matchOption(opts, s); if (m) picked.push(m); else extra.push(s); }
+      if (extra.length && !(f.type === 'multi' && f.other)) return { ok: false, error: `No encontré: ${extra.join(', ')}. Opciones: ${opts.join(' / ')}.` };
+      if (extra.length) { picked.push('Otro'); d[`${f.id}__other`] = extra.join(', '); }
+      const unique = [...new Set(picked)];
+      d[f.id] = f.type === 'modules' ? unique.map((name) => allModules().find((m) => m.name === name)?.id).filter(Boolean) : unique;
+      break;
+    }
+    case 'consent':
+      d[f.id] = /^(si|true|acepto|acepta|de acuerdo|1)\b/.test(fold(raw)) ? new Date().toISOString() : '';
+      break;
+    case 'grid': {
+      const grid = (d[f.id] ||= {});
+      for (const pair of list) {
+        const [rowSaid, colSaid] = pair.split(/\s*:\s*/);
+        const row = matchOption(f.rows, rowSaid);
+        const col = matchOption(opts, colSaid);
+        if (!row || !col) return { ok: false, error: `Usa «fila: opción». Filas: ${f.rows.join(' / ')}. Opciones: ${opts.join(' / ')}.` };
+        grid[row] = col;
+      }
+      break;
+    }
+    case 'idcard': {
+      const m = raw.toUpperCase().replace(/[\s.]/g, '').match(/^([VE])-?(\d{6,9})$/);
+      d[f.id] = m ? `${m[1]}-${m[2]}` : raw;
+      break;
+    }
+    case 'taxid': {
+      const m = raw.toUpperCase().replace(/[\s.]/g, '').match(/^([VEJPG])-?(\d{7,9})-?(\d)$/);
+      d[f.id] = m ? `${m[1]}-${m[2]}-${m[3]}` : raw;
+      break;
+    }
+    case 'email':
+      d[f.id] = raw.replace(/\s+arroba\s+/gi, '@').replace(/\s+punto\s+/gi, '.').replace(/\s+/g, '').toLowerCase();
+      break;
+    case 'number':
+      d[f.id] = raw.replace(/[^\d.,-]/g, '').replace(',', '.');
+      break;
+    default:
+      d[f.id] = raw;
+  }
+  delete ui.errors[f.id];
+  renderDock(q, false);
+  const problem = engine.validate(q, normalizeDraft(q, d), state.answers)[f.id];
+  return { ok: true, campo: f.label, valor: draftText(f), ...(problem ? { revisar: problem } : {}) };
+}
+
+/** Envía la respuesta (como el botón «Enviar») y devuelve la siguiente pregunta o lo que falta. */
+function voiceSubmit() {
+  const q = state.screen === 'chat' ? currentQuestion() : null;
+  if (!q) return { ok: false, error: 'No hay una pregunta abierta en pantalla.' };
+  commit(q, { force: true });
+  if (currentQuestion()?.id === q.id && Object.keys(ui.errors).length) {
+    const label = (id) => q.fields.find((f) => f.id === id)?.label || id;
+    return { ok: false, faltaCorregir: Object.entries(ui.errors).map(([id, msg]) => `${label(id)}: ${msg}`) };
+  }
+  return { ok: true, guardada: q.id, siguiente: voiceQuestion() };
+}
+
+/** El acuerdo en partes, para que Kira lo lea completo en voz alta sin turnos eternos. */
+function ndaParts() {
+  const n = ndaCfg;
+  const parts = [];
+  for (let i = 0; i < n.clauses.length; i += 4) parts.push(n.clauses.slice(i, i + 4).map((c) => `${c.title}. ${c.text}`).join('\n'));
+  parts[0] = `${n.title}. ${n.subtitle}. Versión ${n.version}.\n${n.parties}\n${parts[0]}`;
+  return parts;
+}
+
+function voiceReadNda({ parte } = {}) {
+  const parts = ndaParts();
+  const i = Math.min(parts.length, Math.max(1, Number(parte) || 1));
+  // Mientras Kira lo lee, el texto completo queda abierto en pantalla.
+  const full = logEl?.querySelector('.nda-full');
+  if (full) { full.open = true; if (i === 1) full.scrollIntoView({ block: 'start', behavior: prefersReducedMotion() ? 'auto' : 'smooth' }); }
+  return {
+    parte: i,
+    de: parts.length,
+    texto: parts[i - 1],
+    despues: i < parts.length
+      ? `Léela textual y, sin detenerte, llama a read_nda con parte ${i + 1}.`
+      : 'Era la última parte. Ahora pídele nombre y apellido, cédula y cargo, y que acepte en voz alta el acuerdo y su facultad para aceptarlo.',
+  };
+}
+
 const kiraW = createKiraWidget({
   avatar: ASSET.kira,
   getContext: () => kiraContext(state?.screen === 'chat' ? currentQuestion() : null),
   fallback: (text) => faqAnswer(text),
-  // Las dudas (escritas o dichas) llegan al equipo con el envío, como antes.
+  voiceForm: { question: voiceQuestion, fill: voiceFill, submit: voiceSubmit, readNda: voiceReadNda },
+  // Las dudas escritas llegan al equipo con el envío. Lo dicho por voz no: ahora son respuestas
+  // del formulario (cédula, correo...), no dudas.
   onDoubt: (text) => {
     if (!state || !text) return;
     state.doubts.push({ qid: (state.screen === 'chat' && currentQuestion()?.id) || 'resumen', text, at: new Date().toISOString() });
