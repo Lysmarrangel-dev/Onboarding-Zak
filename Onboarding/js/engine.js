@@ -357,7 +357,14 @@ export function createEngine(schema) {
     }
     if (q.formType === 'CHECKBOX') {
       const f = q.fields.find((x) => x.id === q.formValueField);
-      return choiceValue(f, draft);
+      if (f.type !== 'multi') return choiceValue(f, draft);
+      // El Form acepta UNA sola respuesta fuera de sus opciones (la de «Otro»): con varios
+      // indicadores de «Más indicadores» o uno más el texto propio, Google rechazaba el envío
+      // completo. Las opciones del Form van como tales y todo lo demás, junto en ese único «Otro».
+      const values = choiceValue(f, draft);
+      const known = [...new Set(values.filter((x) => f.options.includes(x)))];
+      const extra = [...new Set(values.filter((x) => !f.options.includes(x)))];
+      return extra.length ? [...known, extra.join(', ')] : known;
     }
     if (q.formType === 'GRID') {
       const f = q.fields.find((x) => x.id === q.formValueField);
