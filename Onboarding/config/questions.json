@@ -8,7 +8,7 @@
       "q": "M.1",
       "f": "modulos"
     },
-    "notes": "Sección 0 añadida con aprobación de iTech (identificación y RIF para la verificación en Meta). Después de la sección 0, la app inserta «Módulos de ZAK» y «Checklist de preparación» (config/modules.json) y «Agentes de IA por departamento» (config/agents.json). El único archivo del onboarding es el PDF del RIF (0.2); los demás documentos se piden por correo a zak@itech.com.ve. Secciones 1–13 = documento original, en el mismo orden. Cada pregunta del documento = 1 ítem del Google Form. Revisión 2026-10-14 (lista de mejoras de iTech): Kira lee las preguntas, checklist con opciones explicativas, CTA de consultoría, usuarios con tipo y módulos, SLA, etc."
+    "notes": "Sección 0 añadida con aprobación de iTech (identificación y RIF para la verificación en Meta). Después de la sección 0, la app inserta «Módulos de ZAK» (config/modules.json). Los archivos del onboarding son el PDF del RIF (0.2) y la base de contactos (1.5, opcional); los demás documentos se piden por correo a zak@itech.com.ve. Secciones 1–13 = documento original, en el mismo orden. Cada pregunta del documento = 1 ítem del Google Form. Revisión 2026-10-14 (lista de mejoras de iTech): Kira lee las preguntas, checklist con opciones explicativas, CTA de consultoría, usuarios con tipo y módulos, SLA, etc. Revisión 2026-10-23 (documento ONBOARDING ZAK): sin checklist ni agentes por departamento, base de contactos adjuntable (1.5), módulos por persona en la 7.1 (se elimina la 7.3) y etiquetas de contacto en lista (X.contactos.2)."
   },
 
   "sections": [
@@ -106,7 +106,8 @@
         {"id": "formato", "type": "single", "label": "¿En qué formato está?", "options": ["Excel", "CSV", "Otro CRM"], "showIf": {"f": "tiene", "op": "eq", "value": "Sí"}},
         {"id": "crm", "type": "text", "label": "¿Qué CRM?", "showIf": {"f": "formato", "op": "eq", "value": "Otro CRM"}},
         {"id": "registros", "type": "number", "label": "Registros aproximados", "min": 1, "integer": true, "showIf": {"f": "tiene", "op": "eq", "value": "Sí"}},
-        {"id": "aviso", "type": "notice", "icon": "shield", "text": "¿Tienen una base de contactos o clientes para migrar al ZAK? Recuerda que tenemos un NDA: tus datos están seguros. Por favor, envíala formalmente a través de zak@itech.com.ve para mayor resguardo. No la subas en este onboarding.", "link": {"label": "Escribir a zak@itech.com.ve", "href": "mailto:zak@itech.com.ve?subject=Base%20de%20contactos%20para%20migrar%20a%20ZAK"}, "showIf": {"f": "tiene", "op": "eq", "value": "Sí"}}
+        {"id": "aviso", "type": "notice", "icon": "shield", "text": "Recuerda que tenemos un acuerdo de confidencialidad: tus datos están seguros. Adjunta aquí la base de datos (Excel o CSV) o, si lo prefieres, envíala a zak@itech.com.ve.", "link": {"label": "Escribir a zak@itech.com.ve", "href": "mailto:zak@itech.com.ve?subject=Base%20de%20contactos%20para%20migrar%20a%20ZAK"}, "showIf": {"f": "tiene", "op": "eq", "value": "Sí"}},
+        {"id": "base", "type": "file", "label": "Base de datos (Excel o CSV)", "accept": ".xlsx,.xls,.csv", "maxMB": 10, "required": false, "hint": "Opcional. Si es muy pesada o prefieres no subirla, envíala por correo.", "showIf": {"f": "tiene", "op": "eq", "value": "Sí"}}
       ]
     },
     {
@@ -302,24 +303,19 @@
       ]
     },
     {
-      "id": "7.1", "section": "s7", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Pueden enviarnos la lista de usuarios con nombre, apellido y correo?", "prompt": "Registra a los usuarios que tendrán acceso a ZAK, con su tipo y los módulos que podrán usar.",
+      "id": "7.1", "section": "s7", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Pueden enviarnos la lista de usuarios con nombre, apellido y correo?", "prompt": "Registra a los usuarios que tendrán acceso a ZAK y su tipo. ¿Qué módulos puede ver cada persona?",
       "fields": [
         {"id": "modo", "type": "single", "label": "¿Cómo prefieres enviarla?", "options": ["La escribo aquí", "Envío la plantilla (Excel) por correo"]},
         {"id": "usuarios", "type": "rows", "label": "Usuarios", "rowLabel": "Usuario", "addLabel": "Agregar usuario", "minLabel": "un usuario", "showIf": {"f": "modo", "op": "eq", "value": "La escribo aquí"}, "columns": [{"id": "nombre", "label": "Nombre", "type": "text"}, {"id": "apellido", "label": "Apellido", "type": "text"}, {"id": "correo", "label": "Correo", "type": "email"}, {"id": "telefono", "label": "Teléfono", "type": "phone"}, {"id": "tipo", "label": "Tipo de usuario", "type": "select", "options": ["Colaborador", "Administrador"]}, {"id": "modulos", "label": "Módulos autorizados", "type": "multiselect", "optionsFrom": "modules", "requiredIf": {"col": "tipo", "eq": "Colaborador"}, "showIf": {"col": "tipo", "eq": "Colaborador"}}]},
         {"id": "plantilla", "type": "notice", "icon": "download", "text": "Descarga la plantilla, complétala con Nombre, Apellido, Correo y Teléfono de cada usuario, y envíala a zak@itech.com.ve.", "link": {"label": "Descargar plantilla de usuarios (Excel)", "href": "assets/plantillas/plantilla-usuarios-zak.xlsx", "download": "plantilla-usuarios-zak.xlsx"}, "showIf": {"f": "modo", "op": "eq", "value": "Envío la plantilla (Excel) por correo"}},
-        {"id": "envio", "type": "notice", "icon": "doc", "text": "Cuando la tengas lista, envíala a zak@itech.com.ve.", "link": {"label": "Escribir a zak@itech.com.ve", "href": "mailto:zak@itech.com.ve?subject=Plantilla%20de%20usuarios%20(ZAK)"}, "showIf": {"f": "modo", "op": "eq", "value": "Envío la plantilla (Excel) por correo"}}
+        {"id": "envio", "type": "notice", "icon": "doc", "text": "Cuando la tengas lista, envíala a zak@itech.com.ve.", "link": {"label": "Escribir a zak@itech.com.ve", "href": "mailto:zak@itech.com.ve?subject=Plantilla%20de%20usuarios%20(ZAK)"}, "showIf": {"f": "modo", "op": "eq", "value": "Envío la plantilla (Excel) por correo"}},
+        {"id": "modulosPorPersona", "type": "rows", "label": "Módulos por persona o rol", "rowLabel": "Persona o rol", "addLabel": "Agregar persona o rol", "minLabel": "una persona o rol", "showIf": {"f": "modo", "op": "eq", "value": "Envío la plantilla (Excel) por correo"}, "columns": [{"id": "persona", "label": "Persona o rol", "type": "text", "placeholder": "Ej.: Ana Pérez o Asesores"}, {"id": "modulos", "label": "Módulos", "type": "multiselect", "optionsFrom": "modules"}]}
       ]
     },
     {
-      "id": "7.2", "section": "s7", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Quiénes serán Administradores y quiénes Colaboradores?", "prompt": "¿Quiénes serán Administradores y quiénes Colaboradores?", "showIf": {"q": "7.1", "f": "modo", "op": "eq", "value": "Subo la plantilla (Excel)"},
+      "id": "7.2", "section": "s7", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Quiénes serán Administradores y quiénes Colaboradores?", "prompt": "¿Quiénes serán Administradores y quiénes Colaboradores?", "showIf": {"q": "7.1", "f": "modo", "op": "eq", "value": "Envío la plantilla (Excel) por correo"},
       "fields": [
         {"id": "rolesTexto", "type": "textarea", "label": "Administradores y Colaboradores", "placeholder": "Ej.: Administradores: Ana y Luis. El resto, Colaboradores."}
-      ]
-    },
-    {
-      "id": "7.3", "section": "s7", "formType": "PARAGRAPH_TEXT", "required": true, "formTitle": "¿Qué módulos debe ver cada persona? Por ejemplo: un asesor solo Pipelines e Inbox; un contador solo Contabilidad y RR. HH.", "prompt": "¿Qué módulos debe ver cada persona?", "hint": "Por ejemplo: un asesor solo Pipelines e Inbox; un contador solo Contabilidad y RR. HH.", "showIf": {"q": "7.1", "f": "modo", "op": "eq", "value": "Subo la plantilla (Excel)"},
-      "fields": [
-        {"id": "modulos", "type": "textarea", "label": "Módulos por persona o rol"}
       ]
     },
     {
@@ -516,16 +512,14 @@
     {"id": "ctl.nda", "formTitle": "Registro de aceptación del NDA (versión, huella SHA-256, fecha)", "formType": "PARAGRAPH_TEXT"},
     {"id": "ctl.session", "formTitle": "ID de sesión", "formType": "TEXT"},
     {"id": "ctl.doubts", "formTitle": "Dudas registradas durante el onboarding", "formType": "PARAGRAPH_TEXT"},
-    {"id": "ctl.readiness", "formTitle": "Preparación global (%)", "formType": "TEXT"},
-    {"id": "ctl.level", "formTitle": "Calificación de preparación", "formType": "TEXT"},
-    {"id": "ctl.byModule", "formTitle": "Preparación por módulo", "formType": "PARAGRAPH_TEXT"},
-    {"id": "ctl.missing", "formTitle": "Requisitos pendientes", "formType": "PARAGRAPH_TEXT"},
     {"id": "ctl.info", "formTitle": "Información disponible (%)", "formType": "TEXT"},
     {"id": "ctl.consulting", "formTitle": "Consultoría recomendada", "formType": "TEXT"},
     {"id": "ctl.infoDetail", "formTitle": "Desglose de información", "formType": "TEXT"},
     {"id": "ctl.infoPending", "formTitle": "Información por completar", "formType": "PARAGRAPH_TEXT"},
     {"id": "ctl.attachments", "formTitle": "Adjuntos por pregunta", "formType": "PARAGRAPH_TEXT"},
     {"id": "ctl.consulting2", "formTitle": "Consultoría solicitada por el cliente", "formType": "PARAGRAPH_TEXT"},
-    {"id": "ctl.rif", "formTitle": "RIF en PDF (enlace para revisión)", "formType": "TEXT"}
+    {"id": "ctl.rif", "formTitle": "RIF en PDF (enlace para revisión)", "formType": "TEXT"},
+    {"id": "ctl.folder", "formTitle": "Carpeta del cliente (RIF y base de contactos)", "formType": "TEXT"},
+    {"id": "ctl.contacts", "formTitle": "Base de contactos (enlace)", "formType": "TEXT"}
   ]
 }

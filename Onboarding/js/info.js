@@ -6,11 +6,11 @@
  *   - Respuestas que indican que falta algo clave (p. ej. «No» tiene tarjeta en Meta) → 0.
  *   - Archivo esperado sin adjuntar (p. ej. comprobante del RIF) → 0,5.
  *   - El resto (texto escrito, datos concretos) → 1.
- * Global = peso × cuestionario + peso × checklist de módulos (si ya se completó).
+ * Global = promedio de las preguntas respondidas.
  * El nivel resultante indica la consultoría recomendada.
  */
 
-export function computeInfo(cfg, engine, state, readiness) {
+export function computeInfo(cfg, engine, state) {
   const unknown = new Set(cfg.unknownValues);
   const partial = new Set(cfg.partialValues);
   const pending = [];
@@ -18,8 +18,8 @@ export function computeInfo(cfg, engine, state, readiness) {
   let n = 0;
 
   for (const q of engine.flow(state.answers)) {
-    // El checklist se mide aparte; el acuerdo de confidencialidad no aporta información de configuración.
-    if (!state.done[q.id] || q.section === 'sC' || q.section === 'sN') continue;
+    // El acuerdo de confidencialidad no aporta información de configuración.
+    if (!state.done[q.id] || q.section === 'sN') continue;
     const draft = state.answers[q.id] || {};
     const fields = engine.visibleFields(q, state.answers, draft);
     const scores = [];
@@ -49,15 +49,9 @@ export function computeInfo(cfg, engine, state, readiness) {
   }
 
   const questionnaire = n ? Math.round((sum / n) * 100) : null;
-  const checklist = readiness?.complete ? readiness.overall : null;
-  let overall = questionnaire;
-  if (questionnaire !== null && checklist !== null) {
-    const w = cfg.weights;
-    overall = Math.round((questionnaire * w.questionnaire + checklist * w.checklist) / (w.questionnaire + w.checklist));
-  } else if (questionnaire === null) overall = checklist;
-
+  const overall = questionnaire;
   const level = overall === null ? null : cfg.levels.find((l) => overall >= l.min);
-  return { overall, questionnaire, checklist, level, pending, answered: n };
+  return { overall, questionnaire, level, pending, answered: n };
 }
 
 /** Texto plano de la información pendiente (Form y correo). */
@@ -94,8 +88,8 @@ export function consultTriggered(cfg, q, draft, fields) {
   return false;
 }
 
-/** Lista de consultorías pedidas: CTA aceptado, opciones que la piden y requisitos marcados. */
-export function consultRequests(engine, state, readiness) {
+/** Lista de consultorías pedidas: CTA aceptado y opciones que la piden. */
+export function consultRequests(engine, state) {
   const out = [];
   for (const q of engine.flow(state.answers)) {
     if (!state.done[q.id]) continue;
@@ -110,9 +104,6 @@ export function consultRequests(engine, state, readiness) {
       const hit = [].concat(raw ?? []).find((x) => (f.consultOptions || []).includes(x));
       if (hit) out.push(`${q.id} · ${f.label}: ${hit}`);
     }
-  }
-  for (const m of readiness?.modules || []) {
-    for (const x of m.missing) if (x.consult) out.push(`Checklist ${m.name} · ${x.text}`);
   }
   return out;
 }

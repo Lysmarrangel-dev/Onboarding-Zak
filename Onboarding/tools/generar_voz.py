@@ -74,15 +74,12 @@ def tts(text, target):
 def kira_texts():
     """Mismos textos que lee Kira en la app (js/app.js → speakQuestion): intro de sección + pregunta."""
     load = lambda n: json.loads((ROOT / f'config/{n}.json').read_text(encoding='utf-8'))
-    q, mods, agents = load('questions'), load('modules'), load('agents')
+    q, mods = load('questions'), load('modules')
     texts = []
     texts += [s.get('intro') for s in q['sections']]
     texts += [x.get('prompt') for x in q['questions']]
-    texts += [mods['sections']['modules']['intro'], mods['sections']['checklist']['intro'], mods['selection']['prompt']]
+    texts += [mods['sections']['modules']['intro'], mods['selection']['prompt']]
     all_mods = [m for g in mods['groups'] for m in g['modules']]
-    texts += [mods['checklist']['promptTemplate'].replace('{module}', m['name']) for m in all_mods if m.get('requirements')]
-    texts += [agents['section']['intro'], agents['selection']['prompt']]
-    texts += [agents['agent']['promptTemplate'].replace('{dept}', 'otro departamento' if d.get('askName') else d['name']) for d in agents['departments']]
     for m in all_mods:
         if m.get('config'):
             texts.append(mods['configSection']['intro'].replace('{module}', m['name']))

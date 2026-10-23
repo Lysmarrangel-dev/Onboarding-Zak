@@ -716,22 +716,6 @@
       "answer": "Depende de cómo vende y atiende tu empresa. Marca los módulos que te interesan: tu consultor de iTech confirma contigo la configuración final. Cada módulo se puede activar después, cuando lo necesites. Según los módulos que elijas, el onboarding solo te pedirá la información de esos módulos."
     },
     {
-      "id": "checklist",
-      "source": "onboarding",
-      "keywords": [
-        "checklist",
-        "preparacion",
-        "porcentaje",
-        "calificacion",
-        "nivel de preparacion",
-        "requisitos",
-        "lo tengo",
-        "en proceso",
-        "que me falta"
-      ],
-      "answer": "El checklist mide qué tan lista está tu empresa para cada módulo que elegiste. «Lo tengo» cuenta 100 %, «En proceso» 50 % y «No lo tengo» 0 %. Tu preparación global es el promedio de los módulos. No es un examen: nos dice por dónde empezar y en qué te acompañamos."
-    },
-    {
       "id": "presentacion",
       "source": "onboarding",
       "keywords": [
@@ -823,7 +807,7 @@
         "porcentaje de informacion",
         "barra"
       ],
-      "answer": "La barra «Información» del encabezado mide cuánta información tienes para configurar ZAK. Combina tus respuestas (las de «No sé» o «No lo tengo» restan) y el checklist de módulos. Con ese porcentaje recomendamos el nivel de consultoría: básica, estándar o intensiva."
+      "answer": "La barra «Información» del encabezado mide cuánta información tienes para configurar ZAK. Se calcula con tus respuestas: las de «No sé» o «No lo tengo» restan. Con ese porcentaje recomendamos el nivel de consultoría: básica, estándar o intensiva."
     },
     {
       "id": "base-contactos",

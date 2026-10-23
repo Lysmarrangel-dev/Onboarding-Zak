@@ -1,9 +1,5 @@
 {
-  "_comment": "Nivel de información disponible para configurar ZAK. Combina (a) la calidad de las respuestas del cuestionario y (b) la preparación del checklist de módulos. El resultado indica cuánta consultoría necesita la empresa. Se muestra como barra en el encabezado, en el resumen y llega al Form.",
-  "weights": {
-    "questionnaire": 0.5,
-    "checklist": 0.5
-  },
+  "_comment": "Nivel de información disponible para configurar ZAK. Se calcula con la calidad de las respuestas del cuestionario. El resultado indica cuánta consultoría necesita la empresa. Se muestra como barra en el encabezado, en el resumen y llega al Form.",
   "unknownValues": [
     "No sé",
     "Aún no sé",

@@ -12,7 +12,7 @@ import { renderForm } from './inputs.js';
 import { freshState, loadState, saveState, clearState, getTheme, setTheme } from './store.js';
 import { submitOnboarding, isDemo } from './api.js';
 import { createIntro } from './intro.js';
-import { buildModuleSchema, buildAgentSchema, buildConfigSchema, computeReadiness, missingText } from './readiness.js';
+import { buildModuleSchema, buildConfigSchema } from './readiness.js';
 import { computeInfo, pendingText, consultTriggered, consultRequests } from './info.js';
 import * as kira from './kira.js';
 import { setKnowledge } from './kiraChat.js';
@@ -32,7 +32,7 @@ const ASSET = {
 /** Avatar de Kira (el mismo pulpo del brochure) en sus mensajes del chat. */
 const kiraAvatar = () => h('span', { class: 'avatar avatar-kira', 'aria-hidden': 'true' }, h('img', { src: ASSET.kira, alt: '' }));
 
-let engine, faq, mapping, schema, modulesCfg, introCfg, agentsCfg, scoringCfg, ndaCfg;
+let engine, faq, mapping, schema, modulesCfg, introCfg, scoringCfg, ndaCfg;
 let ndaHash = ''; // huella SHA-256 del texto del acuerdo que se muestra
 let state;
 let introCtl = null; // controlador de la presentación audiovisual
@@ -49,21 +49,20 @@ const ui = {
 async function boot() {
   setTheme(getTheme());
   try {
-    const files = ['questions', 'faq', 'form-mapping', 'modules', 'intro', 'agents', 'scoring', 'nda'];
-    const [q, f, m, mods, intro, agents, scoring, nda] = await Promise.all(
+    const files = ['questions', 'faq', 'form-mapping', 'modules', 'intro', 'scoring', 'nda'];
+    const [q, f, m, mods, intro, scoring, nda] = await Promise.all(
       files.map((n) => fetch(`config/${n}.json`, { cache: 'no-cache' }).then((r) => r.json())),
     );
-    schema = q; faq = f; mapping = m; modulesCfg = mods; introCfg = intro; agentsCfg = agents; scoringCfg = scoring; ndaCfg = nda;
+    schema = q; faq = f; mapping = m; modulesCfg = mods; introCfg = intro; scoringCfg = scoring; ndaCfg = nda;
     ndaHash = await sha256(ndaText());
     setKnowledge({ faq, modulesCfg });
-    // Tras «Datos de la empresa» se insertan, en este orden: módulos, checklist y agentes de IA
-    // (generados desde modules.json y agents.json; el Apps Script aplica las mismas reglas).
+    // Tras «Datos de la empresa» se inserta la selección de módulos
+    // (generada desde modules.json; el Apps Script aplica las mismas reglas).
     const gen = buildModuleSchema(modulesCfg);
-    const ag = buildAgentSchema(agentsCfg, modulesCfg);
-    // Orden: acuerdo de confidencialidad → datos de la empresa → módulos → checklist → agentes → cuestionario.
+    // Orden: acuerdo de confidencialidad → datos de la empresa → módulos → cuestionario.
     const afterIdx = schema.questions.findLastIndex((x) => x.section === 's0') + 1;
-    schema.sections.splice(schema.sections.findIndex((x) => x.id === 's0') + 1, 0, ...gen.sections, ...ag.sections);
-    schema.questions.splice(afterIdx, 0, ...gen.questions, ...ag.questions);
+    schema.sections.splice(schema.sections.findIndex((x) => x.id === 's0') + 1, 0, ...gen.sections);
+    schema.questions.splice(afterIdx, 0, ...gen.questions);
     // Configuración técnica por módulo: antes del cierre (sección 13).
     const cfgX = buildConfigSchema(modulesCfg);
     schema.sections.splice(schema.sections.findIndex((x) => x.id === 's13'), 0, ...cfgX.sections);
@@ -312,8 +311,6 @@ function renderLog(current) {
   let lastSection = null;
   const flow = engine.flow(state.answers);
   const pendingQ = engine.nextPending(state);
-  const lastCheck = flow.filter((x) => x.section === 'sC').pop();
-  const readiness = computeReadiness(modulesCfg, state.answers);
   for (const q of flow) {
     const shown = state.done[q.id] || (q === pendingQ && state.revealed[q.id]);
     if (!shown) continue;
@@ -345,14 +342,6 @@ function renderLog(current) {
         if (editing) m.classList.add('is-editing');
         return m;
       });
-    }
-    // Al completar el checklist, el agente muestra el diagnóstico de preparación.
-    if (q === lastCheck && state.done[q.id] && readiness.complete) {
-      push('readiness', JSON.stringify(readiness), () => agentMsg([
-        h('p', {}, 'Gracias. Este es el nivel de preparación de tu empresa para los módulos que elegiste:'),
-        readinessCard(readiness),
-        h('p', {}, 'Ahora sigamos con las preguntas de configuración.'),
-      ]));
     }
   }
   if (ui.typing) {
@@ -464,7 +453,7 @@ function sectionNumber(s) {
 }
 
 function currentInfo() {
-  return computeInfo(scoringCfg, engine, state, computeReadiness(modulesCfg, state.answers));
+  return computeInfo(scoringCfg, engine, state);
 }
 
 /** Medidor compacto del encabezado: cuánta información hay para configurar ZAK. */
@@ -492,7 +481,7 @@ function infoCard(info) {
         h('h3', { class: 'ready-level' }, info.level.label),
         h('p', {}, info.level.client))),
     h('ul', { class: 'ready-mods' },
-      [['Respuestas del cuestionario', info.questionnaire], ['Checklist de módulos', info.checklist]].filter(([, v]) => v !== null).map(([k, v]) =>
+      [['Respuestas del cuestionario', info.questionnaire]].filter(([, v]) => v !== null).map(([k, v]) =>
         h('li', {}, h('span', { class: 'ready-name' }, k), h('span', { class: 'ready-bar', 'aria-hidden': 'true' }, h('i', { style: { width: `${v}%` } })), h('span', { class: 'ready-val' }, `${v} %`)))),
     info.pending.length ? h('details', { class: 'ready-missing' },
       h('summary', {}, `Información por completar (${info.pending.length})`),
@@ -508,31 +497,6 @@ function renderIntroDock() {
       h('div', { class: 'right' },
         h('button', { class: 'btn btn-primary', type: 'button', 'data-fk': 'intro-start', onclick: () => { introCtl?.skip(); finishIntro(); } },
           'Empezar el onboarding', icon('arrowRight', 'icon btn-arrow'))))));
-}
-
-/** Tarjeta de diagnóstico: porcentaje global, nivel, barra por módulo y requisitos pendientes. */
-function readinessCard(r, { open = false } = {}) {
-  const missingCount = r.modules.reduce((a, m) => a + m.missing.length, 0);
-  return h('div', { class: 'ready-card' },
-    h('div', { class: 'ready-head' },
-      h('div', { class: 'ready-ring', style: { '--p': r.overall }, role: 'img', 'aria-label': `Preparación global: ${r.overall} por ciento` },
-        h('span', { class: 'ready-pct' }, String(r.overall), h('small', {}, '%'))),
-      h('div', {},
-        h('span', { class: 'eyebrow' }, 'PREPARACIÓN GLOBAL'),
-        h('h3', { class: 'ready-level' }, r.level.label),
-        h('p', {}, r.level.client))),
-    h('ul', { class: 'ready-mods' },
-      r.modules.map((m) => h('li', {},
-        h('span', { class: 'ready-name' }, m.name),
-        h('span', { class: 'ready-bar', 'aria-hidden': 'true' }, h('i', { style: { width: `${m.pct}%` } })),
-        h('span', { class: 'ready-val' }, `${m.pct} %`)))),
-    missingCount ? h('details', { class: 'ready-missing', open: open || null },
-      h('summary', {}, `Lo que falta (${missingCount})`),
-      r.modules.filter((m) => m.missing.length).map((m) => h('div', { class: 'ready-miss-mod' },
-        h('strong', {}, m.name),
-        h('ul', {}, m.missing.map((x) => h('li', {}, x.text, h('span', { class: `ready-state st-${x.state === 'En proceso' ? 'proc' : 'no'}` }, x.state),
-          x.note ? h('span', { class: 'ready-note' }, `Falta: ${x.note}`) : null)))))) :
-      h('p', { class: 'ready-ok' }, icon('check'), 'Cumples todos los requisitos de los módulos elegidos.'));
 }
 
 /** Respuesta rápida (se envía al tocar la opción): un solo campo de opción única, sin «Otro» y sin opciones que abran consultoría. */
@@ -1104,12 +1068,8 @@ function renderSummary() {
         h('h1', { class: 'h2' }, 'Revisa tus respuestas'),
         h('p', {}, 'Confirma que todo está correcto. Puedes editar cualquier respuesta antes de enviarla al equipo de iTech.')),
       (() => {
-        const r = computeReadiness(modulesCfg, state.answers);
         const info = currentInfo();
-        return [
-          info.overall !== null ? h('section', { class: 's-card s-ready', 'aria-label': 'Información para configurar ZAK' }, infoCard(info)) : null,
-          r.complete ? h('section', { class: 's-card s-ready', 'aria-label': 'Preparación de tu empresa' }, readinessCard(r, { open: true })) : null,
-        ];
+        return info.overall !== null ? h('section', { class: 's-card s-ready', 'aria-label': 'Información para configurar ZAK' }, infoCard(info)) : null;
       })(),
       pending.length ? h('div', { class: 'status-card error', role: 'alert', style: { marginBottom: '16px' } },
         h('strong', {}, pending.length === 1 ? 'Falta 1 respuesta.' : `Faltan ${pending.length} respuestas.`),
@@ -1187,8 +1147,9 @@ function buildPayload() {
     company: state.answers['0.1']?.empresa || '',
     legalName: state.answers['0.2']?.razonSocial || '',
     taxId: state.answers['0.2']?.rif || '',
-    // PDF del RIF ya subido a Drive: el Apps Script lo archiva en «RIF de clientes» para revisarlo.
+    // Archivos ya subidos a Drive: el Apps Script los archiva juntos en la carpeta del cliente («RIF de clientes»).
     rifFile: state.answers['0.2']?.comprobante?.id ? { id: state.answers['0.2'].comprobante.id } : null,
+    contactsFile: contactsFileRef(),
     contactName: state.answers['0.3']?.contacto || '',
     contactEmail: state.answers['0.4']?.correo || '',
     answers: flow.map((q) => ({
@@ -1200,11 +1161,18 @@ function buildPayload() {
       value: engine.serialize(q, state.answers),
     })),
     doubts: state.doubts.map((d) => `[${d.qid}] ${d.text}`).join('\n'),
-    readiness: readinessPayload(),
     info: infoPayload(),
     nda: ndaRecord(),
-    consulting: consultRequests(engine, state, computeReadiness(modulesCfg, state.answers)).join('\n'),
+    consulting: consultRequests(engine, state).join('\n'),
   };
+}
+
+/** Base de contactos adjunta en la 1.5, solo si la pregunta sigue visible y dice que hay base. */
+function contactsFileRef() {
+  const a = state.answers['1.5'];
+  const file = [].concat(a?.base || [])[0];
+  if (!file?.id || a.tiene !== 'Sí' || !engine.isVisible(engine.byId['1.5'], state.answers)) return null;
+  return { id: file.id };
 }
 
 /** Nivel de información y consultoría recomendada, para el Form y el correo. */
@@ -1214,20 +1182,8 @@ function infoPayload() {
   return {
     overall: info.overall,
     consulting: info.level.label,
-    detail: `Cuestionario: ${info.questionnaire ?? '—'} % · Checklist: ${info.checklist ?? '—'} %`,
+    detail: `Cuestionario: ${info.questionnaire ?? '—'} %`,
     pending: pendingText(info) || 'Ninguna',
-  };
-}
-
-/** Resultado del checklist para los ítems de control del Form y el correo al equipo. */
-function readinessPayload() {
-  const r = computeReadiness(modulesCfg, state.answers);
-  if (!r.complete) return null;
-  return {
-    overall: r.overall,
-    level: `${r.level.label} · ${r.level.internal}`,
-    byModule: r.modules.map((m) => `${m.name}: ${m.pct} %`).join('\n'),
-    missing: missingText(r) || 'Ninguno',
   };
 }
 
@@ -1275,7 +1231,7 @@ function renderSuccess() {
         h('div', { class: 'next-steps' },
           h('h2', {}, 'Próximos pasos'),
           h('ol', {},
-            h('li', {}, 'Un consultor de iTech revisa tus respuestas y tu checklist de preparación.'),
+            h('li', {}, 'Un consultor de iTech revisa tus respuestas.'),
             h('li', {}, email ? `Te escribimos a ${email} para coordinar los siguientes pasos.` : 'Te contactamos para coordinar los siguientes pasos.'),
             h('li', {}, 'Ten a mano los accesos que mencionaste en el onboarding. Los usaremos durante la configuración.'))),
         h('div', { class: 'welcome-actions', style: { justifyContent: 'center' } },

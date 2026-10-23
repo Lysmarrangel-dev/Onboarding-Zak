@@ -24,58 +24,20 @@ El texto está en `config/nda.json` (versión 1.0, **borrador pendiente de revis
 | 0.4 | Correo de contacto | correo | Respuesta corta | Sí |
 | 0.5 | Teléfono de contacto | teléfono | Respuesta corta | Sí |
 
-## Secciones añadidas a petición de iTech: Módulos de ZAK y checklist de preparación
+## Sección añadida a petición de iTech: Módulos de ZAK
 
-Se generan desde `config/modules.json` (lista oficial de 18 módulos). La app (`js/readiness.js`) y `setupForm()` (Apps Script) aplican las mismas reglas.
+Se genera desde `config/modules.json` (lista oficial de 18 módulos). La app (`js/readiness.js`) y `setupForm()` (Apps Script) aplican las mismas reglas.
 
 | ID | Pregunta | Componente en la app | Ítem en Form | Obligatoria |
 |---|---|---|---|---|
 | M.1 | ¿Qué módulos de ZAK contratará la empresa? | Tarjetas de módulos (selección múltiple) | Casillas (18 opciones) | Sí |
-| C.dashboard | Checklist · Dashboard (3 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.adstudio | Checklist · AdStudio (4 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.agentes-ia | Checklist · Agentes IA (4 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.contactos | Checklist · Contactos (3 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.inbox | Checklist · Inbox Omnicanal (6 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.call-center | Checklist · Call Center (5 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.pipelines | Checklist · Pipelines (4 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.web-funnels | Checklist · Web & Funnels (4 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.ventas | Checklist · Ventas (6 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.email-marketing | Checklist · Email Marketing (4 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.calendario | Checklist · Calendario (3 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.workforce | Checklist · Workforce Center (4 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.rrhh | Checklist · Recursos Humanos (4 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.cowork | Checklist · Cowork (3 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.number-master | Checklist · Number Master (3 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.contabilidad | Checklist · Contabilidad (4 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.workflows | Checklist · Workflows (3 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
-| C.piloto-automatico | Checklist · Piloto Automático (4 requisitos) | Cuadrícula Lo tengo / En proceso / No lo tengo | Cuadrícula | Sí, si se elige el módulo |
 
-**Puntuación:** Lo tengo = 100 %, En proceso = 50 %, No lo tengo = 0 %. Cada módulo es el promedio de sus requisitos, y la preparación global es el promedio de los módulos elegidos. Niveles: ≥ 80 % alta, 50–79 % media, < 50 % inicial.
-
-**Ítems de control nuevos:** Preparación global (%), Calificación de preparación, Preparación por módulo y Requisitos pendientes.
-
-## Agentes de IA por departamento (a petición de iTech)
-
-Se generan desde `config/agents.json` y solo aparecen si el cliente elige el módulo **Agentes IA**.
-
-| ID | Pregunta | Componente en la app | Ítem en Form | Obligatoria |
-|---|---|---|---|---|
-| A.1 | ¿Para qué departamentos necesita la empresa agentes de IA? | Tarjetas de departamentos | Casillas (9 opciones) | Sí, si se elige Agentes IA |
-| A.recepcion | Agente de IA · Recepción | nombre y puesto, funciones, autonomía, canales, documentos | Párrafo (con enlaces de Drive) | Sí, si se elige el departamento |
-| A.ventas | Agente de IA · Ventas | nombre y puesto, funciones, autonomía, canales, documentos | Párrafo (con enlaces de Drive) | Sí, si se elige el departamento |
-| A.cotizador | Agente de IA · Cotizador | nombre y puesto, funciones, autonomía, canales, documentos | Párrafo (con enlaces de Drive) | Sí, si se elige el departamento |
-| A.cobranza | Agente de IA · Cobranza | nombre y puesto, funciones, autonomía, canales, documentos | Párrafo (con enlaces de Drive) | Sí, si se elige el departamento |
-| A.soporte | Agente de IA · Soporte | nombre y puesto, funciones, autonomía, canales, documentos | Párrafo (con enlaces de Drive) | Sí, si se elige el departamento |
-| A.agenda | Agente de IA · Agenda | nombre y puesto, funciones, autonomía, canales, documentos | Párrafo (con enlaces de Drive) | Sí, si se elige el departamento |
-| A.rrhh | Agente de IA · Recursos Humanos | nombre y puesto, funciones, autonomía, canales, documentos | Párrafo (con enlaces de Drive) | Sí, si se elige el departamento |
-| A.reportes | Agente de IA · Reportes | nombre y puesto, funciones, autonomía, canales, documentos | Párrafo (con enlaces de Drive) | Sí, si se elige el departamento |
-| A.otro | Agente de IA · Otro departamento | ¿Qué departamento?, nombre y puesto, funciones, autonomía, canales, documentos | Párrafo (con enlaces de Drive) | Sí, si se elige el departamento |
+El checklist de preparación (C.*) y los agentes de IA por departamento (A.*) se quitaron en la revisión del 23-10-2026. En un Form existente, `updateForm()` los deja como «(obsoleta)» con sus respuestas anteriores.
 
 ## Funciones transversales
 
-- **Un solo archivo:** el RIF en PDF (0.2). Las demás preguntas que antes pedían archivos muestran un aviso con enlace para enviarlos a zak@itech.com.ve. «Adjuntos por pregunta» queda vacío en los envíos nuevos.
-- **«No lo tengo» → «¿Qué te falta?»:** en el checklist, cada requisito marcado «No lo tengo» abre un campo de texto. La nota va a «Requisitos pendientes».
-- **Nivel de información:** barra en el encabezado y tarjeta en el resumen. Reglas en `config/scoring.json`: «No sé» = 0, respuestas parciales = 0,5, carencias clave (p. ej. sin tarjeta en Meta) = 0, comprobante del RIF sin adjuntar = 0,5. Global = 50 % cuestionario + 50 % checklist. Recomendación: ≥ 80 % consultoría básica, 50–79 % estándar, < 50 % intensiva.
+- **Archivos:** el RIF en PDF (0.2) y, opcional, la base de contactos en Excel o CSV (1.5). Las demás preguntas que antes pedían archivos muestran un aviso con enlace para enviarlos a zak@itech.com.ve. «Adjuntos por pregunta» queda vacío en los envíos nuevos.
+- **Nivel de información:** barra en el encabezado y tarjeta en el resumen. Reglas en `config/scoring.json`: «No sé» = 0, respuestas parciales = 0,5, carencias clave (p. ej. sin tarjeta en Meta) = 0, comprobante del RIF sin adjuntar = 0,5. Global = promedio de las preguntas respondidas. Recomendación: ≥ 80 % consultoría básica, 50–79 % estándar, < 50 % intensiva.
 
 ## Revisión del 14-10-2026 (lista de mejoras de iTech)
 
@@ -350,3 +312,13 @@ La marca de tiempo la añade Google Forms automáticamente en la primera columna
 | 2.2 | 2.1 = "Activo en WhatsApp" o "Activo en WhatsApp Business" |
 | 6.2, 6.3, 6.4 | 6.1 ≠ "No usamos ERP" (la sección dice "si aplica") |
 | Campos internos | Formato y registros (1.5) si hay base; aviso del audio por correo y autorización (4.4) si se clona la voz; monto (5.3) si se elige ese caso; lista de usuarios o archivo (7.1) según el modo; roles por usuario o texto libre (7.2) según 7.1; % de descuento y archivo (8.2); planes (8.3); datos del avatar (10.3); URL (11.1); detalle (7.5, 12.3, 13.1, 13.3) |
+
+## Revisión del 23-10-2026 (documento «ONBOARDING ZAK»)
+
+| Área | Cambio aplicado |
+|---|---|
+| Módulos, checklist y agentes | Se quitan el checklist de preparación (C.*) y los agentes de IA por departamento (A.*, `config/agents.json`). Se mantiene la elección de módulos (M.1). El nivel de información se calcula solo con el cuestionario; los ítems de control de preparación ya no se envían. |
+| Base de contactos (1.5) | Se puede adjuntar en Excel o CSV (opcional, hasta 10 MB) o enviarla a zak@itech.com.ve. Al enviar, el Apps Script la archiva junto al RIF en la carpeta del cliente: «RIF de clientes/<fecha>/<RIF · Razón social · referencia>/». Ítems de control nuevos: «Carpeta del cliente (RIF y base de contactos)» y «Base de contactos (enlace)». |
+| Usuarios (7.1 y 7.3) | La 7.1 pregunta también qué módulos ve cada persona. Si la lista va por plantilla, se llena la tabla «Módulos por persona o rol» (persona o rol + módulos en lista desplegable). La 7.3 se elimina. |
+| Administradores y Colaboradores (7.2) | Se vuelve a mostrar cuando la lista de usuarios se envía por plantilla. Antes esperaba la opción «Subo la plantilla (Excel)», que ya no existía. |
+| Etiquetas de contacto (X.contactos.2) | Listas desplegables con descripción, por etapa o relación, por tipo de contacto, por estado de pago y otros criterios, más «Otras etiquetas» en texto. Hay que marcar al menos una o escribir alguna. |

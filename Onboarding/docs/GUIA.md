@@ -54,7 +54,7 @@ Si el Form ya existe y solo cambiaron las preguntas (o el `Code.gs`):
 
    | Propiedad | Valor |
    |---|---|
-   | `QUESTIONS_URL` | `https://TU-SITIO/config/questions.json` (el script lee también `modules.json` y `agents.json` en la misma carpeta) |
+   | `QUESTIONS_URL` | `https://TU-SITIO/config/questions.json` (el script lee también `modules.json` en la misma carpeta) |
    | `NOTIFY_EMAIL` | (opcional) correo o correos del equipo, separados por comas |
 
 ## Paso 3 · Crear el Google Form y la hoja de respuestas
@@ -62,7 +62,7 @@ Si el Form ya existe y solo cambiaron las preguntas (o el `Code.gs`):
 1. En el editor, elige la función **`setupForm`** y pulsa **Ejecutar**.
 2. Autoriza los permisos (Forms, Sheets, Drive, correo y conexión externa). Si Google avisa de que la app no está verificada: *Configuración avanzada → Ir a Onboarding ZAK*. El script es tuyo.
 3. Al terminar, abre **Registro de ejecución**. Verás:
-   - la URL de edición del Form: 65 preguntas + selección de módulos + 18 checklists + agentes de IA (1 + 9) + 12 ítems de control, en 17 secciones;
+   - la URL de edición del Form: las preguntas del cuestionario + selección de módulos + configuración por módulo + ítems de control;
    - la URL de la hoja **"Onboarding ZAK · Respuestas"**, ya vinculada;
    - la carpeta de Drive **"Onboarding ZAK · Archivos"**;
    - un bloque JSON `{ "items": { ... } }`.
@@ -110,9 +110,8 @@ Si el Form ya existe y solo cambiaron las preguntas (o el `Code.gs`):
 | Añadir o cambiar preguntas de configuración de un módulo | Editar el arreglo `config` del módulo en `config/modules.json` (mismos tipos de campo que el cuestionario). Si el Form ya existe, añade el ítem con el título `X.<módulo>.<n> · <pregunta>`. |
 | Cambiar qué preguntas dependen de qué módulo | En `config/questions.json`, edita `"modules"` en la sección (o en una pregunta concreta) con los IDs de `config/modules.json`. Sin `"modules"`, la pregunta se hace siempre. Si el Form ya existe, desmarca «Obligatoria» en esas preguntas. |
 | Cambiar el acuerdo de confidencialidad | Editar `config/nda.json` y **subir `version`**. Las aceptaciones anteriores conservan su versión y huella. Haz revisar el texto con el asesor legal antes de publicarlo. |
-| Cambiar los departamentos o los campos de los agentes de IA | Editar `config/agents.json`. Si el Form ya existe, actualiza también sus opciones, o vuelve a crearlo. |
-| Ajustar cómo se calcula el nivel de información o la consultoría recomendada | Editar `config/scoring.json` (respuestas que restan, archivos esperados, pesos y niveles). No requiere tocar el Form. |
-| Cambiar módulos, requisitos del checklist o umbrales de calificación | Editar `config/modules.json`. Si el Form ya existe, cambia también sus opciones y filas (mismo texto), o vuelve a crearlo con `setupForm()`. |
+| Ajustar cómo se calcula el nivel de información o la consultoría recomendada | Editar `config/scoring.json` (respuestas que restan, archivos esperados y niveles). No requiere tocar el Form. |
+| Cambiar la lista de módulos | Editar `config/modules.json`. Si el Form ya existe, ejecuta `updateForm()` para poner al día sus opciones. |
 | Usar un video real como presentación (p. ej. con el avatar) | Subir el `.mp4` a `assets/video/` y poner su ruta en `intro.videoSrc` de `js/config.js` (opcional: `videoPoster` y subtítulos `.vtt` en `captionsSrc`). |
 | Quitar la voz de la presentación | `intro.voice: false` en `js/config.js`. |
 | Cambiar la voz de ElevenLabs | Cambiar `elevenlabs.voiceId` en `config/intro.json` y ejecutar `python3 tools/generar_voz.py --force`. |
@@ -135,9 +134,8 @@ Onboarding/
 │   ├── intro.json             Guion de la presentación y voz de Kira
 │   ├── (plantillas en assets/plantillas/: usuarios y Number Master)
 │   ├── nda.json               Acuerdo de confidencialidad (texto y versión)
-│   ├── agents.json            Departamentos y campos de los agentes de IA
 │   ├── scoring.json           Reglas del nivel de información y consultoría recomendada
-│   ├── modules.json           18 módulos, requisitos del checklist y niveles de preparación
+│   ├── modules.json           18 módulos y su configuración técnica
 │   ├── form-mapping.json      Mapa id de pregunta ↔ id de ítem del Form
 │   └── faq.json               Respuestas breves sobre ZAK para el chat
 ├── css/
@@ -148,7 +146,7 @@ Onboarding/
 │   ├── app.js                 Pantallas y flujo del chat
 │   ├── engine.js              Condiciones, validación, formato y serialización
 │   ├── intro.js               Presentación audiovisual de bienvenida
-│   ├── readiness.js           Módulos, checklist, agentes de IA y cálculo de preparación
+│   ├── readiness.js           Selección de módulos y configuración técnica por módulo
 │   ├── info.js                Nivel de información y consultoría recomendada
 │   ├── faq.js                 Búsqueda en las preguntas frecuentes
 │   ├── kira.js                Kira lee las preguntas (voz de Kira del CRM)

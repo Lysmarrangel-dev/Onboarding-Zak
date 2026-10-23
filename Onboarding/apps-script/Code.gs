@@ -8,7 +8,8 @@
  *                  la carpeta ni las respuestas. Es lo que hay que ejecutar en cada actualización.
  * 2) doPost(e)     Aplicación web que recibe las respuestas de la app y las envía al Form con
  *                  form.createResponse() → withItemResponse() → submit().
- *                  También recibe el PDF del RIF (action: "upload"), el único archivo del onboarding.
+ *                  También recibe los archivos del onboarding (action: "upload"): el PDF del RIF (0.2)
+ *                  y la base de contactos en Excel o CSV (1.5, opcional).
  * 3) doGet()       Comprobación de estado.
  *
  * Propiedades del script (Configuración del proyecto → Propiedades del script):
@@ -20,22 +21,22 @@
 var MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB por archivo
 var RIF_QUESTION_ID = '0.2';              // su PDF se archiva en «RIF de clientes/<fecha>» (RIF_FOLDER_ID)
 var RIF_TIMEZONE = 'America/Caracas';     // zona horaria de las carpetas por día del RIF
+var CONTACTS_QUESTION_ID = '1.5';         // base de contactos para migrar: Excel o CSV
 
 /* ============================================================
    1. Creación del Form (ejecutar una sola vez desde el editor)
    ============================================================ */
 var DEFAULT_QUESTIONS_URL = 'https://onboarding.zak.ia.ve/config/questions.json';
 
-/** Lee questions.json (+ modules.json y agents.json) del sitio publicado. */
+/** Lee questions.json (+ modules.json) del sitio publicado. */
 function loadSchema_(props) {
   var url = (props.getProperty('QUESTIONS_URL') || DEFAULT_QUESTIONS_URL).trim();
   // Si solo se puso el dominio del sitio, se completa la ruta del JSON.
   if (!/questions\.json/.test(url)) url = url.replace(/\/+$/, '') + '/config/questions.json';
   var schema = JSON.parse(UrlFetchApp.fetch(url, { muteHttpExceptions: false }).getContentText());
-  // Módulos + checklist: mismas reglas que js/readiness.js (buildModuleSchema).
+  // Módulos: mismas reglas que js/readiness.js (buildModuleSchema + buildConfigSchema).
   var mods = JSON.parse(UrlFetchApp.fetch(url.replace(/questions\.json.*$/, 'modules.json')).getContentText());
-  var agents = JSON.parse(UrlFetchApp.fetch(url.replace(/questions\.json.*$/, 'agents.json')).getContentText());
-  addModuleSchema_(schema, mods, agents);
+  addModuleSchema_(schema, mods);
   return schema;
 }
 
@@ -225,41 +226,17 @@ function refreshItem_(item, q) {
 }
 
 /**
- * Inserta tras la primera sección «Módulos de ZAK», «Checklist» y «Agentes de IA por departamento»
- * (mismas reglas que js/readiness.js: buildModuleSchema + buildAgentSchema).
+ * Inserta tras «Datos de la empresa» la sección «Módulos de ZAK» y, antes del cierre, la configuración
+ * técnica por módulo (mismas reglas que js/readiness.js: buildModuleSchema + buildConfigSchema).
  */
-function addModuleSchema_(schema, mod, agents) {
+function addModuleSchema_(schema, mod) {
   var all = [];
   mod.groups.forEach(function (g) { all = all.concat(g.modules); });
-  var states = mod.checklist.states.map(function (s) { return s.label; });
-  var sections = [
-    { id: 'sM', number: 0, title: 'Módulos de ZAK', intro: 'Módulos que contratará la empresa.' },
-    { id: 'sC', number: 0, title: 'Checklist de preparación', intro: 'Requisitos por módulo: Lo tengo / En proceso / No lo tengo.' },
-  ];
+  var sections = [{ id: 'sM', number: 0, title: 'Módulos de ZAK', intro: 'Módulos que contratará la empresa.' }];
   var questions = [{
     id: mod.selection.id, section: 'sM', formType: 'CHECKBOX', required: true, formValueField: 'modulos', formTitle: mod.selection.formTitle,
     fields: [{ id: 'modulos', options: all.map(function (m) { return m.name; }) }],
-  }].concat(all.filter(function (m) { return m.requirements && m.requirements.length; }).map(function (m) {
-    return {
-      id: 'C.' + m.id, section: 'sC', formType: 'GRID', required: true, showIf: { q: mod.selection.id }, formValueField: 'estado',
-      formTitle: 'Checklist · ' + m.name,
-      fields: [{ id: 'estado', rows: m.requirements.map(function (r) { return r.text; }), columns: states }],
-    };
-  }));
-  if (agents) {
-    sections.push({ id: agents.section.id, number: 0, title: agents.section.title, intro: 'Agentes de IA por departamento (solo si se elige el módulo ' + agents.requiresModule + ').' });
-    questions.push({
-      id: agents.selection.id, section: agents.section.id, formType: 'CHECKBOX', required: true, showIf: { q: mod.selection.id },
-      formValueField: 'departamentos', formTitle: agents.selection.formTitle,
-      fields: [{ id: 'departamentos', options: agents.departments.map(function (d) { return d.name; }) }],
-    });
-    agents.departments.forEach(function (d) {
-      questions.push({
-        id: 'A.' + d.id, section: agents.section.id, formType: 'PARAGRAPH_TEXT', required: true, showIf: { q: agents.selection.id },
-        formTitle: agents.agent.formTitleTemplate.replace('{dept}', d.name), fields: [],
-      });
-    });
-  }
+  }];
   // Configuración técnica por módulo: antes del cierre (s13), igual que js/readiness.js (buildConfigSchema).
   var cfgSecs = [], cfgQs = [];
   all.forEach(function (m, i) {
@@ -362,25 +339,22 @@ function handleSubmit_(body) {
     });
     if (missing.length) return fatal_('El Form no tiene los ítems: ' + missing.join(', ') + '. Revisa config/form-mapping.json.');
 
-    var rifUrl = archiveRif_(body, reference); // después de validar: un envío rechazado no deja copias sueltas
+    var docs = archiveClientFiles_(body, reference); // después de validar: un envío rechazado no deja copias sueltas
 
-    var rd = body.readiness || {};
     var ctl = {
       'ctl.reference': reference,
       'ctl.nda': String(body.nda || ''),
       'ctl.session': body.sessionId,
       'ctl.doubts': String(body.doubts || '').slice(0, 20000),
-      'ctl.readiness': rd.overall != null ? String(rd.overall) : '',
-      'ctl.level': rd.level || '',
-      'ctl.byModule': rd.byModule || '',
-      'ctl.missing': rd.missing || '',
       'ctl.info': body.info ? String(body.info.overall) : '',
       'ctl.consulting': body.info ? body.info.consulting : '',
       'ctl.infoDetail': body.info ? body.info.detail : '',
       'ctl.infoPending': body.info ? body.info.pending : '',
       'ctl.attachments': String(body.attachments || '').slice(0, 30000),
       'ctl.consulting2': String(body.consulting || '').slice(0, 20000),
-      'ctl.rif': rifUrl,
+      'ctl.rif': docs.rif,
+      'ctl.folder': docs.folder,
+      'ctl.contacts': docs.contacts,
     };
     Object.keys(ctl).forEach(function (id) {
       var item = itemsById[map[id]] || findByTitle_(form, id);
@@ -390,7 +364,7 @@ function handleSubmit_(body) {
     response.submit();
     cache.setProperty('sub_' + body.sessionId, reference);
 
-    notify_(body, reference, rifUrl);
+    notify_(body, reference, docs);
     return { ok: true, reference: reference, submittedAt: new Date().toISOString() };
   } finally {
     lock.releaseLock();
@@ -422,11 +396,10 @@ function itemResponse_(item, value) {
 function findByTitle_(form, id) {
   var titles = {
     'ctl.reference': 'Referencia de onboarding', 'ctl.nda': 'Registro de aceptación del NDA (versión, huella SHA-256, fecha)', 'ctl.session': 'ID de sesión', 'ctl.doubts': 'Dudas registradas durante el onboarding',
-    'ctl.readiness': 'Preparación global (%)', 'ctl.level': 'Calificación de preparación',
-    'ctl.byModule': 'Preparación por módulo', 'ctl.missing': 'Requisitos pendientes',
     'ctl.info': 'Información disponible (%)', 'ctl.consulting': 'Consultoría recomendada', 'ctl.infoDetail': 'Desglose de información',
     'ctl.infoPending': 'Información por completar', 'ctl.attachments': 'Adjuntos por pregunta', 'ctl.consulting2': 'Consultoría solicitada por el cliente',
-    'ctl.rif': 'RIF en PDF (enlace para revisión)',
+    'ctl.rif': 'RIF en PDF (enlace para revisión)', 'ctl.folder': 'Carpeta del cliente (RIF y base de contactos)',
+    'ctl.contacts': 'Base de contactos (enlace)',
   };
   var hit = form.getItems().filter(function (it) { return it.getTitle() === titles[id]; });
   return hit[0] || null;
@@ -437,11 +410,18 @@ function handleUpload_(body) {
   if (!body.data || !body.name) return fatal_('Archivo vacío');
   var bytes = Utilities.base64Decode(body.data);
   if (bytes.length > MAX_UPLOAD_BYTES) return fatal_('El archivo supera los 10 MB');
-  // El único archivo del onboarding es el RIF (pregunta 0.2), y solo en PDF: se comprueba la firma
-  // «%PDF-» del contenido. Los demás documentos se piden por correo a zak@itech.com.ve.
-  if (body.questionId !== RIF_QUESTION_ID) return fatal_('Solo se recibe el RIF en PDF');
-  if (!isPdf_(bytes)) return fatal_('El RIF debe subirse en PDF');
-  var mime = 'application/pdf';
+  // Solo se reciben el RIF (0.2), en PDF (se comprueba la firma «%PDF-»), y la base de contactos (1.5),
+  // en Excel o CSV. Los demás documentos se piden por correo a zak@itech.com.ve.
+  var mime;
+  if (body.questionId === RIF_QUESTION_ID) {
+    if (!isPdf_(bytes)) return fatal_('El RIF debe subirse en PDF');
+    mime = 'application/pdf';
+  } else if (body.questionId === CONTACTS_QUESTION_ID) {
+    mime = contactsMime_(body.name, bytes);
+    if (!mime) return fatal_('La base de contactos debe subirse en Excel o CSV');
+  } else {
+    return fatal_('Solo se reciben el RIF en PDF y la base de contactos');
+  }
 
   var root = DriveApp.getFolderById(prop_('UPLOAD_FOLDER_ID'));
   var sub = root.getFoldersByName(body.sessionId);
@@ -452,6 +432,23 @@ function handleUpload_(body) {
   return { ok: true, id: file.getId(), url: file.getUrl(), name: safeName };
 }
 
+/** Tipo de la base de contactos según su extensión y su contenido ('' si no es Excel ni CSV). */
+function contactsMime_(name, bytes) {
+  var ext = (/\.(\w+)$/.exec(String(name).toLowerCase()) || [])[1];
+  var starts = function (sig) {
+    if (bytes.length < sig.length) return false;
+    for (var i = 0; i < sig.length; i++) if ((bytes[i] & 0xff) !== sig[i]) return false;
+    return true;
+  };
+  if (ext === 'xlsx' && starts([0x50, 0x4b, 0x03, 0x04])) return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'; // ZIP
+  if (ext === 'xls' && starts([0xd0, 0xcf, 0x11, 0xe0])) return 'application/vnd.ms-excel'; // OLE
+  if (ext === 'csv') {
+    for (var i = 0; i < Math.min(bytes.length, 4096); i++) if (bytes[i] === 0) return ''; // texto, sin bytes nulos
+    return 'text/csv';
+  }
+  return '';
+}
+
 function isPdf_(bytes) {
   var sig = [0x25, 0x50, 0x44, 0x46, 0x2d]; // %PDF-
   if (bytes.length < sig.length) return false;
@@ -460,28 +457,27 @@ function isPdf_(bytes) {
 }
 
 /**
- * Archiva una copia del PDF del RIF en «RIF de clientes» (dentro de la carpeta de archivos), en una
- * subcarpeta por día («2026-10-16»). La carpeta del día se crea solo cuando llega el primer RIF de
- * ese día; los días sin onboardings no crean nada.
- * Nombre fácil de revisar: «RIF · J-12345678-9 · Razón social · ZAK-2026-XXXXXX.pdf».
- * El original se queda en la carpeta de la sesión. Devuelve el enlace de la copia ('' si no hay RIF).
- * Solo se aceptan archivos que este mismo onboarding subió a la carpeta de su sesión.
+ * Archiva los documentos del cliente en «RIF de clientes» (dentro de la carpeta de archivos), en una
+ * subcarpeta por día («2026-10-16») y, dentro, una carpeta por cliente con todo junto:
+ *   «J-12345678-9 · Razón social · ZAK-2026-XXXXXX/»
+ *     «RIF · J-12345678-9 · Razón social · ZAK-2026-XXXXXX.pdf»
+ *     «Base de contactos · J-12345678-9 · Razón social · ZAK-2026-XXXXXX.xlsx» (si la adjuntó en la 1.5)
+ * Las carpetas del día y del cliente se crean solo cuando hay algo que archivar.
+ * Los originales se quedan en la carpeta de la sesión. Solo se aceptan archivos que este mismo
+ * onboarding subió a la carpeta de su sesión.
+ * Devuelve los enlaces { folder, rif, contacts } ('' en los que no haya archivo).
  */
-function archiveRif_(body, reference) {
-  var id = body.rifFile && body.rifFile.id;
-  if (!id) return '';
+function archiveClientFiles_(body, reference) {
+  var out = { folder: '', rif: '', contacts: '' };
+  var rif = body.rifFile && body.rifFile.id;
+  var contacts = body.contactsFile && body.contactsFile.id;
+  if (!rif && !contacts) return out;
   try {
     var root = DriveApp.getFolderById(prop_('UPLOAD_FOLDER_ID'));
-    var file = DriveApp.getFileById(id);
-    var parents = file.getParents();
-    var inSession = false;
-    while (parents.hasNext()) {
-      var p = parents.next();
-      if (p.getName() !== body.sessionId) continue;
-      var gp = p.getParents();
-      while (gp.hasNext()) if (gp.next().getId() === root.getId()) inSession = true;
-    }
-    if (!inSession || file.getMimeType() !== 'application/pdf') return '';
+    var rifFile = rif ? sessionFile_(root, rif, body.sessionId) : null;
+    if (rifFile && rifFile.getMimeType() !== 'application/pdf') rifFile = null;
+    var contactsFile = contacts ? sessionFile_(root, contacts, body.sessionId) : null;
+    if (!rifFile && !contactsFile) return out;
 
     var props = PropertiesService.getScriptProperties();
     var folderId = props.getProperty('RIF_FOLDER_ID');
@@ -496,20 +492,49 @@ function archiveRif_(body, reference) {
     var days = folder.getFoldersByName(day);
     folder = days.hasNext() ? days.next() : folder.createFolder(day);
     var clean = function (s) { return String(s || '').replace(/[\\/:*?"<>|]/g, '_').trim().slice(0, 80); };
-    var name = ['RIF', clean(body.taxId) || 'sin RIF', clean(body.legalName || body.company) || 'sin razón social', reference].join(' · ') + '.pdf';
-    var copy = file.makeCopy(name, folder);
-    copy.setDescription('Onboarding ' + reference + ' · ' + (body.company || '') + ' · ' + (body.contactName || '') + ' <' + (body.contactEmail || '') + '>');
-    return copy.getUrl();
+    var client = [clean(body.taxId) || 'sin RIF', clean(body.legalName || body.company) || 'sin razón social', reference].join(' · ');
+    folder = folder.createFolder(client); // la referencia es única: una carpeta por onboarding
+    var desc = 'Onboarding ' + reference + ' · ' + (body.company || '') + ' · ' + (body.contactName || '') + ' <' + (body.contactEmail || '') + '>';
+    folder.setDescription(desc);
+    out.folder = folder.getUrl();
+
+    if (rifFile) {
+      var copy = rifFile.makeCopy('RIF · ' + client + '.pdf', folder);
+      copy.setDescription(desc);
+      out.rif = copy.getUrl();
+    }
+    if (contactsFile) {
+      var ext = (/\.(\w+)$/.exec(contactsFile.getName()) || [])[1] || 'xlsx';
+      var base = contactsFile.makeCopy('Base de contactos · ' + client + '.' + ext.toLowerCase(), folder);
+      base.setDescription(desc);
+      out.contacts = base.getUrl();
+    }
   } catch (err) {
-    console.error('No se pudo archivar el RIF: ' + err);
-    return ''; // el envío no se bloquea: el PDF sigue en la carpeta de la sesión y su enlace en la respuesta 0.2
+    console.error('No se pudieron archivar los documentos del cliente: ' + err);
+    // el envío no se bloquea: los originales siguen en la carpeta de la sesión y sus enlaces en las respuestas 0.2 y 1.5
   }
+  return out;
+}
+
+/** El archivo, si este onboarding lo subió a la carpeta de su sesión (si no, null). */
+function sessionFile_(root, id, sessionId) {
+  try {
+    var file = DriveApp.getFileById(id);
+    var parents = file.getParents();
+    while (parents.hasNext()) {
+      var p = parents.next();
+      if (p.getName() !== sessionId) continue;
+      var gp = p.getParents();
+      while (gp.hasNext()) if (gp.next().getId() === root.getId()) return file;
+    }
+  } catch (e) { /* id inexistente o sin acceso */ }
+  return null;
 }
 
 /* ============================================================
    3. Notificación por correo (opcional)
    ============================================================ */
-function notify_(body, reference, rifUrl) {
+function notify_(body, reference, docs) {
   var to = prop_('NOTIFY_EMAIL');
   if (!to) return;
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -527,14 +552,13 @@ function notify_(body, reference, rifUrl) {
     '<div style="font-size:22px;margin-top:6px">Nuevo onboarding: ' + esc(body.company) + '</div>' +
     '<div style="margin-top:6px">Referencia <b>' + esc(reference) + '</b> · ' + esc(body.contactName) + ' · ' + esc(body.contactEmail) + '</div>' +
     (body.info ? '<div style="margin-top:10px;font-size:18px">Información: <b>' + esc(body.info.overall) + ' %</b> · ' + esc(body.info.consulting) + '</div>' : '') +
-    (body.readiness ? '<div style="margin-top:4px">Preparación de módulos: <b>' + esc(body.readiness.overall) + ' %</b> · ' + esc(body.readiness.level) + '</div>' : '') +
     (body.taxId ? '<div style="margin-top:4px">RIF: ' + esc(body.taxId) + ' · ' + esc(body.legalName) +
-      (rifUrl ? ' · <a href="' + esc(rifUrl) + '" style="color:#fff;text-decoration:underline">Ver RIF (PDF)</a>' : '') + '</div>' : '') +
+      (docs.rif ? ' · <a href="' + esc(docs.rif) + '" style="color:#fff;text-decoration:underline">Ver RIF (PDF)</a>' : '') + '</div>' : '') +
+    (docs.folder ? '<div style="margin-top:4px"><a href="' + esc(docs.folder) + '" style="color:#fff;text-decoration:underline">Abrir la carpeta del cliente</a>' +
+      (docs.contacts ? ' · <a href="' + esc(docs.contacts) + '" style="color:#fff;text-decoration:underline">Ver base de contactos</a>' : '') + '</div>' : '') +
     '</div>' +
     (body.consulting ? '<h3 style="color:#53037B">Consultoría solicitada</h3><p style="white-space:pre-line">' + esc(body.consulting) + '</p>' : '') +
     (body.info ? '<h3 style="color:#53037B">Información por completar</h3><p style="white-space:pre-line">' + esc(body.info.pending) + '</p>' : '') +
-    (body.readiness ? '<h3 style="color:#53037B">Preparación por módulo</h3><p style="white-space:pre-line">' + esc(body.readiness.byModule) + '</p>' +
-      '<h3 style="color:#53037B">Requisitos pendientes</h3><p style="white-space:pre-line">' + esc(body.readiness.missing) + '</p>' : '') +
     (sheetUrl ? '<p><a href="' + sheetUrl + '" style="color:#53037B">Abrir la hoja de respuestas</a></p>' : '') +
     '<table style="border-collapse:collapse;width:100%;font-size:14px">' + rows + '</table>' +
     (body.doubts ? '<h3 style="color:#53037B">Dudas registradas</h3><p style="white-space:pre-line">' + esc(body.doubts) + '</p>' : '') +

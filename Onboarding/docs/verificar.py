@@ -17,6 +17,11 @@ for line in txt.splitlines():
     if s.startswith('•'):
         doc.append((sec, s.lstrip('•').strip()))
 
+# Preguntas del documento que se quitaron a pedido de iTech (revisión del 23-10-2026):
+# la 7.3 («¿Qué módulos debe ver cada persona?») ahora se responde dentro de la 7.1.
+ELIMINADAS = ('¿Qué módulos debe ver cada persona?',)
+doc = [(s, t) for s, t in doc if not t.startswith(ELIMINADAS)]
+
 root = pathlib.Path(__file__).resolve().parent.parent
 schema = json.loads((root / 'config/questions.json').read_text())
 secs = {s['id']: s['number'] for s in schema['sections']}
