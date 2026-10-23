@@ -3,7 +3,7 @@
  * o sobre ZAK, con el mismo motor que el CRM y el brochure (Gemini por el backend del CRM).
  *
  * - La llamada va a /api/kira/generate del mismo dominio; vercel.json la reenvía al backend en
- *   Railway (como /api/kira/tts), así que no hay claves en el navegador ni CORS que configurar.
+ *   api.zak.ia.ve (como /api/kira/tts), así que no hay claves en el navegador ni CORS que configurar.
  * - Lo que Kira sabe: config/faq.json, los módulos de config/modules.json, los módulos que eligió
  *   el cliente y la pregunta que está respondiendo.
  * - Si el backend no responde, se usa la búsqueda en faq.json (js/faq.js) como antes.

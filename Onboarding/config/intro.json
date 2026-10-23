@@ -3,7 +3,7 @@
   "audioDir": "assets/audio/intro",
   "kiraVoice": {
     "_comment": "Misma voz de Kira que en el CRM y el brochure (Gemini, voz «Aoede»). El backend del CRM la fija en KIRA_VOICE (backend/server.ts); este generador solo llama a su /api/kira/tts.",
-    "ttsUrl": "https://itech-crm-production.up.railway.app/api/kira/tts",
+    "ttsUrl": "https://api.zak.ia.ve/api/kira/tts",
     "voice": "Aoede",
     "mp3Kbps": 64
   },

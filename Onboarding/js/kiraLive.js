@@ -1,8 +1,8 @@
 /**
  * Conversación por voz con Kira (Gemini Live), la misma del CRM y del brochure.
  *
- * - Va por el relay WebSocket del backend del CRM (/api/kira/live en Railway). Vercel no reenvía
- *   WebSockets, por eso la URL apunta directo a Railway (CONFIG.kiraLiveUrl). El relay fija la voz
+ * - Va por el relay WebSocket del backend del CRM (/api/kira/live en api.zak.ia.ve). Vercel no reenvía
+ *   WebSockets, por eso la URL apunta directo al backend (api.zak.ia.ve) (CONFIG.kiraLiveUrl). El relay fija la voz
  *   «Aoede» y la clave de Gemini nunca llega al navegador.
  * - El micrófono se captura a 16 kHz con js/kira-pcm-worklet.js (copia del brochure) y la voz de
  *   Kira llega en PCM 24 kHz.

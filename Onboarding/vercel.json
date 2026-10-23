@@ -4,8 +4,8 @@
   "buildCommand": "",
   "outputDirectory": ".",
   "rewrites": [
-    { "source": "/api/kira/tts", "destination": "https://itech-crm-production.up.railway.app/api/kira/tts" },
-    { "source": "/api/kira/generate", "destination": "https://itech-crm-production.up.railway.app/api/kira/generate" }
+    { "source": "/api/kira/tts", "destination": "https://api.zak.ia.ve/api/kira/tts" },
+    { "source": "/api/kira/generate", "destination": "https://api.zak.ia.ve/api/kira/generate" }
   ],
   "headers": [
     {

@@ -11,7 +11,7 @@ export const CONFIG = {
 
   // Voz de Kira (la misma del CRM y del brochure), servida por el backend del CRM. Se usa cuando falta
   // el MP3 pregenerado de un texto. Vacía = esos textos usan la voz del navegador.
-  // Ruta del mismo dominio: vercel.json la reenvía al backend en Railway (igual que el CRM y el brochure), sin CORS.
+  // Ruta del mismo dominio: vercel.json la reenvía al backend en Easypanel (api.zak.ia.ve) (igual que el CRM y el brochure), sin CORS.
   kiraTtsUrl: '/api/kira/tts',
 
   // Kira responde las dudas del cliente con IA (mismo motor que el CRM y el brochure), por el mismo
@@ -19,8 +19,8 @@ export const CONFIG = {
   kiraChatUrl: '/api/kira/generate',
 
   // Conversación por voz con Kira (botón del micrófono): relay WebSocket del backend del CRM.
-  // Vercel no reenvía WebSockets, por eso va directo a Railway. Vacía = sin botón de voz.
-  kiraLiveUrl: 'wss://itech-crm-production.up.railway.app/api/kira/live',
+  // Vercel no reenvía WebSockets, por eso va directo al backend (api.zak.ia.ve). Vacía = sin botón de voz.
+  kiraLiveUrl: 'wss://api.zak.ia.ve/api/kira/live',
 
   // Reintentos automáticos del envío (esperas en ms entre intentos).
   retryDelays: [1000, 3000, 6000],
